@@ -65,6 +65,11 @@ export function Terminal({ windowId }: { windowId: string }) {
         return;
       }
 
+      if (trimmed === "exit") {
+        window.dispatchEvent(new CustomEvent('close-window', { detail: windowId }));
+        return;
+      }
+
       const currentPrompt = interpreterRef.current.getPrompt();
 
       // Execute command

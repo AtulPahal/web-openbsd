@@ -204,29 +204,29 @@ export function WindowFrame({
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors text-xs"
+            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-xs pb-1"
             onClick={(e) => {
               e.stopPropagation();
               onMinimize();
             }}
             aria-label="Minimize"
           >
-            □
+            _
           </button>
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors text-xs"
+            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
             onClick={(e) => {
               e.stopPropagation();
               onMaximize();
             }}
             aria-label="Maximize"
           >
-            ▢
+            □
           </button>
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-destructive hover:text-primary-foreground transition-colors text-xs"
+            className="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors text-sm"
             onClick={(e) => {
               e.stopPropagation();
               onClose();

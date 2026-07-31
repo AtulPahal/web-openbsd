@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useWindowManager } from "@/hooks/use-window-manager";
 import { WindowFrame } from "@/components/window/window-frame";
 import { Panel } from "@/components/desktop/panel";
@@ -40,6 +41,11 @@ export function Desktop() {
     moveWindow,
     resizeWindow,
   } = useWindowManager();
+  useEffect(() => {
+    const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
+    window.addEventListener('close-window', handleClose as EventListener);
+    return () => window.removeEventListener('close-window', handleClose as EventListener);
+  }, [closeWindow]);
 
   const renderAppContent = (appId: AppId, windowId: string) => {
     switch (appId) {
