@@ -204,14 +204,14 @@ export function WindowFrame({
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-xs pb-1"
+            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-xs"
             onClick={(e) => {
               e.stopPropagation();
               onMinimize();
             }}
             aria-label="Minimize"
           >
-            _
+            -
           </button>
           <button
             type="button"
