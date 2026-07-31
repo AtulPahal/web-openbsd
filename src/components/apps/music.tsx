@@ -166,48 +166,6 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
         {/* Main Content Area */}
         <div className="flex-1 bg-[#1e1e1e] overflow-y-auto p-8 shadow-inner">
           <div className="max-w-4xl mx-auto flex flex-col gap-8">
-            
-            {/* Promo Card 1 */}
-            <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-tr from-rose-600 via-red-500 to-orange-500 flex flex-col items-center justify-center p-6 group cursor-pointer">
-              <div className="absolute top-4 text-xs font-semibold text-white/90 tracking-wide">
-                Limited time off...
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <Apple className="w-10 h-10 text-white fill-white" />
-                <h1 className="text-6xl font-bold text-white tracking-tighter">Music</h1>
-              </div>
-              <div className="absolute bottom-6 flex flex-col items-center">
-                <p className="text-sm font-semibold text-white">Accept Offer</p>
-                <p className="text-[11px] text-white/80 mt-0.5">3 months for ₹ 19.00, then ₹ 139.00/month</p>
-              </div>
-              {/* Decorative abstract shapes mimicking the screenshot */}
-              <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700" />
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-yellow-500/20 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700" />
-            </div>
-
-            {/* Promo Card 2 */}
-            <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-red-600 flex flex-col items-center justify-center p-6 group cursor-pointer">
-              <div className="absolute top-4 text-xs font-semibold text-white/90 tracking-wide">
-                Music for your fami...
-              </div>
-              <div className="flex items-center justify-center gap-2 opacity-90 scale-150 mb-8">
-                {/* Simulated Audio Bars */}
-                <div className="w-2.5 h-8 bg-white/40 rounded-full animate-pulse" />
-                <div className="w-2.5 h-14 bg-white/60 rounded-full animate-pulse delay-75" />
-                <div className="w-2.5 h-20 bg-white/90 rounded-full animate-pulse delay-150" />
-                <div className="w-2.5 h-16 bg-white/70 rounded-full animate-pulse delay-200" />
-                <div className="w-2.5 h-10 bg-white/50 rounded-full animate-pulse delay-300" />
-              </div>
-              <div className="flex items-center justify-center gap-1.5 z-10">
-                <Apple className="w-6 h-6 text-white fill-white" />
-                <h2 className="text-3xl font-bold text-white tracking-tighter">Music</h2>
-              </div>
-              <div className="absolute bottom-6 flex flex-col items-center">
-                <p className="text-sm font-semibold text-white">Accept Offer</p>
-                <p className="text-[11px] text-white/80 mt-0.5">3 months for ₹ 39.00, then ₹ 229.00/month</p>
-              </div>
-            </div>
-
           </div>
         </div>
 
