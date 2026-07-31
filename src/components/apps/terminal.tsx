@@ -15,7 +15,7 @@ const INITIAL_MOTD = `OpenBSD 7.5 (GENERIC.MP) #1: Sat Apr  6 12:00:00 MDT 2024
 Welcome to OpenBSD: The proactively secure Unix-like operating system.
 
 Please use the sendbug(1) utility to report bugs in the system.
-Type 'help' for a list of available commands or 'neofetch' for system info.
+Type 'help' for a list of available commands or 'fastfetch' for system info.
 `;
 
 export function Terminal({ windowId }: { windowId: string }) {

@@ -16,7 +16,7 @@ const PUFFY_ASCII = `
              \`--,_____,--'
                   Puffy`;
 
-const NEOFETCH_TEMPLATE = (cwd: string) => {
+const FASTFETCH_TEMPLATE = (cwd: string) => {
   const now = new Date();
   return `${PUFFY_ASCII}
 
@@ -291,8 +291,8 @@ export class CommandInterpreter {
       case "uname": return this.cmdUname(args);
       case "date": return new Date().toString();
       case "help": return this.cmdHelp();
-      case "neofetch":
-      case "screenfetch": return NEOFETCH_TEMPLATE(this.cwd);
+      case "fastfetch":
+      case "screenfetch": return FASTFETCH_TEMPLATE(this.cwd);
       case "man": return this.cmdMan(args);
       case "env":
       case "printenv": return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join("\n");
@@ -422,7 +422,7 @@ export class CommandInterpreter {
   reboot          Reboot the system
   shutdown        Shutdown the system
   man <cmd>       Manual page
-  neofetch        System information
+  fastfetch       System information
   help            This help message`;
   }
 
