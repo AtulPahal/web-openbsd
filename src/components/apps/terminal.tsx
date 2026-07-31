@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { VirtualFS } from "@/features/virtual-fs";
 import { CommandInterpreter } from "@/features/command-interpreter";
 
@@ -132,7 +131,7 @@ export function Terminal({ windowId }: { windowId: string }) {
       className="h-full w-full bg-[#0a0a0a] text-primary font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
       onClick={handleTerminalClick}
     >
-      <ScrollArea className="flex-1 pr-3">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-3 pb-2 scrollbar-thin">
         <div className="space-y-1">
           {lines.map((line) => (
             <div key={line.id} className="whitespace-pre-wrap leading-relaxed">
@@ -165,7 +164,7 @@ export function Terminal({ windowId }: { windowId: string }) {
           </div>
           <div ref={bottomRef} />
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

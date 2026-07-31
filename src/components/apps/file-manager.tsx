@@ -12,7 +12,6 @@ import {
   ArrowUp,
   X,
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { VirtualFS } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
@@ -168,11 +167,11 @@ function FileViewer({
           <X className="size-4" />
         </button>
       </div>
-      <ScrollArea className="flex-1">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <pre className="p-3 font-mono text-xs leading-relaxed text-foreground/90">
           {node.content || "(empty file)"}
         </pre>
-      </ScrollArea>
+      </div>
       <div className="border-t border-border px-3 py-1 text-xs text-muted-foreground">
         {node.permissions} · {node.owner}:{node.group} · Modified{" "}
         {formatDate(node.modified)}
@@ -341,7 +340,7 @@ export function FileManager({ windowId }: { windowId: string }) {
           <div className="border-b border-border bg-muted/30 px-2 py-1 text-xs font-semibold text-muted-foreground">
             Directories
           </div>
-          <ScrollArea className="h-[calc(100%-24px)]">
+          <div className="h-[calc(100%-24px)] overflow-y-auto">
             <TreeNode
               node={rootNode}
               currentPath={currentPath}
@@ -350,7 +349,7 @@ export function FileManager({ windowId }: { windowId: string }) {
               onNavigate={navigateTo}
               depth={0}
             />
-          </ScrollArea>
+          </div>
         </div>
 
         <Separator orientation="vertical" />
@@ -390,7 +389,7 @@ export function FileManager({ windowId }: { windowId: string }) {
           </div>
 
           {/* File list */}
-          <ScrollArea className="flex-1">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="min-w-0">
               {/* Go up entry */}
               {parentPath !== null && (
@@ -462,7 +461,7 @@ export function FileManager({ windowId }: { windowId: string }) {
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Status bar */}
           <div className="flex items-center justify-between border-t border-border bg-muted/30 px-2 py-0.5 text-xs text-muted-foreground">
