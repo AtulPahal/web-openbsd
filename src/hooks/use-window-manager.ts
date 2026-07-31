@@ -24,7 +24,7 @@ export function useWindowManager() {
 
   const windows = Array.from(windowMap.values());
 
-  const openWindow = useCallback((appId: AppId) => {
+  const openWindow = useCallback((appId: AppId, appState?: Record<string, any>) => {
     const appDef = APP_REGISTRY[appId];
     if (!appDef) return;
 
@@ -44,6 +44,7 @@ export function useWindowManager() {
       isMinimized: false,
       isMaximized: false,
       isFocused: true,
+      appState,
     };
 
     setWindowMap((prev) => {

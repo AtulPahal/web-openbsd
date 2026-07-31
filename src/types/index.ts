@@ -27,6 +27,7 @@ export interface WindowState {
   isMinimized: boolean;
   isMaximized: boolean;
   isFocused: boolean;
+  appState?: Record<string, any>;
 }
 
 /** Registered application identifiers */

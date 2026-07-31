@@ -43,18 +43,27 @@ export function Desktop() {
   } = useWindowManager();
   useEffect(() => {
     const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
-    window.addEventListener('close-window', handleClose as EventListener);
-    return () => window.removeEventListener('close-window', handleClose as EventListener);
-  }, [closeWindow]);
+    const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: Record<string, any> }>) => {
+      openWindow(e.detail.appId, e.detail.appState);
+    };
 
-  const renderAppContent = (appId: AppId, windowId: string) => {
+    window.addEventListener('close-window', handleClose as EventListener);
+    window.addEventListener('open-app', handleOpen as EventListener);
+
+    return () => {
+      window.removeEventListener('close-window', handleClose as EventListener);
+      window.removeEventListener('open-app', handleOpen as EventListener);
+    };
+  }, [closeWindow, openWindow]);
+
+  const renderAppContent = (appId: AppId, windowId: string, appState?: Record<string, any>) => {
     switch (appId) {
       case "terminal":
         return <Terminal windowId={windowId} />;
       case "file-manager":
         return <FileManager windowId={windowId} />;
       case "text-editor":
-        return <TextEditor windowId={windowId} />;
+        return <TextEditor windowId={windowId} path={appState?.path} />;
       case "system-monitor":
         return <SystemMonitor windowId={windowId} />;
       case "about":
@@ -105,7 +114,7 @@ export function Desktop() {
                 onMove={(pos) => moveWindow(win.id, pos)}
                 onResize={(size) => resizeWindow(win.id, size)}
               >
-                {renderAppContent(win.appId, win.id)}
+                {renderAppContent(win.appId, win.id, win.appState)}
               </WindowFrame>
             ))}
           </div>

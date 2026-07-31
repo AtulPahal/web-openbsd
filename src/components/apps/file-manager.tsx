@@ -102,48 +102,6 @@ const PLACES = [
   { name: "Root", path: "/", icon: HardDrive },
 ];
 
-// --- File content viewer ---
-
-function FileViewer({
-  node,
-  onClose,
-}: {
-  node: FSNode;
-  onClose: () => void;
-}) {
-  return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-border bg-muted/50 px-3 py-1.5">
-        <div className="flex items-center gap-2 text-xs">
-          <FileText className="size-3.5 text-amber-400/80" />
-          <span className="font-mono text-foreground/90">{node.path}</span>
-          <span className="text-muted-foreground">
-            ({formatSize(node.size)})
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-0.5 text-muted-foreground hover:bg-accent/30 hover:text-foreground"
-        >
-          <X className="size-4" />
-        </button>
-      </div>
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <pre className="p-3 font-mono text-xs leading-relaxed text-foreground/90">
-          {node.content || "(empty file)"}
-        </pre>
-      </div>
-      <div className="border-t border-border px-3 py-1 text-xs text-muted-foreground">
-        {node.permissions} · {node.owner}:{node.group} · Modified{" "}
-        {formatDate(node.modified)}
-      </div>
-    </div>
-  );
-}
-
-// --- Main File Manager ---
-
 export function FileManager({ windowId }: { windowId: string }) {
   const fsRef = useRef(new VirtualFS());
   const fs = fsRef.current;
@@ -152,7 +110,6 @@ export function FileManager({ windowId }: { windowId: string }) {
   const [history, setHistory] = useState<string[]>(["/home/user"]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [viewingFile, setViewingFile] = useState<FSNode | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -233,7 +190,11 @@ export function FileManager({ windowId }: { windowId: string }) {
       if (node.type === "directory") {
         navigateTo(node.path);
       } else {
-        setViewingFile(node);
+        window.dispatchEvent(
+          new CustomEvent("open-app", {
+            detail: { appId: "text-editor", appState: { path: node.path } },
+          })
+        );
       }
     },
     [navigateTo]
@@ -464,13 +425,6 @@ export function FileManager({ windowId }: { windowId: string }) {
         </div>
       </div>
 
-      {/* File viewer overlay */}
-      {viewingFile && (
-        <FileViewer
-          node={viewingFile}
-          onClose={() => setViewingFile(null)}
-        />
-      )}
     </div>
   );
 }

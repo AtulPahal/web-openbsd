@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FileText, WrapText } from "lucide-react";
+import { VirtualFS } from "@/features/virtual-fs";
 
 const SAMPLE_TEXT = `# Welcome to OpenBSD Web Desktop
 #
@@ -17,9 +18,21 @@ interface CursorPos {
   col: number;
 }
 
-export function TextEditor({ windowId }: { windowId: string }) {
-  const [content, setContent] = useState(SAMPLE_TEXT);
-  const [fileName] = useState("untitled");
+export function TextEditor({ windowId, path }: { windowId: string; path?: string }) {
+  const fsRef = useRef(new VirtualFS());
+  const [content, setContent] = useState(() => {
+    if (path) {
+      const fileContent = fsRef.current.read(path, "/");
+      return fileContent ?? "";
+    }
+    return SAMPLE_TEXT;
+  });
+  const [fileName] = useState(() => {
+    if (path) {
+      return path.split("/").pop() || "untitled";
+    }
+    return "untitled";
+  });
   const [isModified, setIsModified] = useState(false);
   const [cursor, setCursor] = useState<CursorPos>({ line: 1, col: 1 });
   const [wordWrap, setWordWrap] = useState(true);
@@ -51,6 +64,14 @@ export function TextEditor({ windowId }: { windowId: string }) {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "o")) {
+        e.preventDefault();
+        if (path) {
+          fsRef.current.write(path, "/", content);
+          setIsModified(false);
+        }
+        return;
+      }
       if (e.key === "Tab") {
         e.preventDefault();
         const ta = textareaRef.current;
@@ -69,7 +90,7 @@ export function TextEditor({ windowId }: { windowId: string }) {
         });
       }
     },
-    [content, isModified]
+    [content, isModified, path]
   );
 
   const handleScroll = useCallback(() => {
