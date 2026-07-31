@@ -113,7 +113,7 @@ function buildDefaultFS(): FSNode {
           makeFile("SoundHelix_Song_2.mp3", "/home/user/Music/SoundHelix_Song_2.mp3", "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", "user", "user", "rw-r--r--"),
         ]),
         makeDir("Videos", "/home/user/Videos", "user", "user", [
-          makeFile("Big_Buck_Bunny_720p.mp4", "/home/user/Videos/Big_Buck_Bunny_720p.mp4", "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4", "user", "user", "rw-r--r--"),
+          makeFile("OpenBSD_Guide.mp4", "/home/user/Videos/OpenBSD_Guide.mp4", "https://youtu.be/FtutLA63Cp8", "user", "user", "rw-r--r--"),
         ]),
       ]),
     ]),
