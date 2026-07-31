@@ -4,7 +4,7 @@ import { AppLauncher } from "./app-launcher";
 import { SystemTray } from "./system-tray";
 import type { WindowState, WindowId, AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { Terminal, Folder, FileText, Activity, Info, Globe } from "lucide-react";
+import { Terminal, Folder, FileText, Activity, Info, Globe, AudioLines, Clapperboard } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Terminal,
@@ -13,6 +13,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Activity,
   Info,
   Globe,
+  AudioLines,
+  Clapperboard,
 };
 
 interface PanelProps {

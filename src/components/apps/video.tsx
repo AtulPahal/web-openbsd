@@ -1,20 +1,48 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Maximize, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Film } from "lucide-react";
+import { VirtualFS } from "@/features/virtual-fs";
 
-export function VideoApp({ windowId }: { windowId: string }) {
+export function VideoApp({ windowId, path }: { windowId: string; path?: string }) {
+  const fsRef = useRef(new VirtualFS());
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [title, setTitle] = useState("mpv");
 
-  // Big Buck Bunny open source video link
-  const VIDEO_URL = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4";
+  useEffect(() => {
+    if (path) {
+      const fileNode = fsRef.current.getNode(path);
+      if (fileNode && fileNode.type === "file" && fileNode.content) {
+        setVideoUrl(fileNode.content);
+        setTitle(`mpv - ${fileNode.name}`);
+      }
+    } else {
+      setVideoUrl("");
+      setTitle("mpv");
+    }
+  }, [path]);
+
+  // Handle auto-play when URL changes
+  useEffect(() => {
+    if (videoUrl && videoRef.current) {
+      videoRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(e => {
+        console.warn("Autoplay prevented:", e);
+        setIsPlaying(false);
+      });
+    }
+  }, [videoUrl]);
+
+  const controlsTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -56,7 +84,10 @@ export function VideoApp({ windowId }: { windowId: string }) {
 
   const handleMouseMove = () => {
     setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = null;
+    }
     controlsTimeoutRef.current = setTimeout(() => {
       if (isPlaying) setShowControls(false);
     }, 2000);
@@ -64,7 +95,10 @@ export function VideoApp({ windowId }: { windowId: string }) {
 
   useEffect(() => {
     return () => {
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -73,6 +107,17 @@ export function VideoApp({ windowId }: { windowId: string }) {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
     return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  // If no video URL is loaded, show a blank screen like real mpv
+  if (!videoUrl) {
+    return (
+      <div className="w-full h-full bg-[#1a1b26] flex flex-col items-center justify-center text-white/30 select-none font-mono">
+        <Film className="w-16 h-16 mb-4 opacity-50" />
+        <p className="text-xl font-bold tracking-widest opacity-80">mpv</p>
+        <p className="text-xs mt-2 opacity-50">Drop files or URLs to play</p>
+      </div>
+    );
   }
 
   return (
@@ -84,13 +129,12 @@ export function VideoApp({ windowId }: { windowId: string }) {
     >
       <video
         ref={videoRef}
-        src={VIDEO_URL}
+        src={videoUrl}
         className="w-full h-full object-contain"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
         onClick={(e) => e.stopPropagation()}
-        loop
       />
 
       {/* On-Screen Controller (OSC) mimicking mpv */}
@@ -132,8 +176,8 @@ export function VideoApp({ windowId }: { windowId: string }) {
 
       {/* Top Title Bar Overlay */}
       <div className={`absolute top-0 left-0 right-0 p-2 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
-        <h1 className="text-white text-xs font-mono font-semibold truncate drop-shadow-md">
-          mpv - Big_Buck_Bunny_720_10s_1MB.mp4
+        <h1 className="text-white text-xs font-mono font-semibold truncate drop-shadow-md px-1">
+          {title}
         </h1>
       </div>
     </div>

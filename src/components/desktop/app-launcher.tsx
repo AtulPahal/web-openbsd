@@ -16,18 +16,19 @@ import {
   Folder,
   FileText,
   Activity,
-  Info,
   Shield,
   Globe,
+  AudioLines,
+  Clapperboard,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Terminal,
   Folder,
   FileText,
-  Activity,
-  Info,
   Globe,
+  AudioLines,
+  Clapperboard,
 };
 
 interface AppLauncherProps {

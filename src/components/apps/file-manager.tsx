@@ -190,9 +190,18 @@ export function FileManager({ windowId }: { windowId: string }) {
       if (node.type === "directory") {
         navigateTo(node.path);
       } else {
+        const lowerName = node.name.toLowerCase();
+        let targetAppId = "text-editor";
+        
+        if (lowerName.endsWith(".mp3") || lowerName.endsWith(".wav") || lowerName.endsWith(".ogg")) {
+          targetAppId = "music";
+        } else if (lowerName.endsWith(".mp4") || lowerName.endsWith(".webm") || lowerName.endsWith(".mov")) {
+          targetAppId = "video";
+        }
+
         window.dispatchEvent(
           new CustomEvent("open-app", {
-            detail: { appId: "text-editor", appState: { path: node.path } },
+            detail: { appId: targetAppId, appState: { path: node.path } },
           })
         );
       }

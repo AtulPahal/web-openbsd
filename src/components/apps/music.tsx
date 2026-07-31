@@ -1,126 +1,175 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, SkipBack, SkipForward, Volume2, ListMusic } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Music as MusicIcon, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-const PLAYLIST = [
-  { title: "OpenBSD Song 7.5", artist: "Puffy and the Developers", duration: 214 },
-  { title: "Code Compilation Chill", artist: "Lofi Unix", duration: 185 },
-  { title: "Kernel Panic", artist: "The Core Dumps", duration: 240 },
-  { title: "Terminal Beats", artist: "Ksh Grooves", duration: 156 },
-];
+import { VirtualFS } from "@/features/virtual-fs";
 
 function formatTime(seconds: number) {
+  if (isNaN(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function MusicApp({ windowId }: { windowId: string }) {
+export function MusicApp({ windowId, path }: { windowId: string; path?: string }) {
+  const fsRef = useRef(new VirtualFS());
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
   
-  const currentTrack = PLAYLIST[currentTrackIndex];
+  // Default to a known file if no path is provided
+  const targetPath = path || "/home/user/Music/SoundHelix_Song_1.mp3";
+  
+  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [title, setTitle] = useState("Unknown Song");
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= currentTrack.duration) {
-            setCurrentTrackIndex((i) => (i + 1) % PLAYLIST.length);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
+    // Load audio from Virtual FS
+    const fileNode = fsRef.current.getNode(targetPath);
+    if (fileNode && fileNode.type === "file" && fileNode.content) {
+      setAudioUrl(fileNode.content);
+      setTitle(fileNode.name.replace(/_/g, " ").replace(".mp3", ""));
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTrack.duration]);
+  }, [targetPath]);
 
-  const togglePlay = () => setIsPlaying(!isPlaying);
+  // Handle auto-play when URL changes
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(e => {
+        console.warn("Autoplay prevented:", e);
+        setIsPlaying(false);
+      });
+    }
+  }, [audioUrl]);
 
-  const nextTrack = () => {
-    setCurrentTrackIndex((i) => (i + 1) % PLAYLIST.length);
-    setProgress(0);
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
-  const prevTrack = () => {
-    setCurrentTrackIndex((i) => (i - 1 + PLAYLIST.length) % PLAYLIST.length);
-    setProgress(0);
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setProgress(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = Number(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setProgress(time);
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const vol = Number(e.target.value);
+    setVolume(vol);
+    if (audioRef.current) {
+      audioRef.current.volume = vol;
+      if (vol > 0 && isMuted) {
+        setIsMuted(false);
+        audioRef.current.muted = false;
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#111111] text-foreground font-sans select-none">
-      {/* Top Bar / Now Playing */}
-      <div className="flex items-center gap-4 p-4 border-b border-white/10 bg-black/20">
-        <div className="w-16 h-16 bg-amber-500/20 rounded flex items-center justify-center border border-amber-500/30 shadow-inner">
-          <ListMusic className="w-8 h-8 text-amber-500" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-base font-bold text-white truncate">{currentTrack.title}</h2>
-          <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
-        </div>
-      </div>
+    <div className="flex flex-col h-full bg-gradient-to-br from-neutral-800 to-black text-foreground font-sans select-none overflow-hidden">
+      {/* Hidden Audio Element */}
+      <audio
+        ref={audioRef}
+        src={audioUrl}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => setIsPlaying(false)}
+      />
 
-      {/* Progress Bar */}
-      <div className="px-4 py-3">
-        <div className="flex justify-between text-[10px] font-mono text-muted-foreground mb-1.5">
-          <span>{formatTime(progress)}</span>
-          <span>{formatTime(currentTrack.duration)}</span>
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        {/* Album Art (Apple Music Style) */}
+        <div className="w-48 h-48 sm:w-56 sm:h-56 bg-gradient-to-tr from-amber-500/20 to-rose-500/20 rounded-3xl shadow-2xl flex items-center justify-center border border-white/5 mb-8 overflow-hidden backdrop-blur-xl transition-transform duration-500 ease-out hover:scale-105">
+          <MusicIcon className="w-20 h-20 text-white/40 drop-shadow-lg" />
         </div>
-        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer">
-          <div 
-            className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
-            style={{ width: `${(progress / currentTrack.duration) * 100}%` }}
+
+        {/* Track Info */}
+        <div className="text-center mb-8 w-full px-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-white truncate drop-shadow-md">{title}</h2>
+          <p className="text-sm text-white/60 font-medium truncate mt-1">OpenBSD Audio Player</p>
+        </div>
+
+        {/* Scrubber */}
+        <div className="w-full max-w-sm px-4 mb-8">
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={progress}
+            onChange={handleSeek}
+            className="w-full h-1.5 bg-white/20 rounded-full appearance-none outline-none accent-white/90 cursor-pointer"
           />
+          <div className="flex justify-between text-[10px] font-medium text-white/50 mt-2 font-mono tracking-wider">
+            <span>{formatTime(progress)}</span>
+            <span>-{formatTime(duration - progress)}</span>
+          </div>
         </div>
-      </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-4 py-2">
-        <Button variant="ghost" size="icon" onClick={prevTrack} className="hover:bg-white/10 rounded-full w-10 h-10">
-          <SkipBack className="w-5 h-5 text-white/80" />
-        </Button>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={togglePlay} 
-          className="border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-full w-12 h-12"
-        >
-          {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-1" />}
-        </Button>
-        <Button variant="ghost" size="icon" onClick={nextTrack} className="hover:bg-white/10 rounded-full w-10 h-10">
-          <SkipForward className="w-5 h-5 text-white/80" />
-        </Button>
-      </div>
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-6 mb-4">
+          <Button variant="ghost" size="icon" className="hover:bg-white/10 rounded-full w-12 h-12">
+            <SkipBack className="w-6 h-6 text-white/90 fill-current" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={togglePlay} 
+            className="border-none bg-white/10 hover:bg-white/20 hover:scale-105 transition-all text-white rounded-full w-16 h-16 shadow-lg backdrop-blur-sm"
+          >
+            {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="hover:bg-white/10 rounded-full w-12 h-12">
+            <SkipForward className="w-6 h-6 text-white/90 fill-current" />
+          </Button>
+        </div>
 
-      {/* Playlist */}
-      <div className="flex-1 overflow-hidden mt-2 border-t border-white/5 bg-black/40">
-        <div className="h-full overflow-y-auto overflow-x-hidden">
-          {PLAYLIST.map((track, idx) => (
-            <div 
-              key={idx}
-              onClick={() => {
-                setCurrentTrackIndex(idx);
-                setProgress(0);
-                setIsPlaying(true);
-              }}
-              className={`flex items-center justify-between px-4 py-2.5 cursor-pointer text-xs transition-colors ${idx === currentTrackIndex ? 'bg-amber-500/10 text-amber-400 border-l-2 border-amber-500' : 'text-white/70 hover:bg-white/5 border-l-2 border-transparent'}`}
-            >
-              <div className="flex items-center gap-3 truncate">
-                <span className="w-4 text-right font-mono text-[10px] text-white/30">{idx + 1}</span>
-                <div className="truncate">
-                  <p className="font-medium truncate">{track.title}</p>
-                  <p className="text-[10px] text-white/40 truncate">{track.artist}</p>
-                </div>
-              </div>
-              <span className="font-mono text-[10px] text-white/40">{formatTime(track.duration)}</span>
-            </div>
-          ))}
+        {/* Volume */}
+        <div className="flex items-center gap-3 w-full max-w-xs px-8 mt-2 opacity-60 hover:opacity-100 transition-opacity">
+          <button onClick={toggleMute} className="text-white/80 hover:text-white">
+            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={isMuted ? 0 : volume}
+            onChange={handleVolumeChange}
+            className="flex-1 h-1 bg-white/20 rounded-full appearance-none outline-none accent-white cursor-pointer"
+          />
         </div>
       </div>
     </div>

@@ -108,6 +108,13 @@ function buildDefaultFS(): FSNode {
             "Welcome to OpenBSD.\n\nThis is a virtual filesystem running in your browser.\nFeel free to explore!\n", "user", "user"),
         ]),
         makeDir("Downloads", "/home/user/Downloads", "user", "user"),
+        makeDir("Music", "/home/user/Music", "user", "user", [
+          makeFile("SoundHelix_Song_1.mp3", "/home/user/Music/SoundHelix_Song_1.mp3", "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", "user", "user", "rw-r--r--"),
+          makeFile("SoundHelix_Song_2.mp3", "/home/user/Music/SoundHelix_Song_2.mp3", "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", "user", "user", "rw-r--r--"),
+        ]),
+        makeDir("Videos", "/home/user/Videos", "user", "user", [
+          makeFile("Big_Buck_Bunny_720p.mp4", "/home/user/Videos/Big_Buck_Bunny_720p.mp4", "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4", "user", "user", "rw-r--r--"),
+        ]),
       ]),
     ]),
     makeDir("usr", "/usr", "root", "wheel", [

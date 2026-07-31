@@ -20,7 +20,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { Terminal as TerminalIcon, Folder, FileText, Activity, Info, RefreshCw, Globe, Music, Film } from "lucide-react";
+import { Terminal as TerminalIcon, Folder, FileText, Activity, Info, RefreshCw, Globe, AudioLines, Clapperboard } from "lucide-react";
 import { SystemMonitor } from "@/components/apps/system-monitor";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -30,8 +30,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Activity,
   Info,
   Globe,
-  Music,
-  Film,
+  AudioLines,
+  Clapperboard,
 };
 
 export function Desktop() {
@@ -75,9 +75,9 @@ export function Desktop() {
       case "firefox":
         return <Firefox windowId={windowId} />;
       case "music":
-        return <MusicApp windowId={windowId} />;
+        return <MusicApp windowId={windowId} path={appState?.path} />;
       case "video":
-        return <VideoApp windowId={windowId} />;
+        return <VideoApp windowId={windowId} path={appState?.path} />;
       default:
         return (
           <div className="p-4 font-mono text-sm text-foreground">
