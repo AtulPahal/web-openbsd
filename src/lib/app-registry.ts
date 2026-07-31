@@ -1,0 +1,46 @@
+import type { AppDefinition } from "@/types";
+
+export const APP_REGISTRY: Record<string, AppDefinition> = {
+  terminal: {
+    id: "terminal",
+    name: "Terminal",
+    icon: "Terminal",
+    defaultSize: { width: 680, height: 420 },
+    minSize: { width: 400, height: 250 },
+  },
+  "file-manager": {
+    id: "file-manager",
+    name: "Files",
+    icon: "Folder",
+    defaultSize: { width: 720, height: 480 },
+    minSize: { width: 400, height: 300 },
+  },
+  "text-editor": {
+    id: "text-editor",
+    name: "Editor",
+    icon: "FileText",
+    defaultSize: { width: 640, height: 480 },
+    minSize: { width: 360, height: 280 },
+  },
+  "system-monitor": {
+    id: "system-monitor",
+    name: "System Monitor",
+    icon: "Activity",
+    defaultSize: { width: 600, height: 400 },
+    minSize: { width: 400, height: 300 },
+  },
+  about: {
+    id: "about",
+    name: "About",
+    icon: "Info",
+    defaultSize: { width: 420, height: 340 },
+    minSize: { width: 320, height: 280 },
+  },
+  firefox: {
+    id: "firefox",
+    name: "Firefox",
+    icon: "Globe",
+    defaultSize: { width: 800, height: 600 },
+    minSize: { width: 400, height: 300 },
+  },
+};
