@@ -71,7 +71,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
 
           <h2 className="text-xl text-white font-semibold mb-6">user</h2>
 
-          <form onSubmit={handleSubmit} className="w-full relative">
+          <form onSubmit={handleSubmit} className="w-full relative" suppressHydrationWarning>
             <input
               type="password"
               value={password}

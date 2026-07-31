@@ -1,5 +1,6 @@
 "use client";
 
+import { Home, HardDrive, Monitor, Download, ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
 import { useState, useRef, useCallback, useMemo } from "react";
 import {
   Folder,
@@ -62,83 +63,44 @@ function getFileIcon(node: FSNode) {
   }
 }
 
-// --- Directory tree sidebar item ---
+// --- Places Sidebar Item ---
 
-function TreeNode({
-  node,
+function PlaceItem({
+  name,
+  path,
+  icon: Icon,
   currentPath,
-  expandedPaths,
-  onToggle,
-  onNavigate,
-  depth,
+  onClick,
 }: {
-  node: FSNode;
+  name: string;
+  path: string;
+  icon: React.ElementType;
   currentPath: string;
-  expandedPaths: Set<string>;
-  onToggle: (path: string) => void;
-  onNavigate: (path: string) => void;
-  depth: number;
+  onClick: (path: string) => void;
 }) {
-  if (node.type !== "directory") return null;
-
-  const isExpanded = expandedPaths.has(node.path);
-  const isActive = currentPath === node.path;
-  const dirs = (node.children ?? []).filter((c) => c.type === "directory");
-
+  const isSelected = currentPath === path || currentPath.startsWith(path + "/");
   return (
-    <div>
-      <button
-        type="button"
-        className={`flex w-full items-center gap-1 px-1 py-0.5 text-left text-xs hover:bg-accent/30 ${
-          isActive ? "bg-accent/20 text-amber-400" : "text-foreground/80"
-        }`}
-        style={{ paddingLeft: `${depth * 12 + 4}px` }}
-        onClick={() => {
-          onNavigate(node.path);
-          if (!isExpanded) onToggle(node.path);
-        }}
-      >
-        {dirs.length > 0 ? (
-          <span
-            className="shrink-0 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(node.path);
-            }}
-          >
-            {isExpanded ? (
-              <ChevronDown className="size-3" />
-            ) : (
-              <ChevronRight className="size-3" />
-            )}
-          </span>
-        ) : (
-          <span className="size-3 shrink-0" />
-        )}
-        {isExpanded ? (
-          <FolderOpen className="size-3.5 shrink-0 text-amber-400/80" />
-        ) : (
-          <Folder className="size-3.5 shrink-0 text-amber-400/80" />
-        )}
-        <span className="truncate">{node.name === "/" ? "/" : node.name}</span>
-      </button>
-      {isExpanded &&
-        dirs
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((child) => (
-            <TreeNode
-              key={child.path}
-              node={child}
-              currentPath={currentPath}
-              expandedPaths={expandedPaths}
-              onToggle={onToggle}
-              onNavigate={onNavigate}
-              depth={depth + 1}
-            />
-          ))}
-    </div>
+    <button
+      type="button"
+      onClick={() => onClick(path)}
+      className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors ${
+        isSelected
+          ? "bg-amber-400/15 text-amber-400 font-medium"
+          : "text-foreground/80 hover:bg-accent/20 hover:text-foreground"
+      }`}
+    >
+      <Icon className={`size-4 ${isSelected ? "text-amber-400" : "text-muted-foreground"}`} />
+      <span>{name}</span>
+    </button>
   );
 }
+
+const PLACES = [
+  { name: "Home", path: "/home/user", icon: Home },
+  { name: "Documents", path: "/home/user/Documents", icon: FileText },
+  { name: "Downloads", path: "/home/user/Downloads", icon: Download },
+  { name: "Root", path: "/", icon: HardDrive },
+];
 
 // --- File content viewer ---
 
@@ -187,47 +149,43 @@ export function FileManager({ windowId }: { windowId: string }) {
   const fs = fsRef.current;
 
   const [currentPath, setCurrentPath] = useState("/home/user");
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(
-    () => new Set(["/", "/home", "/home/user"])
-  );
+  const [history, setHistory] = useState<string[]>(["/home/user"]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [viewingFile, setViewingFile] = useState<FSNode | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
-  const toggleExpanded = useCallback((path: string) => {
-    setExpandedPaths((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
-  }, []);
+  const goBack = useCallback(() => {
+    if (historyIndex > 0) {
+      setHistoryIndex((prev) => prev - 1);
+      setCurrentPath(history[historyIndex - 1]);
+      setSelectedPath(null);
+    }
+  }, [history, historyIndex]);
 
+  const goForward = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex((prev) => prev + 1);
+      setCurrentPath(history[historyIndex + 1]);
+      setSelectedPath(null);
+    }
+  }, [history, historyIndex]);
   const navigateTo = useCallback(
     (path: string) => {
       const node = fs.getNode(path);
       if (node?.type === "directory") {
         setCurrentPath(path);
         setSelectedPath(null);
-        // Expand all ancestors
-        const parts = path.split("/").filter(Boolean);
-        setExpandedPaths((prev) => {
-          const next = new Set(prev);
-          next.add("/");
-          let built = "";
-          for (const part of parts) {
-            built += `/${part}`;
-            next.add(built);
-          }
+        setHistory((prev) => {
+          const next = prev.slice(0, historyIndex + 1);
+          next.push(path);
           return next;
         });
+        setHistoryIndex((prev) => prev + 1);
       }
     },
-    [fs]
+    [fs, historyIndex]
   );
 
   const currentContents = useMemo(() => {
@@ -314,41 +272,71 @@ export function FileManager({ windowId }: { windowId: string }) {
 
   return (
     <div className="relative flex h-full flex-col bg-background text-sm" data-window-id={windowId}>
-      {/* Breadcrumb / Path bar */}
-      <div className="flex items-center gap-1 border-b border-border bg-muted/30 px-2 py-1">
-        <span className="mr-1 text-xs text-muted-foreground">Path:</span>
-        {pathSegments.map((seg, i) => (
-          <span key={seg.path} className="flex items-center">
-            {i > 0 && (
-              <ChevronRight className="mx-0.5 size-3 text-muted-foreground/60" />
-            )}
-            <button
-              type="button"
-              onClick={() => navigateTo(seg.path)}
-              className="rounded px-1 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/30 hover:text-amber-400"
-            >
-              {seg.name}
-            </button>
-          </span>
-        ))}
+      {/* Top Toolbar (Dolphin Style) */}
+      <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-2 py-1.5">
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            type="button"
+            onClick={goBack}
+            disabled={historyIndex === 0}
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+          >
+            <ArrowLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={goForward}
+            disabled={historyIndex === history.length - 1}
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+          >
+            <ArrowRight className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => parentPath && navigateTo(parentPath)}
+            disabled={!parentPath}
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+          >
+            <ArrowUp className="size-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 flex items-center bg-background/50 border border-border rounded px-2 h-7 overflow-hidden ml-1">
+          {pathSegments.map((seg, i) => (
+            <span key={seg.path} className="flex items-center">
+              {i > 0 && (
+                <ChevronRight className="mx-0.5 size-3 text-muted-foreground/60" />
+              )}
+              <button
+                type="button"
+                onClick={() => navigateTo(seg.path)}
+                className="rounded px-1.5 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/40 hover:text-amber-400"
+              >
+                {seg.name === "/" ? "root" : seg.name}
+              </button>
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar — directory tree */}
-        <div className="w-48 shrink-0 border-r border-border bg-muted/20">
-          <div className="border-b border-border bg-muted/30 px-2 py-1 text-xs font-semibold text-muted-foreground">
-            Directories
+        {/* Left sidebar — Places */}
+        <div className="w-40 shrink-0 border-r border-border bg-muted/10 flex flex-col py-2">
+          <div className="px-3 pb-1 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+            Places
           </div>
-          <div className="h-[calc(100%-24px)] overflow-y-auto">
-            <TreeNode
-              node={rootNode}
-              currentPath={currentPath}
-              expandedPaths={expandedPaths}
-              onToggle={toggleExpanded}
-              onNavigate={navigateTo}
-              depth={0}
-            />
+          <div className="flex flex-col flex-1 overflow-y-auto">
+            {PLACES.map((place) => (
+              <PlaceItem
+                key={place.path}
+                name={place.name}
+                path={place.path}
+                icon={place.icon}
+                currentPath={currentPath}
+                onClick={navigateTo}
+              />
+            ))}
           </div>
         </div>
 
