@@ -7,9 +7,10 @@ import { Panel } from "@/components/desktop/panel";
 import { Terminal } from "@/components/apps/terminal";
 import { FileManager } from "@/components/apps/file-manager";
 import { TextEditor } from "@/components/apps/text-editor";
-import { SystemMonitor } from "@/components/apps/system-monitor";
 import { About } from "@/components/apps/about";
 import { Firefox } from "@/components/apps/firefox";
+import { MusicApp } from "@/components/apps/music";
+import { VideoApp } from "@/components/apps/video";
 import type { AppId } from "@/types";
 import {
   ContextMenu,
@@ -19,7 +20,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { Terminal as TerminalIcon, Folder, FileText, Activity, Info, RefreshCw, Globe } from "lucide-react";
+import { Terminal as TerminalIcon, Folder, FileText, Activity, Info, RefreshCw, Globe, Music, Film } from "lucide-react";
+import { SystemMonitor } from "@/components/apps/system-monitor";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Terminal: TerminalIcon,
@@ -28,6 +30,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Activity,
   Info,
   Globe,
+  Music,
+  Film,
 };
 
 export function Desktop() {
@@ -70,6 +74,10 @@ export function Desktop() {
         return <About windowId={windowId} />;
       case "firefox":
         return <Firefox windowId={windowId} />;
+      case "music":
+        return <MusicApp windowId={windowId} />;
+      case "video":
+        return <VideoApp windowId={windowId} />;
       default:
         return (
           <div className="p-4 font-mono text-sm text-foreground">
@@ -138,14 +146,6 @@ export function Desktop() {
             </ContextMenuItem>
           );
         })}
-        <ContextMenuSeparator className="bg-border/60" />
-        <ContextMenuItem
-          onClick={() => window.location.reload()}
-          className="gap-2.5 px-2 py-1.5 cursor-pointer text-muted-foreground focus:bg-amber-500/20 focus:text-amber-300 rounded-none"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Reload Session</span>
-        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

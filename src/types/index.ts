@@ -38,7 +38,9 @@ export type AppId =
   | "system-monitor"
   | "settings"
   | "about"
-  | "firefox";
+  | "firefox"
+  | "music"
+  | "video";
 /** Application metadata for the launcher / taskbar */
 export interface AppDefinition {
   id: AppId;

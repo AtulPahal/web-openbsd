@@ -43,4 +43,18 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     defaultSize: { width: 800, height: 600 },
     minSize: { width: 400, height: 300 },
   },
+  music: {
+    id: "music",
+    name: "Music",
+    icon: "Music",
+    defaultSize: { width: 500, height: 400 },
+    minSize: { width: 350, height: 300 },
+  },
+  video: {
+    id: "video",
+    name: "mpv",
+    icon: "Film",
+    defaultSize: { width: 640, height: 360 },
+    minSize: { width: 400, height: 225 },
+  },
 };
