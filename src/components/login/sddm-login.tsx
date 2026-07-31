@@ -19,7 +19,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
       const now = new Date();
       setTime(
         now.toLocaleTimeString("en-US", {
-          hour12: false,
+          hour12: true,
           hour: "2-digit",
           minute: "2-digit",
         })

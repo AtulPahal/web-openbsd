@@ -91,15 +91,6 @@ export function Desktop() {
             }}
           />
 
-          {/* OpenBSD Logo Watermark */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-5">
-            <div className="font-mono text-9xl font-extrabold text-amber-400 tracking-tighter">
-              OpenBSD
-            </div>
-            <div className="font-mono text-xl text-amber-300 mt-2">
-              7.6-web (amd64)
-            </div>
-          </div>
 
           {/* Window Canvas */}
           <div className="flex-1 relative overflow-hidden">
