@@ -104,7 +104,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
-        src={audioUrl}
+        src={audioUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
