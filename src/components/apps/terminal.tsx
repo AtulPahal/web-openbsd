@@ -68,6 +68,15 @@ export function Terminal({ windowId }: { windowId: string }) {
         window.dispatchEvent(new CustomEvent('close-window', { detail: windowId }));
         return;
       }
+      if (trimmed === "reboot") {
+        window.location.reload();
+        return;
+      }
+
+      if (trimmed === "shutdown") {
+        window.close();
+        return;
+      }
 
       const currentPrompt = interpreterRef.current.getPrompt();
 

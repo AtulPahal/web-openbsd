@@ -99,40 +99,38 @@ DESCRIPTION
      The echo utility writes any specified operands, separated by
      single blank characters, to the standard output.`,
 
-  mkdir: `MKDIR(1)                  General Commands Manual                 MKDIR(1)
+  reboot: `REBOOT(8)                 System Manager's Manual                 REBOOT(8)
 
 NAME
-     mkdir - make directories
+     reboot - stopping and restarting the system
 
 SYNOPSIS
-     mkdir directory ...
+     reboot
 
 DESCRIPTION
-     The mkdir utility creates the directories named as operands.`,
+     The reboot utility restarts the system.`,
 
-  rm: `RM(1)                     General Commands Manual                    RM(1)
+  shutdown: `SHUTDOWN(8)               System Manager's Manual               SHUTDOWN(8)
 
 NAME
-     rm - remove directory entries
+     shutdown - close down the system at a given time
 
 SYNOPSIS
-     rm file ...
+     shutdown
 
 DESCRIPTION
-     The rm utility attempts to remove the non-directory type entries
-     specified on the command line.`,
+     The shutdown command terminates all processes and shuts down the system.`,
 
-  touch: `TOUCH(1)                  General Commands Manual                 TOUCH(1)
+  exit: `EXIT(1)                   General Commands Manual                    EXIT(1)
 
 NAME
-     touch - change file access and modification times
+     exit - exit the shell
 
 SYNOPSIS
-     touch file ...
+     exit
 
 DESCRIPTION
-     Set the modification and access times of files. If any file
-     does not exist, it is created with default permissions.`,
+     The exit utility terminates the current shell or terminal window.`,
 
   uname: `UNAME(1)                  General Commands Manual                 UNAME(1)
 
@@ -287,9 +285,6 @@ export class CommandInterpreter {
       case "pwd": return this.cwd;
       case "cat": return this.cmdCat(args);
       case "echo": return args.join(" ");
-      case "mkdir": return this.cmdMkdir(args);
-      case "touch": return this.cmdTouch(args);
-      case "rm": return this.cmdRm(args);
       case "clear": return "\x1BCLEAR";
       case "whoami": return "user";
       case "hostname": return "openbsd.local";
@@ -299,7 +294,6 @@ export class CommandInterpreter {
       case "neofetch":
       case "screenfetch": return NEOFETCH_TEMPLATE(this.cwd);
       case "man": return this.cmdMan(args);
-      case "history": return this.history.map((h, i) => `  ${i + 1}  ${h}`).join("\n");
       case "env":
       case "printenv": return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join("\n");
       case "export": return this.cmdExport(args);
@@ -406,38 +400,6 @@ export class CommandInterpreter {
     return results.join("\n");
   }
 
-  private cmdMkdir(args: string[]): string {
-    if (args.length === 0) return "usage: mkdir directory ...";
-    const results: string[] = [];
-    for (const a of args) {
-      if (!this.fs.mkdir(a, this.cwd)) {
-        results.push(`mkdir: ${a}: File exists or parent not found`);
-      }
-    }
-    return results.join("\n");
-  }
-
-  private cmdTouch(args: string[]): string {
-    if (args.length === 0) return "usage: touch file ...";
-    for (const a of args) {
-      if (!this.fs.exists(a, this.cwd)) {
-        this.fs.write(a, this.cwd, "");
-      }
-    }
-    return "";
-  }
-
-  private cmdRm(args: string[]): string {
-    if (args.length === 0) return "usage: rm file ...";
-    const results: string[] = [];
-    for (const a of args) {
-      if (!this.fs.remove(a, this.cwd)) {
-        results.push(`rm: ${a}: No such file or directory`);
-      }
-    }
-    return results.join("\n");
-  }
-
   private cmdUname(args: string[]): string {
     if (args.includes("-a")) {
       return "OpenBSD openbsd.local 7.5 GENERIC.MP#1 amd64";
@@ -452,15 +414,13 @@ export class CommandInterpreter {
   pwd             Print working directory
   cat <file>      Print file contents
   echo <text>     Print text
-  mkdir <dir>     Create directory
-  touch <file>    Create empty file
-  rm <file>       Remove file
   clear           Clear screen
   whoami          Print current user
   hostname        Print hostname
   uname [-a]      Print system information
   date            Print current date/time
-  history         Command history
+  reboot          Reboot the system
+  shutdown        Shutdown the system
   man <cmd>       Manual page
   neofetch        System information
   help            This help message`;
