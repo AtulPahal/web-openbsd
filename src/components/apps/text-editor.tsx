@@ -64,6 +64,48 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // Ctrl+X — close the window (comes first to avoid conflict with save)
+      if ((e.ctrlKey || e.metaKey) && e.key === "x") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("close-window", { detail: windowId }));
+        return;
+      }
+
+      // Ctrl+K — cut (delete) the current line
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        const ta = textareaRef.current;
+        if (!ta) return;
+        const pos = ta.selectionStart;
+        const currentLines = content.split("\n");
+        let offset = 0;
+        let lineIdx = 0;
+        for (let i = 0; i < currentLines.length; i++) {
+          const lineEnd =
+            offset +
+            currentLines[i].length +
+            (i < currentLines.length - 1 ? 1 : 0);
+          if (pos <= lineEnd) {
+            lineIdx = i;
+            break;
+          }
+          offset = lineEnd;
+        }
+        const newLines = currentLines.filter((_, i) => i !== lineIdx);
+        const newContent = newLines.join("\n");
+        setContent(newContent);
+        if (!isModified) setIsModified(true);
+        requestAnimationFrame(() => {
+          if (ta) {
+            const newPos = Math.min(offset, newContent.length);
+            ta.selectionStart = newPos;
+            ta.selectionEnd = newPos;
+          }
+        });
+        return;
+      }
+
+      // Ctrl+S / Ctrl+O — save
       if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "o")) {
         e.preventDefault();
         if (path) {
@@ -72,6 +114,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
         }
         return;
       }
+
       if (e.key === "Tab") {
         e.preventDefault();
         const ta = textareaRef.current;
@@ -90,7 +133,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
         });
       }
     },
-    [content, isModified, path]
+    [content, isModified, path, windowId]
   );
 
   const handleScroll = useCallback(() => {

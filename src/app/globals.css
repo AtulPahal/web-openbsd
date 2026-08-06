@@ -117,6 +117,19 @@
   --sidebar-ring: #f0c040;
 }
 
+/* Nerd Fonts Symbols Only — subset for media icons (see src/components/apps/music.tsx). */
+@font-face {
+  font-family: "Symbols Nerd Font";
+  src: url("/fonts/SymbolsNerdFont.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.nf {
+  font-family: "Symbols Nerd Font", "Geist Mono", var(--font-mono), monospace;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -6,7 +6,7 @@ import { CommandInterpreter } from "@/features/command-interpreter";
 
 interface TerminalLine {
   id: string;
-  type: "input" | "output" | "system";
+  type: "input" | "output" | "system" | "pending";
   content: string;
 }
 
@@ -80,31 +80,65 @@ export function Terminal({ windowId }: { windowId: string }) {
 
       const currentPrompt = interpreterRef.current.getPrompt();
 
-      // Execute command
-      const output = interpreterRef.current.execute(inputVal);
+      // Execute command — may return string or Promise<string>
+      const result = interpreterRef.current.execute(inputVal);
 
       // Add to command history if not empty
       if (trimmed) {
         setCommandHistory((prev) => [...prev, trimmed]);
       }
 
-      setLines((prev) => [
-        ...prev,
-        {
-          id: `in-${Date.now()}-${Math.random()}`,
-          type: "input",
-          content: `${currentPrompt}${inputVal}`,
-        },
-        ...(output
-          ? [
-              {
-                id: `out-${Date.now()}-${Math.random()}`,
-                type: "output" as const,
-                content: output,
-              },
-            ]
-          : []),
-      ]);
+      if (typeof result === "string") {
+        // Synchronous result — append immediately
+        setLines((prev) => [
+          ...prev,
+          {
+            id: `in-${Date.now()}-${Math.random()}`,
+            type: "input" as const,
+            content: `${currentPrompt}${inputVal}`,
+          },
+          ...(result
+            ? [
+                {
+                  id: `out-${Date.now()}-${Math.random()}`,
+                  type: "output" as const,
+                  content: result,
+                },
+              ]
+            : []),
+        ]);
+      } else {
+        // Async result — show pending line, replace when resolved
+        const pendingId = `pending-${Date.now()}-${Math.random()}`;
+        setLines((prev) => [
+          ...prev,
+          {
+            id: `in-${Date.now()}-${Math.random()}`,
+            type: "input" as const,
+            content: `${currentPrompt}${inputVal}`,
+          },
+          { id: pendingId, type: "pending" as const, content: "Fetching..." },
+        ]);
+        result
+          .then((output) => {
+            setLines((prev) =>
+              prev.map((l) =>
+                l.id === pendingId
+                  ? { ...l, type: "output" as const, content: output || "(empty response)" }
+                  : l
+              )
+            );
+          })
+          .catch((err) => {
+            setLines((prev) =>
+              prev.map((l) =>
+                l.id === pendingId
+                  ? { ...l, type: "output" as const, content: `Error: ${String(err)}` }
+                  : l
+              )
+            );
+          });
+      }
 
       setInputVal("");
       setHistoryIndex(null);
@@ -146,6 +180,10 @@ export function Terminal({ windowId }: { windowId: string }) {
             <div key={line.id} className="whitespace-pre-wrap leading-relaxed">
               {line.type === "input" ? (
                 <span className="text-amber-400 font-semibold">
+                  {line.content}
+                </span>
+              ) : line.type === "pending" ? (
+                <span className="text-muted-foreground italic animate-pulse">
                   {line.content}
                 </span>
               ) : (

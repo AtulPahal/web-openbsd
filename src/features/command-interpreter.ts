@@ -1,4 +1,4 @@
-import { VirtualFS } from "./virtual-fs";
+import { VirtualFS } from "@/features/virtual-fs";
 
 const PUFFY_ASCII = `
                  _____
@@ -237,6 +237,7 @@ export class CommandInterpreter {
   private cwd: string;
   private env: Record<string, string>;
   private history: string[];
+  private startTime = Date.now();
 
   constructor(fs: VirtualFS) {
     this.fs = fs;
@@ -267,7 +268,7 @@ export class CommandInterpreter {
     return `user@openbsd:${display}$ `;
   }
 
-  execute(input: string): string {
+  execute(input: string): string | Promise<string> {
     const trimmed = input.trim();
     if (!trimmed) return "";
     this.history.push(trimmed);
@@ -298,7 +299,22 @@ export class CommandInterpreter {
       case "printenv": return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join("\n");
       case "export": return this.cmdExport(args);
       case "id": return "uid=1000(user) gid=1000(user) groups=1000(user), 0(wheel)";
-      case "uptime": return ` ${new Date().toLocaleTimeString()} up ${Math.floor(Math.random() * 24)}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")}, 1 user, load averages: 0.12, 0.08, 0.06`;
+      case "uptime": {
+        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        const h = Math.floor(elapsed / 3600);
+        const m = Math.floor((elapsed % 3600) / 60);
+        const upStr = `${h}:${String(m).padStart(2, "0")}`;
+        return ` ${new Date().toLocaleTimeString()}  up ${upStr}, 1 user, load averages: 0.12 0.08 0.06`;
+      }
+      case "curl": return this.cmdCurl(args);
+      case "touch": return this.cmdTouch(args);
+      case "mkdir": return this.cmdMkdir(args);
+      case "rm": return this.cmdRm(args);
+      case "history": return this.history.map((c, i) => `${String(i + 1).padStart(4)} ${c}`).join("\n");
+      case "grep": return this.cmdGrep(args);
+      case "wc": return this.cmdWc(args);
+      case "head": return this.cmdHead(args);
+      case "tail": return this.cmdHead(args, true);
       default:
         return `ksh: ${cmd}: not found`;
     }
@@ -409,21 +425,29 @@ export class CommandInterpreter {
 
   private cmdHelp(): string {
     return `Available commands:
-  ls [-la]        List directory contents
-  cd <dir>        Change directory
-  pwd             Print working directory
-  cat <file>      Print file contents
-  echo <text>     Print text
-  clear           Clear screen
-  whoami          Print current user
-  hostname        Print hostname
-  uname [-a]      Print system information
-  date            Print current date/time
-  reboot          Reboot the system
-  shutdown        Shutdown the system
-  man <cmd>       Manual page
-  fastfetch       System information
-  help            This help message`;
+  ls [-la]           List directory contents
+  cd <dir>           Change directory
+  pwd                Print working directory
+  cat <file>         Print file contents
+  echo <text>        Print text
+  clear              Clear screen
+  whoami             Print current user
+  hostname           Print hostname
+  uname [-a]         Print system information
+  date               Print current date/time
+  reboot             Reboot the system
+  shutdown           Shutdown the system
+  man <cmd>          Manual page
+  fastfetch          System information
+  curl <url>         Fetch a URL
+  touch <file>       Create or update file
+  mkdir <dir>        Create directory
+  rm [-r] <path>     Remove file or directory
+  history            Show command history
+  grep <pat> <file>  Search file for pattern
+  wc <file>          Count lines/words/chars
+  head/tail <file>   First/last lines of file
+  help               This help message`;
   }
 
   private cmdMan(args: string[]): string {
@@ -441,5 +465,113 @@ export class CommandInterpreter {
       }
     }
     return "";
+  }
+
+  private async cmdCurl(args: string[]): Promise<string> {
+    if (args.length === 0) return "usage: curl <url>";
+    let url = args[0];
+    if (!url.startsWith("http")) url = "https://" + url;
+    try {
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return `curl: (22) The requested URL returned error: ${res.status}`;
+      const text = await res.text();
+      const body = text.slice(0, 4000);
+      const len = body.length;
+      return `  % Total    % Received\n  100  ${len}  100  ${len}\n\n${body}`;
+    } catch {
+      try {
+        const hostname = new URL(url).hostname;
+        return `curl: (6) Could not resolve host: ${hostname}`;
+      } catch {
+        return `curl: (6) Could not resolve host: ${url}`;
+      }
+    }
+  }
+
+  private cmdTouch(args: string[]): string {
+    if (args.length === 0) return "usage: touch <file> ...";
+    for (const a of args) {
+      const ok = this.fs.write(a, this.cwd, this.fs.read(a, this.cwd) ?? "");
+      if (!ok) return `touch: ${a}: cannot create file`;
+    }
+    return "";
+  }
+
+  private cmdMkdir(args: string[]): string {
+    if (args.length === 0) return "usage: mkdir <dir> ...";
+    for (const a of args) {
+      const ok = this.fs.mkdir(a, this.cwd);
+      if (!ok) return `mkdir: ${a}: File exists`;
+    }
+    return "";
+  }
+
+  private cmdRm(args: string[]): string {
+    if (args.length === 0) return "usage: rm [-r] <path> ...";
+    const targets = args.filter((a) => !a.startsWith("-"));
+    for (const t of targets) {
+      const ok = this.fs.remove(t, this.cwd);
+      if (!ok) return `rm: ${t}: No such file or directory`;
+    }
+    return "";
+  }
+
+  private cmdGrep(args: string[]): string {
+    if (args.length < 2) return "usage: grep <pattern> <file>";
+    const [pattern, filePath] = args;
+    const content = this.fs.read(filePath, this.cwd);
+    if (content === null) return `grep: ${filePath}: No such file or directory`;
+    try {
+      const regex = new RegExp(pattern);
+      return content.split("\n").filter((l) => regex.test(l)).join("\n");
+    } catch {
+      return `grep: invalid regex: ${pattern}`;
+    }
+  }
+
+  private cmdWc(args: string[]): string {
+    if (args.length === 0) return "usage: wc <file>";
+    const results: string[] = [];
+    for (const a of args) {
+      const content = this.fs.read(a, this.cwd);
+      if (content === null) {
+        results.push(`wc: ${a}: No such file or directory`);
+        continue;
+      }
+      const lines = content.split("\n").length;
+      const words = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
+      const chars = content.length;
+      results.push(`${String(lines).padStart(4)} ${String(words).padStart(4)} ${String(chars).padStart(4)} ${a}`);
+    }
+    return results.join("\n");
+  }
+
+  private cmdHead(args: string[], fromEnd = false): string {
+    let n = 10;
+    const files: string[] = [];
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === "-n" && args[i + 1]) {
+        n = parseInt(args[++i]) || 10;
+      } else if (args[i].startsWith("-") && /^\d+$/.test(args[i].slice(1))) {
+        n = parseInt(args[i].slice(1));
+      } else {
+        files.push(args[i]);
+      }
+    }
+    const cmd = fromEnd ? "tail" : "head";
+    if (files.length === 0) return `usage: ${cmd} [-n N] <file>`;
+    const results: string[] = [];
+    for (const f of files) {
+      const content = this.fs.read(f, this.cwd);
+      if (content === null) {
+        results.push(`${cmd}: ${f}: No such file or directory`);
+        continue;
+      }
+      const lines = content.split("\n");
+      const slice = fromEnd ? lines.slice(-n) : lines.slice(0, n);
+      if (files.length > 1) results.push(`==> ${f} <==`);
+      results.push(slice.join("\n"));
+    }
+    return results.join("\n");
   }
 }

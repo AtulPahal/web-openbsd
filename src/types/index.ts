@@ -36,7 +36,6 @@ export type AppId =
   | "file-manager"
   | "text-editor"
   | "system-monitor"
-  | "settings"
   | "about"
   | "firefox"
   | "music"

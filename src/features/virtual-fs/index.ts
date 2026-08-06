@@ -297,20 +297,131 @@ export class VirtualFS {
     return this.root;
   }
 
-  getNode(path: string): FSNode | null {
-    if (path === "/") return this.root;
+  /** Normalize a path relative to cwd into an absolute path */
+  normalizePath(path: string, cwd: string): string {
+    if (!path) return cwd;
 
-    const parts = path.split("/").filter(Boolean);
+    let abs: string;
+    if (path.startsWith("/")) {
+      abs = path;
+    } else if (path === "~" || path.startsWith("~/")) {
+      abs = "/home/user" + path.slice(1);
+    } else {
+      abs = cwd === "/" ? "/" + path : cwd + "/" + path;
+    }
+
+    const parts = abs.split("/").filter(Boolean);
+    const resolved: string[] = [];
+    for (const p of parts) {
+      if (p === ".") continue;
+      if (p === "..") {
+        resolved.pop();
+      } else {
+        resolved.push(p);
+      }
+    }
+    return "/" + resolved.join("/");
+  }
+
+  /** Resolve a path to a FSNode or null */
+  resolve(path: string, cwd: string): FSNode | null {
+    const abs = this.normalizePath(path, cwd);
+    if (abs === "/") return this.root;
+
+    const parts = abs.split("/").filter(Boolean);
     let current: FSNode = this.root;
-
     for (const part of parts) {
       if (current.type !== "directory" || !current.children) return null;
       const child = current.children.find((c) => c.name === part);
       if (!child) return null;
       current = child;
     }
-
     return current;
+  }
+
+  /** Read file content */
+  read(path: string, cwd: string): string | null {
+    const node = this.resolve(path, cwd);
+    if (!node || node.type !== "file") return null;
+    return node.content ?? "";
+  }
+
+  /** Write content to a file, creating it if it doesn't exist */
+  write(path: string, cwd: string, content: string): boolean {
+    const abs = this.normalizePath(path, cwd);
+    const node = this.resolve(abs, "/");
+    if (node) {
+      if (node.type !== "file") return false;
+      node.content = content;
+      node.size = content.length;
+      node.modified = new Date();
+      return true;
+    }
+
+    // Create in parent directory
+    const lastSlash = abs.lastIndexOf("/");
+    const parentPath = abs.slice(0, lastSlash) || "/";
+    const fileName = abs.slice(lastSlash + 1);
+    const parent = this.resolve(parentPath, "/");
+    if (!parent || parent.type !== "directory") return false;
+    if (!parent.children) parent.children = [];
+    parent.children.push(mkFile(fileName, parentPath, { content, owner: "user", group: "user" }));
+    return true;
+  }
+
+  /** Create a directory */
+  mkdir(path: string, cwd: string): boolean {
+    const abs = this.normalizePath(path, cwd);
+    if (this.resolve(abs, "/")) return false; // already exists
+
+    const lastSlash = abs.lastIndexOf("/");
+    const parentPath = abs.slice(0, lastSlash) || "/";
+    const dirName = abs.slice(lastSlash + 1);
+    const parent = this.resolve(parentPath, "/");
+    if (!parent || parent.type !== "directory") return false;
+    if (!parent.children) parent.children = [];
+    parent.children.push(mkDir(dirName, parentPath, [], { owner: "user", group: "user" }));
+    return true;
+  }
+
+  /** Remove a file or directory (non-empty dirs return false) */
+  remove(path: string, cwd: string): boolean {
+    const abs = this.normalizePath(path, cwd);
+    if (abs === "/") return false;
+
+    const lastSlash = abs.lastIndexOf("/");
+    const parentPath = abs.slice(0, lastSlash) || "/";
+    const name = abs.slice(lastSlash + 1);
+    const parent = this.resolve(parentPath, "/");
+    if (!parent || !parent.children) return false;
+
+    const idx = parent.children.findIndex((c) => c.name === name);
+    if (idx === -1) return false;
+
+    const target = parent.children[idx];
+    if (target.type === "directory" && target.children && target.children.length > 0) {
+      return false; // non-empty directory
+    }
+
+    parent.children.splice(idx, 1);
+    return true;
+  }
+
+  /** Check if a path exists */
+  exists(path: string, cwd: string): boolean {
+    return this.resolve(path, cwd) !== null;
+  }
+
+  /** List children of a directory */
+  list(path: string, cwd: string): FSNode[] {
+    const node = this.resolve(path, cwd);
+    if (!node || node.type !== "directory") return [];
+    return node.children ?? [];
+  }
+
+  /** Delegate to resolve(path, "/") for backward compat */
+  getNode(path: string): FSNode | null {
+    return this.resolve(path, "/");
   }
 
   listDirectory(path: string): FSNode[] {
