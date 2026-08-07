@@ -4,18 +4,7 @@ import { AppLauncher } from "./app-launcher";
 import { SystemTray } from "./system-tray";
 import type { WindowState, WindowId, AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { Terminal, Folder, FileText, Activity, Info, Globe, AudioLines, Clapperboard } from "lucide-react";
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Terminal,
-  Folder,
-  FileText,
-  Activity,
-  Info,
-  Globe,
-  AudioLines,
-  Clapperboard,
-};
+import { APP_ICON_MAP } from "@/lib/app-icons";
 
 interface PanelProps {
   windows: WindowState[];
@@ -35,7 +24,7 @@ export function Panel({ windows, onFocusWindow, onOpenApp }: PanelProps) {
       <div className="flex-1 flex items-center gap-1 overflow-x-auto px-4 scrollbar-none">
         {windows.map((win) => {
           const appMeta = APP_REGISTRY[win.appId];
-          const IconComponent = appMeta ? ICON_MAP[appMeta.icon] ?? Terminal : Terminal;
+          const IconComponent = appMeta ? APP_ICON_MAP[appMeta.icon] ?? APP_ICON_MAP.Terminal : APP_ICON_MAP.Terminal;
           const isActive = win.isFocused && !win.isMinimized;
 
           return (

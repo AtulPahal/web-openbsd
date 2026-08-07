@@ -1,21 +1,18 @@
 "use client";
 
-import { Home, HardDrive, Monitor, Download, ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
+import { Home, HardDrive, Download, ArrowLeft, ArrowRight, ArrowUp, ChevronRight } from "lucide-react";
 import { useState, useRef, useCallback, useMemo } from "react";
 import {
   Folder,
-  FolderOpen,
   File,
   FileText,
   FileCode,
-  ChevronRight,
-  ChevronDown,
-  ArrowUp,
-  X,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { VirtualFS } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
+import { SYSTEM_PATHS } from "@/lib/system-config";
+import { getFileAssociation } from "@/lib/file-associations";
 
 type SortKey = "name" | "size" | "permissions" | "modified";
 type SortDir = "asc" | "desc";
@@ -96,18 +93,18 @@ function PlaceItem({
 }
 
 const PLACES = [
-  { name: "Home", path: "/home/user", icon: Home },
-  { name: "Documents", path: "/home/user/Documents", icon: FileText },
-  { name: "Downloads", path: "/home/user/Downloads", icon: Download },
-  { name: "Root", path: "/", icon: HardDrive },
+  { name: "Home", path: SYSTEM_PATHS.home, icon: Home },
+  { name: "Documents", path: SYSTEM_PATHS.documents, icon: FileText },
+  { name: "Downloads", path: SYSTEM_PATHS.downloads, icon: Download },
+  { name: "Root", path: SYSTEM_PATHS.root, icon: HardDrive },
 ];
 
 export function FileManager({ windowId }: { windowId: string }) {
   const fsRef = useRef(new VirtualFS());
   const fs = fsRef.current;
 
-  const [currentPath, setCurrentPath] = useState("/home/user");
-  const [history, setHistory] = useState<string[]>(["/home/user"]);
+  const [currentPath, setCurrentPath] = useState<string>(SYSTEM_PATHS.home);
+  const [history, setHistory] = useState<string[]>([SYSTEM_PATHS.home]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("name");
@@ -190,14 +187,7 @@ export function FileManager({ windowId }: { windowId: string }) {
       if (node.type === "directory") {
         navigateTo(node.path);
       } else {
-        const lowerName = node.name.toLowerCase();
-        let targetAppId = "text-editor";
-        
-        if (lowerName.endsWith(".mp3") || lowerName.endsWith(".wav") || lowerName.endsWith(".ogg")) {
-          targetAppId = "music";
-        } else if (lowerName.endsWith(".mp4") || lowerName.endsWith(".webm") || lowerName.endsWith(".mov")) {
-          targetAppId = "video";
-        }
+        const targetAppId = getFileAssociation(node.name);
 
         window.dispatchEvent(
           new CustomEvent("open-app", {

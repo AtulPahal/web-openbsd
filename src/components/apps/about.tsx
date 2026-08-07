@@ -1,5 +1,6 @@
 "use client";
 
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 const PUFFY_ASCII = `
      _____
     /     \\
@@ -17,11 +18,11 @@ export function About({ windowId }: { windowId: string }) {
 
       {/* Title */}
       <h1 className="text-lg font-bold tracking-wide text-foreground">
-        OpenBSD Web Desktop
+        {SYSTEM_CONFIG.productTitle}
       </h1>
 
       {/* Version */}
-      <p className="text-sm text-amber-400/80">Version 7.6-web</p>
+      <p className="text-sm text-amber-400/80">Version {SYSTEM_CONFIG.desktopVersion}</p>
 
       {/* Copyright */}
       <p className="text-xs text-muted-foreground">
@@ -36,7 +37,7 @@ export function About({ windowId }: { windowId: string }) {
 
       {/* Link */}
       <a
-        href="https://www.openbsd.org"
+        href={SYSTEM_CONFIG.website}
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs text-amber-400 underline underline-offset-2 hover:text-amber-300"

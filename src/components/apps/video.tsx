@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { MEDIA_CONFIG } from "@/lib/media-config";
 import { VirtualFS } from "@/features/virtual-fs";
 
 function formatTime(seconds: number) {
@@ -212,7 +213,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
           aria-label={isPlaying ? "Pause" : "Play"}
           className="px-2 py-1 text-sm border border-border text-foreground hover:text-amber-400 disabled:opacity-40"
         >
-          <span className="nf text-lg" aria-hidden="true">{isPlaying ? '\uF04C' : '\uF04B'}</span>
+          <span className="nf text-lg" aria-hidden="true">{isPlaying ? MEDIA_CONFIG.glyphs.pause : MEDIA_CONFIG.glyphs.play}</span>
         </button>
 
         <span className="font-mono text-sm text-muted-foreground shrink-0">
@@ -237,7 +238,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
           aria-label={isMuted ? "Unmute" : "Mute"}
           className="px-2 py-1 text-sm border border-border text-foreground hover:text-amber-400 disabled:opacity-40"
         >
-          <span className="nf text-base" aria-hidden="true">{isMuted ? '\uF026' : '\uF028'}</span>
+          <span className="nf text-base" aria-hidden="true">{isMuted ? MEDIA_CONFIG.glyphs.mute : MEDIA_CONFIG.glyphs.volume}</span>
         </button>
         </div>
       )}

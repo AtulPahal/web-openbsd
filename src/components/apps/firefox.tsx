@@ -3,8 +3,9 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, ArrowRight, RotateCw, Home, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BROWSER_HOME_URL, buildProxyUrl } from "@/lib/browser-config";
 
-const HOME_URL = "https://en.wikipedia.org/wiki/OpenBSD";
+const HOME_URL: string = BROWSER_HOME_URL;
 
 export function Firefox({ windowId }: { windowId: string }) {
   const [url, setUrl] = useState(HOME_URL);
@@ -29,7 +30,7 @@ export function Firefox({ windowId }: { windowId: string }) {
     setUrl(finalUrl);
     setInputUrl(finalUrl);
     
-    const iframeSrc = proxyState ? `/api/proxy?url=${encodeURIComponent(finalUrl)}` : finalUrl;
+    const iframeSrc = proxyState ? buildProxyUrl(finalUrl) : finalUrl;
     setCurrentIframeSrc(iframeSrc);
     
     const newHistory = history.slice(0, historyIndex + 1);
@@ -45,7 +46,7 @@ export function Firefox({ windowId }: { windowId: string }) {
       const newUrl = history[newIndex];
       setUrl(newUrl);
       setInputUrl(newUrl);
-      setCurrentIframeSrc(useProxy ? `/api/proxy?url=${encodeURIComponent(newUrl)}` : newUrl);
+      setCurrentIframeSrc(useProxy ? buildProxyUrl(newUrl) : newUrl);
     }
   };
 
@@ -56,7 +57,7 @@ export function Firefox({ windowId }: { windowId: string }) {
       const newUrl = history[newIndex];
       setUrl(newUrl);
       setInputUrl(newUrl);
-      setCurrentIframeSrc(useProxy ? `/api/proxy?url=${encodeURIComponent(newUrl)}` : newUrl);
+      setCurrentIframeSrc(useProxy ? buildProxyUrl(newUrl) : newUrl);
     }
   };
 

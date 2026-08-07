@@ -3,16 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ProcessInfo } from "@/types";
-
-const INITIAL_PROCESSES: ProcessInfo[] = [
-  { pid: 1, name: "init", cpu: 0.0, memory: 0.1, state: "running", user: "root" },
-  { pid: 23, name: "sshd", cpu: 0.1, memory: 0.5, state: "running", user: "root" },
-  { pid: 45, name: "cron", cpu: 0.0, memory: 0.2, state: "sleeping", user: "root" },
-  { pid: 67, name: "Xorg", cpu: 2.3, memory: 4.1, state: "running", user: "user" },
-  { pid: 89, name: "fvwm", cpu: 0.8, memory: 1.2, state: "running", user: "user" },
-  { pid: 112, name: "xterm", cpu: 0.2, memory: 0.8, state: "running", user: "user" },
-  { pid: 134, name: "httpd", cpu: 0.5, memory: 1.5, state: "running", user: "www" },
-];
+import {
+  INITIAL_CPU_USAGE,
+  INITIAL_PROCESSES,
+  INITIAL_RX_BYTES,
+  INITIAL_TX_BYTES,
+  INITIAL_UPTIME,
+  NETWORK_CONFIG,
+} from "@/lib/system-monitor-config";
 
 function jitter(base: number, range: number): number {
   const delta = (Math.random() - 0.5) * 2 * range;
@@ -146,14 +144,14 @@ function NetworkTab({ txBytes, rxBytes }: { txBytes: number; rxBytes: number }) 
       {/* em0 */}
       <div className="border border-border p-3">
         <div className="mb-2 flex items-center gap-2">
-          <span className="font-bold">em0</span>
+          <span className="font-bold">{NETWORK_CONFIG.interface}</span>
           <span className="text-green-400">● active</span>
         </div>
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <span className="text-muted-foreground">IPv4</span>
-          <span>10.0.0.42</span>
+          <span>{NETWORK_CONFIG.ipv4}</span>
           <span className="text-muted-foreground">MAC</span>
-          <span>00:0c:29:3a:bc:d5</span>
+          <span>{NETWORK_CONFIG.mac}</span>
           <span className="text-muted-foreground">TX</span>
           <span className="tabular-nums">{formatBytes(txBytes)}</span>
           <span className="text-muted-foreground">RX</span>
@@ -163,14 +161,14 @@ function NetworkTab({ txBytes, rxBytes }: { txBytes: number; rxBytes: number }) 
       {/* lo0 */}
       <div className="border border-border p-3">
         <div className="mb-2 flex items-center gap-2">
-          <span className="font-bold">lo0</span>
+          <span className="font-bold">{NETWORK_CONFIG.loopbackInterface}</span>
           <span className="text-muted-foreground">loopback</span>
         </div>
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <span className="text-muted-foreground">IPv4</span>
-          <span>127.0.0.1</span>
+          <span>{NETWORK_CONFIG.loopbackIpv4}</span>
           <span className="text-muted-foreground">IPv6</span>
-          <span>::1</span>
+          <span>{NETWORK_CONFIG.loopbackIpv6}</span>
           <span className="text-muted-foreground">TX</span>
           <span className="tabular-nums">0 B</span>
           <span className="text-muted-foreground">RX</span>
@@ -183,10 +181,10 @@ function NetworkTab({ txBytes, rxBytes }: { txBytes: number; rxBytes: number }) 
 
 export function SystemMonitor({ windowId }: { windowId: string }) {
   const [processes, setProcesses] = useState<ProcessInfo[]>(INITIAL_PROCESSES);
-  const [cpuUsage, setCpuUsage] = useState(28);
-  const [uptime, setUptime] = useState(43217);
-  const [txBytes, setTxBytes] = useState(1_572_864);
-  const [rxBytes, setRxBytes] = useState(8_912_043);
+  const [cpuUsage, setCpuUsage] = useState(INITIAL_CPU_USAGE);
+  const [uptime, setUptime] = useState(INITIAL_UPTIME);
+  const [txBytes, setTxBytes] = useState(INITIAL_TX_BYTES);
+  const [rxBytes, setRxBytes] = useState(INITIAL_RX_BYTES);
   const intervalRefs = useRef<ReturnType<typeof setInterval>[]>([]);
 
   const clearIntervals = useCallback(() => {

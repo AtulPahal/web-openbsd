@@ -11,25 +11,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import {
-  Terminal,
-  Folder,
-  FileText,
-  Activity,
-  Shield,
-  Globe,
-  AudioLines,
-  Clapperboard,
-} from "lucide-react";
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Terminal,
-  Folder,
-  FileText,
-  Globe,
-  AudioLines,
-  Clapperboard,
-};
+import { APP_ICON_MAP } from "@/lib/app-icons";
+import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { Shield } from "lucide-react";
 
 interface AppLauncherProps {
   onOpenApp: (appId: AppId) => void;
@@ -49,11 +33,11 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs text-amber-400 font-bold px-2 py-1.5 flex items-center justify-between">
             <span>APPLICATIONS</span>
-            <span className="text-[10px] text-muted-foreground font-normal">v7.6-web</span>
+            <span className="text-[10px] text-muted-foreground font-normal">v{SYSTEM_CONFIG.desktopVersion}</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-border/60" />
           {Object.values(APP_REGISTRY).map((app) => {
-            const IconComponent = ICON_MAP[app.icon] ?? Terminal;
+            const IconComponent = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
             return (
               <DropdownMenuItem
                 key={app.id}

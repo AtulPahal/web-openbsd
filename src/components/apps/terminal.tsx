@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { INITIAL_MOTD } from "@/lib/command-data";
 import { VirtualFS } from "@/features/virtual-fs";
 import { CommandInterpreter } from "@/features/command-interpreter";
 
@@ -10,13 +11,6 @@ interface TerminalLine {
   content: string;
 }
 
-const INITIAL_MOTD = `OpenBSD 7.5 (GENERIC.MP) #1: Sat Apr  6 12:00:00 MDT 2024
-
-Welcome to OpenBSD: The proactively secure Unix-like operating system.
-
-Please use the sendbug(1) utility to report bugs in the system.
-Type 'help' for a list of available commands or 'fastfetch' for system info.
-`;
 
 export function Terminal({ windowId }: { windowId: string }) {
   const fsRef = useRef(new VirtualFS());

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { MEDIA_CONFIG } from "@/lib/media-config";
 import { VirtualFS } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
 
-const MUSIC_DIR = "/home/user/Music";
+const { glyphs: MEDIA_GLYPHS } = MEDIA_CONFIG;
 
 function formatTime(seconds: number) {
   if (isNaN(seconds) || seconds <= 0) return "0:00";
@@ -36,8 +37,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   // Build the local music library from the virtual filesystem (once).
   useEffect(() => {
     const songs = fsRef.current
-      .listDirectory(MUSIC_DIR)
-      .filter((n) => n.type === "file" && n.name.toLowerCase().endsWith(".mp3"));
+      .listDirectory(MEDIA_CONFIG.musicDirectory)
+      .filter((n) => n.type === "file" && n.name.toLowerCase().endsWith(MEDIA_CONFIG.musicExtension));
     setPlaylist(songs);
   }, []);
 
@@ -47,7 +48,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       const node = fsRef.current.getNode(targetPath);
       if (node && node.type === "file" && node.content) {
         setAudioUrl(node.content);
-        setTitle(node.name.replace(/_/g, " ").replace(/\.mp3$/i, ""));
+        setTitle(node.name.replace(/_/g, " ").replace(new RegExp(`\\${MEDIA_CONFIG.musicExtension}$`, "i"), ""));
         setCurrentTrackPath(node.path);
         setProgress(0);
         setDuration(0);
@@ -119,7 +120,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       return;
     }
     setAudioUrl(node.content);
-    setTitle(node.name.replace(/_/g, " ").replace(/\.mp3$/i, ""));
+    setTitle(node.name.replace(/_/g, " ").replace(new RegExp(`\\${MEDIA_CONFIG.musicExtension}$`, "i"), ""));
     setCurrentTrackPath(node.path);
     setProgress(0);
     setDuration(0);
@@ -153,7 +154,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
       {/* Header / Now Playing */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border text-sm">
-        <span className="nf text-amber-400" aria-hidden="true">{'\uF001'}</span>
+        <span className="nf text-amber-400" aria-hidden="true">{MEDIA_GLYPHS.music}</span>
         <span className="text-amber-400">Now Playing:</span>{" "}
         <span className="text-foreground">{title || "idle"}</span>
       </div>
@@ -162,7 +163,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       <div className="flex-1 overflow-y-auto p-4">
         {playlist.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No files found in {MUSIC_DIR}
+            No files found in {MEDIA_CONFIG.musicDirectory}
           </p>
         ) : (
           <table className="w-full text-sm">
@@ -224,7 +225,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             aria-label="Previous track"
             className="px-2 py-1 border border-border text-foreground disabled:opacity-40"
           >
-            [<span className="nf" aria-hidden="true">{'\uF048'}</span>]
+            [<span className="nf" aria-hidden="true">{MEDIA_GLYPHS.previous}</span>]
           </button>
           <button
             type="button"
@@ -233,7 +234,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             aria-label={isPlaying ? "Pause" : "Play"}
             className={`px-2 py-1 border border-border disabled:opacity-40 ${isPlaying ? "text-amber-400" : ""}`}
           >
-            [<span className="nf" aria-hidden="true">{isPlaying ? '\uF04C' : '\uF04B'}</span>]
+            [<span className="nf" aria-hidden="true">{isPlaying ? MEDIA_GLYPHS.pause : MEDIA_GLYPHS.play}</span>]
           </button>
           <button
             type="button"
@@ -242,7 +243,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             aria-label="Next track"
             className="px-2 py-1 border border-border text-foreground disabled:opacity-40"
           >
-            [<span className="nf" aria-hidden="true">{'\uF051'}</span>]
+            [<span className="nf" aria-hidden="true">{MEDIA_GLYPHS.next}</span>]
           </button>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -253,7 +254,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
             className={`px-2 py-1 border border-border disabled:opacity-40 ${isMuted || volume === 0 ? "text-amber-400" : ""}`}
           >
-            [<span className="nf" aria-hidden="true">{isMuted || volume === 0 ? '\uF026' : '\uF028'}</span>]
+            [<span className="nf" aria-hidden="true">{isMuted || volume === 0 ? MEDIA_GLYPHS.mute : MEDIA_GLYPHS.volume}</span>]
           </button>
           <input
             type="range"

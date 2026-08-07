@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenBSD Web Desktop",
-  description: "An OpenBSD-inspired desktop environment in your browser",
+  title: SYSTEM_CONFIG.productTitle,
+  description: SYSTEM_CONFIG.productDescription,
 };
 
 export default function RootLayout({

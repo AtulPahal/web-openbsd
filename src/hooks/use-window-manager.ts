@@ -3,10 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { WindowId, WindowState, AppId, Position, Size } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
-
-const BASE_OFFSET = 60;
-const CASCADE_STEP = 30;
-const PANEL_HEIGHT = 48;
+import { BASE_OFFSET, CASCADE_STEP, PANEL_HEIGHT } from "@/lib/desktop-config";
 
 function generateId(): WindowId {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

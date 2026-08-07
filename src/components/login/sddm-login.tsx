@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { User, ArrowRight, Power, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 interface SDDMLoginProps {
   onLogin: () => void;
@@ -39,7 +40,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "2026") {
+    if (password === SYSTEM_CONFIG.loginPassword) {
       setError(false);
       onLogin();
     } else {
@@ -51,7 +52,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
   return (
     <div
       className="h-screen w-screen bg-cover bg-center flex flex-col justify-between p-8 select-none"
-      style={{ backgroundImage: "url('/wallpaper.jpg')" }}
+      style={{ backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')` }}
     >
       {/* Top section: Clock */}
       <div className="flex flex-col items-center mt-16 drop-shadow-md">
@@ -69,7 +70,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
             <User className="w-12 h-12 text-white/80" />
           </div>
 
-          <h2 className="text-xl text-white font-semibold mb-6">user</h2>
+          <h2 className="text-xl text-white font-semibold mb-6">{SYSTEM_CONFIG.username}</h2>
 
           <form onSubmit={handleSubmit} className="w-full relative" suppressHydrationWarning>
             <input
@@ -108,7 +109,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
       {/* Bottom section: Power Controls */}
       <div className="flex justify-between items-end px-4 pb-4">
         <div className="text-white/50 text-sm font-mono">
-          OpenBSD 7.6-web (amd64)
+          {SYSTEM_CONFIG.name} {SYSTEM_CONFIG.desktopVersion} ({SYSTEM_CONFIG.architecture})
         </div>
         <div className="flex gap-4">
           <Button

@@ -11,6 +11,7 @@ import { About } from "@/components/apps/about";
 import { Firefox } from "@/components/apps/firefox";
 import { MusicApp } from "@/components/apps/music";
 import { VideoApp } from "@/components/apps/video";
+import { SystemMonitor } from "@/components/apps/system-monitor";
 import type { AppId } from "@/types";
 import {
   ContextMenu,
@@ -20,19 +21,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { Terminal as TerminalIcon, Folder, FileText, Activity, Info, RefreshCw, Globe, AudioLines, Clapperboard } from "lucide-react";
-import { SystemMonitor } from "@/components/apps/system-monitor";
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Terminal: TerminalIcon,
-  Folder,
-  FileText,
-  Activity,
-  Info,
-  Globe,
-  AudioLines,
-  Clapperboard,
-};
+import { APP_ICON_MAP } from "@/lib/app-icons";
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 export function Desktop() {
   const {
@@ -95,7 +85,7 @@ export function Desktop() {
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center"
             style={{
-              backgroundImage: `url('/wallpaper.jpg')`,
+              backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
             }}
           />
 
@@ -134,7 +124,7 @@ export function Desktop() {
         </div>
         <ContextMenuSeparator className="bg-border/60" />
         {Object.values(APP_REGISTRY).map((app) => {
-          const IconComp = ICON_MAP[app.icon] ?? TerminalIcon;
+          const IconComp = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
           return (
             <ContextMenuItem
               key={app.id}

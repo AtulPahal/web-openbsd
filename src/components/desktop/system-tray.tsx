@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Clock, Shield, Monitor } from "lucide-react";
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 export function SystemTray() {
   const [time, setTime] = useState<string>("");
@@ -41,9 +42,9 @@ export function SystemTray() {
         <span className="hidden sm:inline">PF</span>
       </div>
 
-      <div className="flex items-center gap-1 text-sky-400" title="OpenBSD 7.6-web">
+      <div className="flex items-center gap-1 text-sky-400" title={`${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.desktopVersion}`}>
         <Monitor className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">openbsd</span>
+        <span className="hidden sm:inline">{SYSTEM_CONFIG.name.toLowerCase()}</span>
       </div>
 
       <div className="flex items-center gap-1.5 bg-background/50 px-2 py-1 border border-border/50 text-foreground font-semibold min-w-[130px] justify-center">
