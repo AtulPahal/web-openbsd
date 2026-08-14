@@ -43,7 +43,7 @@ export const SYSTEM_CONFIG = {
   browserHome: "https://github.com/AtulPahal",
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  productTitle: "Atul Pahal | AI/ML Engineer & Developer",
+  productTitle: "openBSD-Portfolio",
   productDescription:
     "Portfolio of Atul Pahal — AI/ML Engineer & Full-Stack Developer building browser-native AI apps",
   userEmail: "atulpahal@gmail.com",
