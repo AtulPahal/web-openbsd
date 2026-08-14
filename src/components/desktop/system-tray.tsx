@@ -197,17 +197,6 @@ export function SystemTray({
         )}
       </button>
 
-      {/* 4. macOS Control Center Sliders Button */}
-      <button
-        type="button"
-        onClick={() => togglePopover("control-center")}
-        className={`p-1 rounded hover:bg-amber-500/10 transition-colors cursor-pointer ${
-          activePopover === "control-center" ? "bg-amber-500/20 text-amber-300" : "text-foreground/80 hover:text-amber-400"
-        }`}
-        title="Control Center"
-      >
-        <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
-      </button>
 
       {/* Divider */}
       <div className="text-border/80 text-xs px-0.5">|</div>
