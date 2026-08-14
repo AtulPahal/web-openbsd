@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ArrowLeft, ArrowRight, RotateCw, Home, Search, ExternalLink, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, RotateCw, Home, Search, ExternalLink, Globe, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BROWSER_HOME_URL, buildProxyUrl } from "@/lib/browser-config";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 
 const HOME_URL: string = BROWSER_HOME_URL;
 
@@ -85,6 +86,9 @@ export function Firefox({ windowId }: { windowId: string }) {
     }
   };
 
+  // Check if URL is GitHub or external site that blocks direct frame embedding
+  const isDirectFrameBlocked = !useProxy && (url.includes("github.com") || url.includes("google.com"));
+
   return (
     <div className="h-full flex flex-col bg-background font-mono select-none" data-window-id={windowId}>
       {/* Browser Chrome */}
@@ -141,7 +145,7 @@ export function Firefox({ windowId }: { windowId: string }) {
             target="_blank"
             rel="noopener noreferrer"
             className="p-1 text-muted-foreground hover:text-amber-400 transition-colors ml-1"
-            title="Open in new browser tab"
+            title="Open original website in new browser tab"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -164,21 +168,59 @@ export function Firefox({ windowId }: { windowId: string }) {
 
       {/* Content Area */}
       <div className="flex-1 bg-white relative">
-        <iframe
-          ref={iframeRef}
-          src={currentIframeSrc}
-          className="absolute inset-0 w-full h-full border-none bg-white"
-          title="Browser Content"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          onError={() => setLoadError(true)}
-        />
+        {isDirectFrameBlocked ? (
+          <div className="absolute inset-0 bg-card p-6 flex flex-col items-center justify-center text-center space-y-4 font-mono text-xs select-none">
+            <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">Direct Frame Embedding Restricted</h3>
+              <p className="text-muted-foreground max-w-md">
+                <span className="text-amber-400 font-semibold">{url}</span> restricts direct iframe embedding via <span className="font-semibold">X-Frame-Options: DENY</span> security headers.
+              </p>
+            </div>
 
-        {loadError && (
+            <div className="p-3 bg-background/60 border border-border/60 rounded-xl max-w-sm w-full text-left space-y-2">
+              <div className="text-[10px] font-bold text-amber-400 uppercase">Solutions to View:</div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center gap-2 text-foreground">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Enable <strong>Proxy Mode</strong> in the top right to strip headers.</span>
+                </div>
+                <div className="flex items-center gap-2 text-foreground">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Click below to open the original live website directly.</span>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-xl font-bold text-xs transition-all shadow-md flex items-center gap-2"
+            >
+              <span>Open Original {url} ↗</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src={currentIframeSrc}
+            className="absolute inset-0 w-full h-full border-none bg-white"
+            title="Browser Content"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            onError={() => setLoadError(true)}
+          />
+        )}
+
+        {loadError && !isDirectFrameBlocked && (
           <div className="absolute inset-0 bg-card p-8 flex flex-col items-center justify-center text-center space-y-3 font-mono text-xs">
             <Globe className="w-10 h-10 text-amber-400 animate-pulse" />
             <h3 className="text-sm font-bold text-foreground">Web Page Connection Notice</h3>
             <p className="text-muted-foreground max-w-sm">
-              The site <span className="text-amber-400 font-semibold">{url}</span> could not be loaded inside the iframe frame.
+              The site <span className="text-amber-400 font-semibold">{url}</span> could not be loaded inside the frame.
             </p>
             <a
               href={url}
@@ -186,7 +228,7 @@ export function Firefox({ windowId }: { windowId: string }) {
               rel="noopener noreferrer"
               className="px-4 py-2 bg-amber-500/20 text-amber-300 border border-amber-500/50 rounded font-semibold hover:bg-amber-500/30 transition-colors"
             >
-              Open {url} in New Tab ↗
+              Open Original Website in New Tab ↗
             </a>
           </div>
         )}
