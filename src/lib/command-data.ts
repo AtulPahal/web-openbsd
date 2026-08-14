@@ -221,4 +221,31 @@ SYNOPSIS
 
 DESCRIPTION
      The man utility displays the manual pages for the given command.`,
+
+  resume: `RESUME(1)                  General Commands Manual                 RESUME(1)
+
+NAME
+     resume - print contact info and project summary
+
+SYNOPSIS
+     resume
+
+DESCRIPTION
+     Displays a plain-text summary of the portfolio owner's contact
+     information, technical skills, and project highlights. A formatted
+     PDF resume is available at /resume.pdf and can be opened via the
+     "Resume" application in the desktop.`,
+
+  portfolio: `PORTFOLIO(1)                General Commands Manual              PORTFOLIO(1)
+
+NAME
+     portfolio - print projects, education, and certifications summary
+
+SYNOPSIS
+     portfolio
+
+DESCRIPTION
+     Displays a plain-text summary of the portfolio owner's projects,
+     education history, and certifications. A detailed interactive view
+     is available via the "Portfolio" application in the desktop.`,
 };

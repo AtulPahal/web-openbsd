@@ -16,6 +16,12 @@ export interface Size {
 }
 
 /** Window state managed by the window manager */
+/** Application-specific state passed when opening a window */
+export interface AppState {
+  path?: string;
+  [key: string]: unknown;
+}
+
 export interface WindowState {
   id: WindowId;
   title: string;
@@ -27,7 +33,7 @@ export interface WindowState {
   isMinimized: boolean;
   isMaximized: boolean;
   isFocused: boolean;
-  appState?: Record<string, any>;
+  appState?: AppState;
 }
 
 /** Registered application identifiers */
@@ -39,7 +45,9 @@ export type AppId =
   | "about"
   | "firefox"
   | "music"
-  | "video";
+  | "video"
+  | "portfolio"
+  | "resume";
 /** Application metadata for the launcher / taskbar */
 export interface AppDefinition {
   id: AppId;

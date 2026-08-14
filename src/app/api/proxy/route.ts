@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       status: res.status,
       headers,
     });
-  } catch (error) {
+  } catch {
     return new NextResponse("Failed to fetch the URL", { status: 500 });
   }
 }

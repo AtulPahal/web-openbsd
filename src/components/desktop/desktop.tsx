@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useWindowManager } from "@/hooks/use-window-manager";
 import { WindowFrame } from "@/components/window/window-frame";
-import { Panel } from "@/components/desktop/panel";
+import { Dock } from "@/components/desktop/dock";
+import { TopMenuBar } from "@/components/desktop/top-menu-bar";
 import { Terminal } from "@/components/apps/terminal";
 import { FileManager } from "@/components/apps/file-manager";
 import { TextEditor } from "@/components/apps/text-editor";
@@ -11,8 +12,10 @@ import { About } from "@/components/apps/about";
 import { Firefox } from "@/components/apps/firefox";
 import { MusicApp } from "@/components/apps/music";
 import { VideoApp } from "@/components/apps/video";
+import { Portfolio } from "@/components/apps/portfolio";
+import { Resume } from "@/components/apps/resume";
 import { SystemMonitor } from "@/components/apps/system-monitor";
-import type { AppId } from "@/types";
+import type { AppId, AppState } from "@/types";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -37,7 +40,7 @@ export function Desktop() {
   } = useWindowManager();
   useEffect(() => {
     const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
-    const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: Record<string, any> }>) => {
+    const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: AppState }>) => {
       openWindow(e.detail.appId, e.detail.appState);
     };
 
@@ -50,7 +53,7 @@ export function Desktop() {
     };
   }, [closeWindow, openWindow]);
 
-  const renderAppContent = (appId: AppId, windowId: string, appState?: Record<string, any>) => {
+  const renderAppContent = (appId: AppId, windowId: string, appState?: AppState) => {
     switch (appId) {
       case "terminal":
         return <Terminal windowId={windowId} />;
@@ -68,6 +71,10 @@ export function Desktop() {
         return <MusicApp windowId={windowId} path={appState?.path} />;
       case "video":
         return <VideoApp windowId={windowId} path={appState?.path} />;
+      case "portfolio":
+        return <Portfolio windowId={windowId} />;
+      case "resume":
+        return <Resume windowId={windowId} />;
       default:
         return (
           <div className="p-4 font-mono text-sm text-foreground">
@@ -80,7 +87,9 @@ export function Desktop() {
   return (
     <ContextMenu>
       <ContextMenuTrigger className="w-full h-full">
-        <div className="h-screen w-screen bg-[#090d16] flex flex-col overflow-hidden relative select-none">
+        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden relative select-none">
+          {/* Top Menu Bar */}
+          <TopMenuBar />
           {/* Desktop Wallpaper */}
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center"
@@ -108,8 +117,8 @@ export function Desktop() {
             ))}
           </div>
 
-          {/* Bottom Taskbar / Panel */}
-          <Panel
+          {/* GNOME-style left dock */}
+          <Dock
             windows={windows}
             onFocusWindow={focusWindow}
             onOpenApp={openWindow}
@@ -118,7 +127,7 @@ export function Desktop() {
       </ContextMenuTrigger>
 
       {/* Desktop Context Menu */}
-      <ContextMenuContent className="w-52 bg-[#181818] border-border font-mono text-xs rounded-none p-1 shadow-2xl">
+      <ContextMenuContent className="w-52 bg-card border-border font-mono text-xs rounded-none p-1 shadow-2xl">
         <div className="px-2 py-1 text-[10px] text-amber-400 font-bold tracking-wider">
           OPENBSD DESKTOP
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Home, HardDrive, Download, ArrowLeft, ArrowRight, ArrowUp, ChevronRight } from "lucide-react";
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Folder,
   File,
@@ -99,9 +99,25 @@ const PLACES = [
   { name: "Root", path: SYSTEM_PATHS.root, icon: HardDrive },
 ];
 
+interface SortIndicatorProps {
+  column: SortKey;
+  currentKey: SortKey;
+  direction: SortDir;
+}
+
+function SortIndicator({ column, currentKey, direction }: SortIndicatorProps) {
+  if (currentKey !== column) return null;
+  return (
+    <span className="ml-0.5 text-amber-400">
+      {direction === "asc" ? "▲" : "▼"}
+    </span>
+  );
+}
+
 export function FileManager({ windowId }: { windowId: string }) {
-  const fsRef = useRef(new VirtualFS());
-  const fs = fsRef.current;
+  // VirtualFS is a plain class instance — use useMemo so it is stable
+  // across renders without triggering react-hooks/refs lint errors.
+  const fs = useMemo(() => new VirtualFS(), []);
 
   const [currentPath, setCurrentPath] = useState<string>(SYSTEM_PATHS.home);
   const [history, setHistory] = useState<string[]>([SYSTEM_PATHS.home]);
@@ -219,17 +235,6 @@ export function FileManager({ windowId }: { windowId: string }) {
     return parts.length === 0 ? "/" : `/${parts.join("/")}`;
   }, [currentPath]);
 
-  const rootNode = fs.getRoot();
-
-  const SortIndicator = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column) return null;
-    return (
-      <span className="ml-0.5 text-amber-400">
-        {sortDir === "asc" ? "▲" : "▼"}
-      </span>
-    );
-  };
-
   return (
     <div className="relative flex h-full flex-col bg-background text-sm" data-window-id={windowId}>
       {/* Top Toolbar (Dolphin Style) */}
@@ -311,28 +316,28 @@ export function FileManager({ windowId }: { windowId: string }) {
               onClick={() => handleSort("name")}
               className="flex flex-1 items-center px-2 py-1 text-left hover:text-foreground"
             >
-              Name <SortIndicator column="name" />
+              Name <SortIndicator column="name" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("size")}
               className="flex w-20 items-center justify-end px-2 py-1 text-right hover:text-foreground"
             >
-              Size <SortIndicator column="size" />
+              Size <SortIndicator column="size" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("permissions")}
               className="flex w-24 items-center px-2 py-1 text-left hover:text-foreground"
             >
-              Perms <SortIndicator column="permissions" />
+              Perms <SortIndicator column="permissions" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("modified")}
               className="flex w-32 items-center px-2 py-1 text-left hover:text-foreground"
             >
-              Modified <SortIndicator column="modified" />
+              Modified <SortIndicator column="modified" currentKey={sortKey} direction={sortDir} />
             </button>
           </div>
 

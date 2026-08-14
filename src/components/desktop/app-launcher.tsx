@@ -22,13 +22,13 @@ interface AppLauncherProps {
 export function AppLauncher({ onOpenApp }: AppLauncherProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="h-8 px-2.5 gap-2 border border-amber-500/40 bg-amber-950/20 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 font-mono font-bold text-xs shadow-none inline-flex items-center justify-center cursor-pointer transition-colors outline-none focus:ring-1 focus:ring-amber-400">
+      <DropdownMenuTrigger className="h-8 px-2.5 gap-2 border border-amber-500/40 bg-amber-950/20 text-amber-400 hover:bg-amber-500/30 hover:text-amber-300 font-mono font-bold text-xs shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-200 outline-none focus:ring-1 focus:ring-amber-400">
         <Shield className="w-4 h-4 text-amber-400 fill-amber-400/20" />
         <span>OpenBSD</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-56 bg-[#181818] border-border text-foreground font-mono rounded-none p-1 shadow-xl"
+        className="w-56 bg-card border-border text-foreground font-mono rounded-none p-1 shadow-xl"
       >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs text-amber-400 font-bold px-2 py-1.5 flex items-center justify-between">

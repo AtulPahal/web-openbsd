@@ -8,6 +8,7 @@ import {
   Globe,
   Info,
   Terminal,
+  User,
 } from "lucide-react";
 
 /** Lucide icons used by the applications registered in the desktop. */
@@ -20,4 +21,5 @@ export const APP_ICON_MAP: Record<string, ElementType> = {
   Globe,
   AudioLines,
   Clapperboard,
+  User,
 };

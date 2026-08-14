@@ -2,6 +2,7 @@ import { VirtualFS } from "@/features/virtual-fs";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { buildFastfetch, MAN_PAGES } from "@/lib/command-data";
 import { buildProxyUrl } from "@/lib/browser-config";
+import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 
 
 function formatPermissions(node: { type: string; permissions: string }): string {
@@ -78,7 +79,7 @@ export class CommandInterpreter {
       case "cat": return this.cmdCat(args);
       case "echo": return args.join(" ");
       case "clear": return "\x1BCLEAR";
-      case "whoami": return SYSTEM_CONFIG.username;
+      case "whoami": return SYSTEM_CONFIG.username + " (" + SYSTEM_CONFIG.userFullName + ")";
       case "hostname": return SYSTEM_CONFIG.hostname;
       case "uname": return this.cmdUname(args);
       case "date": return new Date().toString();
@@ -106,9 +107,53 @@ export class CommandInterpreter {
       case "wc": return this.cmdWc(args);
       case "head": return this.cmdHead(args);
       case "tail": return this.cmdHead(args, true);
+      case "resume": return this.cmdResume(args);
+      case "portfolio": return this.cmdPortfolio(args);
       default:
         return `ksh: ${cmd}: not found`;
     }
+  }
+
+  private cmdResume(_args: string[]): string {
+    const name = PORTFOLIO_DATA.name;
+    const email = PORTFOLIO_DATA.email;
+    const phone = PORTFOLIO_DATA.phone;
+    const location = PORTFOLIO_DATA.location;
+    const projects = PORTFOLIO_DATA.projects;
+    const skills = PORTFOLIO_DATA.skillCategories;
+
+    let output = name + " \u2014 " + PORTFOLIO_DATA.title + "\n\n";
+    output += "Location: " + location + "\n";
+    output += "Email:    " + email + "\n";
+    output += "Phone:    " + phone + "\n\n";
+    output += "TECHNICAL SKILLS\n";
+    for (const cat of skills) {
+      output += "\n  " + cat.label + ":\n    " + cat.items.join(", ") + "\n";
+    }
+    output += "\nPROJECTS\n";
+    for (const p of projects) {
+      output += "\n  " + p.title + "  [" + p.date + "]\n";
+      output += "    " + p.description + "\n";
+      output += "    Stack: " + p.stack.join(", ") + "\n";
+    }
+    output += "\nFull resume: /resume.pdf (open the 'Resume' app to view)\n";
+    return output;
+  }
+
+  private cmdPortfolio(_args: string[]): string {
+    const name = PORTFOLIO_DATA.name;
+    let output = name + " \u2014 " + PORTFOLIO_DATA.title + "\n\n";
+    output += "PROJECTS\n";
+    for (const p of PORTFOLIO_DATA.projects) {
+      output += "\n  " + p.title + "  [" + p.date + "]\n";
+      output += "    " + p.stack.join(", ") + "\n";
+    }
+    output += "\nEDUCATION\n";
+    for (const edu of PORTFOLIO_DATA.education) {
+      output += "\n  " + edu.degree + " \u2014 " + edu.institution + "  [" + edu.period + "]\n";
+    }
+    output += "\nView details in the 'Portfolio' app.\n";
+    return output;
   }
 
   private tokenize(input: string): string[] {

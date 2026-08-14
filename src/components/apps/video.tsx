@@ -158,7 +158,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   if (!videoUrl) {
     return (
       <div
-        className="w-full h-full bg-background text-foreground font-mono flex flex-col items-center justify-center select-none transition-colors"
+        className="w-full h-full bg-background text-foreground font-mono flex flex-col items-center justify-center select-none transition-colors" data-window-id={windowId}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -173,7 +173,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
 
   return (
     <div 
-      className={`relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none group ${isDragging ? 'border-2 border-dashed border-amber-500/50 opacity-80' : ''}`}
+      className={`relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none group ${isDragging ? 'border-2 border-dashed border-amber-500/50 opacity-80' : ''}`} data-window-id={windowId}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         if (isPlaying) setShowControls(false);

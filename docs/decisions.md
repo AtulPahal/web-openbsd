@@ -79,3 +79,27 @@
 - Amber accent provides clear visual hierarchy for focused/active elements
 - Sharp corners reinforce the utilitarian, no-nonsense aesthetic
 - Design tokens are defined as CSS custom properties in `globals.css` and consumed via Tailwind utility classes
+
+---
+
+## ADR-006: Transform into a Portfolio Website
+
+**Status:** Accepted
+
+**Context:** The OpenBSD Web Desktop environment serves as a compelling technical showcase, but it needs portfolio-specific content — a resume, projects, skills, and contact information — to function as a professional portfolio website. The resume data exists in `resuma.pdf`.
+
+**Decision:** Extend the desktop environment with portfolio apps rather than replacing it:
+- **Portfolio app** — Tabbed interface showing About, Skills, Projects, and Education content, backed by a new `src/lib/portfolio-data.ts` module that mirrors the resume content in structured form.
+- **Resume app** — PDF embed of `public/resume.pdf` with download and pop-out links.
+- **Terminal integration** — `resume` and `portfolio` shell commands that print formatted summaries, plus man pages for both.
+- **About app** — Repurposed to show contact info, social links, and tech stack (using Puffy ASCII art as visual anchor).
+- **Filesystem** — `resume.txt` added to `~/Documents/` with key contact info and skills.
+
+**Consequences:**
+- The desktop environment doubles as both a technical demonstration and a portfolio showcase
+- Resume data is maintained in two forms: structured (portfolio-data.ts) and PDF (resuma.pdf)
+- All existing OpenBSD aesthetic and behavior is preserved
+- The login password (`2026`) remains as a demo gate; a "View Resume" link is available on the login screen for immediate access
+
+---
+

@@ -1,12 +1,15 @@
 {
-  "name": "openbsd",
-  "version": "0.1.0",
+  "name": "openbsd-portfolio",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "next typecheck"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

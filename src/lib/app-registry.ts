@@ -57,4 +57,18 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     defaultSize: { width: 640, height: 360 },
     minSize: { width: 400, height: 225 },
   },
+  portfolio: {
+    id: "portfolio",
+    name: "Portfolio",
+    icon: "User",
+    defaultSize: { width: 720, height: 520 },
+    minSize: { width: 400, height: 300 },
+  },
+  resume: {
+    id: "resume",
+    name: "Resume",
+    icon: "FileText",
+    defaultSize: { width: 760, height: 600 },
+    minSize: { width: 400, height: 300 },
+  },
 };

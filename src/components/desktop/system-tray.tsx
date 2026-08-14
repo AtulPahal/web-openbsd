@@ -7,10 +7,9 @@ import { SYSTEM_CONFIG } from "@/lib/system-config";
 export function SystemTray() {
   const [time, setTime] = useState<string>("");
   const [date, setDate] = useState<string>("");
-  const [mounted, setMounted] = useState(false);
+  
 
   useEffect(() => {
-    setMounted(true);
     const updateTime = () => {
       const now = new Date();
       setTime(
@@ -49,7 +48,7 @@ export function SystemTray() {
 
       <div className="flex items-center gap-1.5 bg-background/50 px-2 py-1 border border-border/50 text-foreground font-semibold min-w-[130px] justify-center">
         <Clock className="w-3.5 h-3.5 text-amber-400" />
-        {mounted ? (
+        {true ? (
           <>
             <span>{date}</span>
             <span className="text-amber-400">{time}</span>

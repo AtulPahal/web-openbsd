@@ -1,6 +1,6 @@
 # Project Overview
 
-OpenBSD Web Desktop is a browser-based desktop environment inspired by the OpenBSD operating system's utilitarian aesthetic and the classic CDE/fvwm/cwm window managers. Built entirely client-side with Next.js 16 App Router, TypeScript (strict mode), Tailwind CSS v4, shadcn/ui primitives, and Lucide icons, the project delivers a functional windowed desktop with a terminal emulator, file manager, text editor, and system monitor — all running in the browser with zero backend dependencies, no database, and no external API calls.
+OpenBSD Web Desktop is a browser-based desktop environment inspired by the OpenBSD operating system's utilitarian aesthetic and the classic CDE/fvwm/cwm window managers. It serves as both a technical showcase and a **portfolio website** for Atul Pahal, an AI/ML Engineer and Full-Stack Developer. Built entirely client-side with Next.js 16 App Router, TypeScript (strict mode), Tailwind CSS v4, shadcn/ui primitives, and Lucide icons, the project delivers a functional windowed desktop with a terminal emulator, file manager, text editor, and system monitor — all running in the browser with zero backend dependencies, no database, and no external API calls.
 
 ## Stack
 
@@ -13,6 +13,7 @@ OpenBSD Web Desktop is a browser-based desktop environment inspired by the OpenB
 | Icons          | Lucide React                |
 | Fonts          | Geist Sans, Geist Mono      |
 | Runtime        | React 19                    |
+| Package Manager | Bun 1.x                     |
 
 ## Constraints
 

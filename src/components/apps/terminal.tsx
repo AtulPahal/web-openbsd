@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { INITIAL_MOTD } from "@/lib/command-data";
 import { VirtualFS } from "@/features/virtual-fs";
 import { CommandInterpreter } from "@/features/command-interpreter";
@@ -13,8 +13,9 @@ interface TerminalLine {
 
 
 export function Terminal({ windowId }: { windowId: string }) {
-  const fsRef = useRef(new VirtualFS());
-  const interpreterRef = useRef(new CommandInterpreter(fsRef.current));
+  // Stable instances — useMemo avoids react-hooks/refs lint errors
+  const fs = useMemo(() => new VirtualFS(), []);
+  const interpreter = useMemo(() => new CommandInterpreter(fs), [fs]);
 
   const [lines, setLines] = useState<TerminalLine[]>([
     {
@@ -27,7 +28,7 @@ export function Terminal({ windowId }: { windowId: string }) {
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [prompt, setPrompt] = useState(() =>
-    interpreterRef.current.getPrompt()
+    interpreter.getPrompt()
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,10 +73,10 @@ export function Terminal({ windowId }: { windowId: string }) {
         return;
       }
 
-      const currentPrompt = interpreterRef.current.getPrompt();
+      const currentPrompt = interpreter.getPrompt();
 
       // Execute command — may return string or Promise<string>
-      const result = interpreterRef.current.execute(inputVal);
+      const result = interpreter.execute(inputVal);
 
       // Add to command history if not empty
       if (trimmed) {
@@ -136,7 +137,7 @@ export function Terminal({ windowId }: { windowId: string }) {
 
       setInputVal("");
       setHistoryIndex(null);
-      setPrompt(interpreterRef.current.getPrompt());
+      setPrompt(interpreter.getPrompt());
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
@@ -165,7 +166,7 @@ export function Terminal({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="h-full w-full bg-[#0a0a0a] text-primary font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
+      className="h-full w-full bg-background text-primary font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
       onClick={handleTerminalClick}
     >
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-3 pb-2 scrollbar-thin">

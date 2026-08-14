@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import type { WindowId, WindowState, AppId, Position, Size } from "@/types";
+import type { WindowId, WindowState, AppId, Position, Size, AppState } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { BASE_OFFSET, CASCADE_STEP, PANEL_HEIGHT } from "@/lib/desktop-config";
 
@@ -21,7 +21,7 @@ export function useWindowManager() {
 
   const windows = Array.from(windowMap.values());
 
-  const openWindow = useCallback((appId: AppId, appState?: Record<string, any>) => {
+  const openWindow = useCallback((appId: AppId, appState?: AppState) => {
     const appDef = APP_REGISTRY[appId];
     if (!appDef) return;
 

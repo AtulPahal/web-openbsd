@@ -80,13 +80,13 @@ export function Firefox({ windowId }: { windowId: string }) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background" data-window-id={windowId}>
       {/* Browser Chrome */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-[#2a2a2a] border-b border-border">
+      <div className="flex items-center gap-1.5 p-1.5 bg-muted border-b border-border">
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-[#3a3a3a] hover:text-foreground shrink-0"
+          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
           onClick={goBack}
           disabled={historyIndex === 0}
         >
@@ -95,7 +95,7 @@ export function Firefox({ windowId }: { windowId: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-[#3a3a3a] hover:text-foreground shrink-0"
+          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
           onClick={goForward}
           disabled={historyIndex === history.length - 1}
         >
@@ -104,7 +104,7 @@ export function Firefox({ windowId }: { windowId: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-[#3a3a3a] hover:text-foreground shrink-0"
+          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
           onClick={reload}
         >
           <RotateCw className="w-4 h-4" />
@@ -112,14 +112,14 @@ export function Firefox({ windowId }: { windowId: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-[#3a3a3a] hover:text-foreground shrink-0"
+          className="w-7 h-7 rounded-none text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
           onClick={goHome}
         >
           <Home className="w-4 h-4" />
         </Button>
 
         {/* URL Bar */}
-        <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#333] px-2 h-7 focus-within:border-amber-500/50 min-w-0">
+        <div className="flex-1 flex items-center bg-background border border-border px-2 h-7 focus-within:border-amber-500/50 min-w-0">
           <Search className="w-3.5 h-3.5 text-muted-foreground mr-2 shrink-0" />
           <input
             type="text"
@@ -149,7 +149,7 @@ export function Firefox({ windowId }: { windowId: string }) {
 
       {/* Info bar for iframe restrictions */}
       <div className="bg-amber-950/40 border-b border-amber-900/50 p-1.5 text-[10px] text-amber-400 font-mono text-center shrink-0">
-        If a site refuses to connect, check "Proxy Mode" to bypass headers. Clicking links inside a proxied page may break.
+        If a site refuses to connect, check &lsquo;Proxy Mode&rsquo; to bypass headers. Clicking links inside a proxied page may break.
       </div>
 
       {/* Content Area */}

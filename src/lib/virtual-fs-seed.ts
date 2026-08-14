@@ -107,6 +107,24 @@ function buildDefaultFS(): FSNode {
         makeDir("Documents", SYSTEM_PATHS.documents, SYSTEM_CONFIG.username, SYSTEM_CONFIG.username, [
           makeFile("readme.txt", `${SYSTEM_PATHS.documents}/readme.txt`,
             "Welcome to OpenBSD.\n\nThis is a virtual filesystem running in your browser.\nFeel free to explore!\n", SYSTEM_CONFIG.username, SYSTEM_CONFIG.username),
+          makeFile("resume.txt", `${SYSTEM_PATHS.documents}/resume.txt`,
+            `${SYSTEM_CONFIG.userFullName} — ${SYSTEM_CONFIG.productDescription}\n\n` +
+            `Location: ${SYSTEM_CONFIG.userLocation}\n` +
+            `Email: ${SYSTEM_CONFIG.userEmail}\n` +
+            `Phone: ${SYSTEM_CONFIG.userPhone}\n\n` +
+            `Technical Skills:\n` +
+            `  Languages: Python (Expert), JavaScript, HTML, CSS, C, Rust\n` +
+            `  ML: TensorFlow, PyTorch, Scikit-learn, ONNX, Pandas, NumPy\n` +
+            `  Web: ReactJS, NextJS, FastAPI, Langchain, Vite\n` +
+            `  Tools: Neovim, Git/GitHub, Docker, Bun, VS Code, Linux\n\n` +
+            `Projects:\n` +
+            `  Oculus Vision — Real-time Object Detection (YOLOv5, ONNX Runtime Web)\n` +
+            `  Crop Health Monitoring — Random Forest, 92% accuracy\n` +
+            `  Movie Recommender — React, Vite, TMDB API\n` +
+            `  Breast Cancer Diagnostic — KNN, 94.74% accuracy\n\n` +
+            `Run 'resume' or 'portfolio' in the terminal for more, or open the\n` +
+            `"Portfolio" and "Resume" apps from the desktop.\n`,
+            SYSTEM_CONFIG.username, SYSTEM_CONFIG.username),
         ]),
         makeDir("Downloads", SYSTEM_PATHS.downloads, SYSTEM_CONFIG.username, SYSTEM_CONFIG.username),
         makeDir("Music", SYSTEM_PATHS.music, SYSTEM_CONFIG.username, SYSTEM_CONFIG.username, [

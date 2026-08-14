@@ -1,0 +1,6 @@
+[install]
+# Use bun's default registry
+registry = "https://registry.npmjs.org"
+
+[run]
+# Enable hot reloading for dev

@@ -5,6 +5,7 @@ export interface SystemConfig {
   readonly architecture: string;
   readonly hostname: string;
   readonly username: string;
+  readonly userFullName: string;
   readonly home: string;
   readonly shell: string;
   readonly path: string;
@@ -17,6 +18,9 @@ export interface SystemConfig {
   readonly userAgent: string;
   readonly productTitle: string;
   readonly productDescription: string;
+  readonly userEmail: string;
+  readonly userPhone: string;
+  readonly userLocation: string;
 }
 
 export const SYSTEM_CONFIG = {
@@ -25,8 +29,9 @@ export const SYSTEM_CONFIG = {
   desktopVersion: "7.6-web",
   architecture: "amd64",
   hostname: "openbsd.local",
-  username: "user",
-  home: "/home/user",
+  username: "atulpahal",
+  userFullName: "Atul Pahal",
+  home: "/home/atulpahal",
   shell: "/bin/ksh",
   path: "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin",
   terminal: "xterm-256color",
@@ -34,12 +39,16 @@ export const SYSTEM_CONFIG = {
   // Demo-only client-side value; this is not a security boundary.
   loginPassword: "2026",
   wallpaper: "/wallpaper.jpg",
-  website: "https://www.openbsd.org",
-  browserHome: "https://en.wikipedia.org/wiki/OpenBSD",
+  website: "https://github.com/atulpahal",
+  browserHome: "https://github.com/atulpahal",
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  productTitle: "OpenBSD Web Desktop",
-  productDescription: "An OpenBSD-inspired desktop environment in your browser",
+  productTitle: "Atul Pahal | AI/ML Engineer & Developer",
+  productDescription:
+    "Portfolio of Atul Pahal — AI/ML Engineer & Full-Stack Developer building browser-native AI apps",
+  userEmail: "atulpahal@gmail.com",
+  userPhone: "+91-9499190701",
+  userLocation: "Sonipat, Haryana, India",
 } as const satisfies SystemConfig;
 
 export const SYSTEM_PATHS = {

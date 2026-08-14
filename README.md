@@ -1,104 +1,50 @@
-# OpenBSD Web Desktop
+# Atul Pahal — Portfolio
 
-A browser-based desktop environment inspired by OpenBSD and classic UNIX window managers. Built with Next.js 16, React 19, and TypeScript.
+An interactive OpenBSD-inspired terminal desktop environment showcasing my AI/ML and full-stack development portfolio. Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and Bun.
 
-**Login password:** `2026`
+**Login password:** `2026` (demo only — opens the desktop to explore)
 
 ## Screenshots
 
-> Open apps from the panel launcher or right-click the desktop.
+> Open apps from the panel launcher or right-click the desktop. Launch the **Portfolio** app to see projects/skills/experience, or the **Resume** app to view the full PDF resume.
 
-## Features
+## What's Here
+
+This isn't a static resume page — it's a *browser-based desktop environment* built as a living showcase of full-stack engineering. Navigate a login screen, window manager, panel, and terminal — all running purely client-side.
 
 ### Desktop Shell
 - **SDDM-style login screen** — password-gated entry with clock and wallpaper
 - **Window manager** — draggable, resizable windows with minimize / maximize / close; z-index stacking and cascade placement
 - **Panel taskbar** — app launcher, open-window buttons with active state, system tray
-- **System tray** — live clock, PF firewall indicator, hostname chip
+- **System tray** — live clock, PF firewall indicator, hostname chip (now showing your name)
 - **Right-click context menu** — launch any app from the desktop
 
-### Apps
-
+### Portfolio Apps
 | App | Description |
 |-----|-------------|
-| **Terminal** | ksh-style shell against a virtual filesystem. 20+ commands including `curl`, `grep`, `wc`, `head`, `tail`, `touch`, `mkdir`, `rm`, `history`, `man`, `fastfetch` |
-| **File Manager** | Directory tree sidebar, sortable file listing, breadcrumb navigation, double-click to open files in the correct app |
-| **Text Editor** | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS, Ctrl+K cut line, Ctrl+X close |
-| **Music Player** | Auto-scans `/home/user/Music`, tabular tracklist, prev/next/play/pause, Nerd Font glyphs, sharp amber slider |
-| **mpv (Video)** | HTML5 video, YouTube embed, URL streams, drag-and-drop files/URLs, Nerd Font OSC controls, auto-hide on play |
-| **Firefox** | iframe browser with back/forward/reload, proxy mode to bypass X-Frame-Options headers |
+| **Portfolio** | Interactive showcase of projects, technical skills, education, certifications, and interests — tabbed interface with project detail view |
+| **Resume** | Embedded PDF viewer for the full resume with download and pop-out links |
+| **About** | Personal info card with social links, Puffy ASCII art, and tech stack |
+
+### System Apps
+| App | Description |
+|-----|-------------|
+| **Terminal** | ksh-style shell against a virtual filesystem. Run `resume` or `portfolio` commands for quick summaries |
+| **File Manager** | Directory tree sidebar, sortable file listing, breadcrumb navigation — includes a `resume.txt` file |
+| **Text Editor** | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS |
 | **System Monitor** | Live process table with simulated CPU/memory jitter, uptime counter, network RX/TX graph |
-| **About** | System info and version |
+| **Firefox** | iframe browser with back/forward/reload, proxy mode to bypass X-Frame-Options headers |
+| **Music** | Auto-scans `/home/user/Music`, tabular tracklist, prev/next/play/pause controls |
+| **Video** | HTML5 video, YouTube embed, drag-and-drop files/URLs, Nerd Font OSC controls |
 
-### Terminal Commands
-
-```
-ls [-la]        List directory contents
-cd <dir>        Change directory
-pwd             Print working directory
-cat <file>      Print file contents
-echo <text>     Echo text
-clear           Clear screen
-curl <url>      Fetch a URL (async, via proxy)
-grep <pat> <f>  Search file for pattern
-wc <file>       Count lines/words/chars
-head/tail <f>   First/last N lines
-touch <file>    Create or update file
-mkdir <dir>     Create directory
-rm [-r] <path>  Remove file or directory
-history         Show command history
-man <cmd>       Manual page
-fastfetch       System information (Puffy ASCII)
-env/export      Environment variables
-uname [-a]      System info
-date            Current date/time
-whoami/id       User info
-hostname        Hostname
-uptime          Stable uptime since window open
-reboot          Reload the page
-shutdown        Close the tab
-exit            Close terminal window
-```
-
-### Virtual Filesystem
-
-In-memory file tree modeled after OpenBSD's directory layout. All apps share the same VirtualFS instance per window — changes made in the terminal (`touch`, `mkdir`, `rm`) are immediately visible in the File Manager, and files saved in the Text Editor can be `cat`-ed in the terminal.
+### Terminal Commands (Portfolio additions)
 
 ```
-/
-├── bin/        ksh, ls, cat, ...
-├── dev/        null, zero, random
-├── etc/        hostname, hosts, pf.conf, myname, ...
-├── home/
-│   └── user/
-│       ├── .profile, .kshrc
-│       ├── Documents/  readme.txt
-│       ├── Downloads/
-│       ├── Music/      SoundHelix-Song-1.mp3, SoundHelix-Song-2.mp3
-│       └── Videos/     bad_apple.mp4
-├── tmp/
-├── usr/
-│   ├── bin/    man, grep, sed, ...
-│   └── local/
-└── var/
-    └── log/    messages, authlog, daemon
+resume          Print contact info, skills, and project summary
+portfolio       Print projects, education, and certifications summary
 ```
 
-### Design System
-
-- **Palette** — near-black background `#0a0a0a`, amber accent `#f0c040`, muted foreground `#999`
-- **Typography** — Geist Mono (`font-mono`) throughout; `--radius: 0px` (zero border-radius everywhere)
-- **Nerd Font glyphs** — `public/fonts/SymbolsNerdFont.woff2` subset for media icons (play `U+F04B`, pause `U+F04C`, volume `U+F028`/`U+F026`, music `U+F001`)
-- **Colour tokens** — `bg-background`, `text-foreground`, `border-border`, `text-amber-400`, `accent-amber-500`
-
-## Getting Started
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) — log in with password **`2026`**.
+All the original OpenBSD-style commands also work (`ls`, `cd`, `cat`, `fastfetch`, `man`, etc.).
 
 ## Tech Stack
 
@@ -111,6 +57,33 @@ Open [http://localhost:3000](http://localhost:3000) — log in with password **`
 | shadcn/ui     | 4       | UI primitives (base-nova)  |
 | Lucide React  | 1       | Icons                      |
 | Geist         | —       | Typography (Sans + Mono)   |
+| **Bun**      | 1.x     | **Runtime & package manager** |
+
+> Developed with **Bun** instead of npm. All dependency management and execution uses `bun`.
+
+## Getting Started
+
+```bash
+bun install
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) — log in with password `2026`.
+
+## Build & Lint
+
+```bash
+bun run build     # production build
+bun run lint      # ESLint via Next.js
+bun run typecheck # TypeScript strict check
+```
+
+## Resume
+
+The full resume PDF is available:
+- **In the app:** Open the **Resume** application from the panel launcher
+- **Directly:** [`/resume.pdf`](public/resume.pdf) (served from `public/resume.pdf`)
+- **In the terminal:** Run `cat ~/Documents/resume.txt` or the `resume` command
 
 ## Project Structure
 
@@ -119,9 +92,11 @@ src/
   app/
     api/proxy/      Next.js route — strips X-Frame-Options for Firefox proxy mode
     globals.css     Theme tokens, Nerd Font @font-face, .nf helper class
+    layout.tsx      Root layout with fonts, metadata, OG tags
+    page.tsx        Entry point — login gate + Desktop
   components/
     apps/           Terminal, FileManager, TextEditor, Music, Video, Firefox,
-                    SystemMonitor, About
+                    SystemMonitor, About, Portfolio, Resume
     desktop/        Desktop, Panel, AppLauncher, SystemTray
     login/          SDDMLogin
     ui/             shadcn/ui primitives
@@ -129,14 +104,20 @@ src/
   features/
     virtual-fs/     In-memory VirtualFS (normalizePath, resolve, read, write,
                     mkdir, remove, exists, list, getNode, listDirectory)
-    command-interpreter.ts   ksh command parser + executor (async curl support)
+    command-interpreter.ts   ksh command parser + executor (async curl support,
+                             plus portfolio/resume commands)
   hooks/
     use-window-manager.ts    Window state (open, close, focus, minimize, maximize,
                              move, resize, cascade)
   lib/
     app-registry.ts          App metadata (id, name, icon, defaultSize, minSize)
-  types/            Shared TypeScript types
-docs/               Architecture, design decisions, changelog
+    portfolio-data.ts        Structured resume/portfolio data (skills, projects,
+                             education, certifications)
+    system-config.ts         System + user config (name, contact, branding)
+    virtual-fs-seed.ts       Virtual filesystem tree (with resume.txt)
+    command-data.ts          MOTD, fastfetch, man pages
+    browser-config.ts        Firefox proxy URL builder
+    media-config.ts          Music/video Nerd Font glyphs
 ```
 
 ## API Routes

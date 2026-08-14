@@ -80,7 +80,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
                 setPassword(e.target.value);
                 if (error) setError(false);
               }}
-              placeholder="Password..."
+              placeholder="Enter password (demo: 2026)..."
               className={`w-full bg-white/10 border ${
                 error ? "border-red-500/80" : "border-white/20"
               } text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500/50 transition-all placeholder:text-white/40`}
@@ -102,6 +102,32 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
                 Login failed
               </p>
             )}
+          </div>
+        </div>
+
+        {/* Portfolio Hint */}
+        <div className="flex flex-col items-center gap-1.5 mt-3 pt-2 border-t border-white/5">
+          <div className="text-center text-white/40 text-[10px]">
+            Password: 2026 (demo)
+          </div>
+          <div className="flex gap-3 text-[10px]">
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400/60 hover:text-amber-300 transition-colors"
+            >
+              View Resume (PDF)
+            </a>
+            <span className="text-white/20">·</span>
+            <a
+              href="https://github.com/atulpahal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400/60 hover:text-amber-300 transition-colors"
+            >
+              GitHub
+            </a>
           </div>
         </div>
       </div>

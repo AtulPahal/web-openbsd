@@ -21,7 +21,12 @@ RootLayout (server)
                                 ├── FileManager
                                 ├── TextEditor
                                 ├── SystemMonitor
-                                └── About
+                                ├── About (Portfolio-focused)
+                                ├── Portfolio (new)
+                                ├── Resume (new)
+                                ├── Firefox
+                                ├── Music
+                                └── Video
 ```
 
 ## State Management

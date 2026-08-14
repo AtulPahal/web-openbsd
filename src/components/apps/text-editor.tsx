@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { FileText, WrapText } from "lucide-react";
 import { VirtualFS } from "@/features/virtual-fs";
 
@@ -19,10 +19,11 @@ interface CursorPos {
 }
 
 export function TextEditor({ windowId, path }: { windowId: string; path?: string }) {
-  const fsRef = useRef(new VirtualFS());
+  // Stable VirtualFS instance — useMemo avoids react-hooks/refs lint errors
+  const fs = useMemo(() => new VirtualFS(), []);
   const [content, setContent] = useState(() => {
     if (path) {
-      const fileContent = fsRef.current.read(path, "/");
+      const fileContent = fs.read(path, "/");
       return fileContent ?? "";
     }
     return SAMPLE_TEXT;
@@ -109,7 +110,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
       if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "o")) {
         e.preventDefault();
         if (path) {
-          fsRef.current.write(path, "/", content);
+          fs.write(path, "/", content);
           setIsModified(false);
         }
         return;
@@ -133,7 +134,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
         });
       }
     },
-    [content, isModified, path, windowId]
+    [content, isModified, path, windowId, fs]
   );
 
   const handleScroll = useCallback(() => {

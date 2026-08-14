@@ -201,39 +201,43 @@ export function WindowFrame({
         onDoubleClick={handleTitleDoubleClick}
       >
         <span className="truncate pr-2">{win.title}</span>
-        <div className="flex items-center gap-0.5 shrink-0">
+        {/* Traffic-light window controls (macOS-style, amber-accented) */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-xs"
             onClick={(e) => {
               e.stopPropagation();
               onMinimize();
             }}
             aria-label="Minimize"
+            title="Minimize"
+            className="w-3.5 h-3.5 rounded-full bg-amber-500/30 hover:bg-amber-500/50 hover:shadow-amber-500/30 shadow group transition-all duration-150 flex items-center justify-center"
           >
-            -
+            <span className="text-xs text-amber-400">—</span>
           </button>
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-white/20 transition-colors text-[10px]"
             onClick={(e) => {
               e.stopPropagation();
               onMaximize();
             }}
-            aria-label="Maximize"
+            aria-label={win.isMaximized ? "Restore" : "Maximize"}
+            title={win.isMaximized ? "Restore" : "Maximize"}
+            className="w-3.5 h-3.5 rounded-full bg-amber-500/30 hover:bg-amber-500/50 hover:shadow-amber-500/30 shadow group transition-all duration-150 flex items-center justify-center"
           >
-            □
+            <span className="text-[8px] text-amber-400">□</span>
           </button>
           <button
             type="button"
-            className="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors text-sm"
             onClick={(e) => {
               e.stopPropagation();
               onClose();
             }}
             aria-label="Close"
+            title="Close"
+            className="w-3.5 h-3.5 rounded-full bg-amber-500/30 hover:bg-amber-500 hover:shadow-amber-500/40 transition-all duration-150 flex items-center justify-center"
           >
-            ×
+            <span className="text-[8px] text-amber-950">✕</span>
           </button>
         </div>
       </div>

@@ -16,6 +16,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: SYSTEM_CONFIG.productTitle,
   description: SYSTEM_CONFIG.productDescription,
+  icons: {
+    icon: [
+      { rel: "icon", url: "/favicon.ico", sizes: "any" },
+      { rel: "apple-touch-icon", url: "/favicon.png", sizes: "192x192" },
+    ],
+  },
+  openGraph: {
+    title: SYSTEM_CONFIG.productTitle,
+    description: SYSTEM_CONFIG.productDescription,
+    type: "website",
+    url: "https://atulpahal.github.io",
+  },
 };
 
 export default function RootLayout({

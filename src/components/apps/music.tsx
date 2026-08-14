@@ -142,7 +142,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   const remaining = formatTime(Math.max(0, (duration || 0) - progress));
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground font-mono select-none">
+    <div className="flex flex-col h-full bg-background text-foreground font-mono select-none" data-window-id={windowId}>
       {/* Hidden audio element */}
       <audio
         ref={audioRef}

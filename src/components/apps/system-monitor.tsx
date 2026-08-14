@@ -228,7 +228,7 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
   }, [clearIntervals]);
 
   return (
-    <div className="flex h-full flex-col bg-background font-mono text-foreground text-xs">
+    <div className="flex h-full flex-col bg-background font-mono text-foreground text-xs" data-window-id={windowId}>
       <Tabs defaultValue="processes" className="flex h-full flex-col">
         <TabsList className="shrink-0 rounded-none border-b border-border bg-muted/50">
           <TabsTrigger value="processes">Processes</TabsTrigger>

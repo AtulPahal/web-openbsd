@@ -143,19 +143,53 @@
 }
 
 .window-titlebar {
-  background: #2a2a3a;
-  border-bottom: 1px solid #444;
+  background: var(--titlebar-bg);
+  border-bottom: 1px solid var(--border);
 }
 
 .window-titlebar-active {
-  background: #3a3a5a;
+  background: var(--titlebar-active-bg);
 }
 
 .desktop-bg {
-  background: #0c1220;
+  background: var(--background);
 }
 
 .panel-bg {
-  background: #1a1a2a;
-  border-top: 1px solid #333;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Window focus transition */
+.window-focused {
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+/* Dock-style hover magnification for panel buttons */
+.panel-app-btn {
+  @apply transition-all duration-200 ease-out;
+}
+
+/* Custom scrollbar for terminal and app content */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) var(--background);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--background);
+  border: 1px solid var(--muted-foreground);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 0;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
