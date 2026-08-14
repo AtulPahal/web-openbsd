@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { User, ArrowRight, Power, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 
 interface SDDMLoginProps {
   onLogin: () => void;
@@ -80,7 +81,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
                 setPassword(e.target.value);
                 if (error) setError(false);
               }}
-              placeholder="Enter password (demo: 2026)..."
+              placeholder={`Enter password (demo: ${SYSTEM_CONFIG.loginPassword})...`}
               className={`w-full bg-white/10 border ${
                 error ? "border-red-500/80" : "border-white/20"
               } text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500/50 transition-all placeholder:text-white/40`}
@@ -108,7 +109,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
         {/* Portfolio Hint */}
         <div className="flex flex-col items-center gap-1.5 mt-3 pt-2 border-t border-white/5">
           <div className="text-center text-white/40 text-[10px]">
-            Password: 2026 (demo)
+            Password: {SYSTEM_CONFIG.loginPassword} (demo)
           </div>
           <div className="flex gap-3 text-[10px]">
             <a
@@ -121,7 +122,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
             </a>
             <span className="text-white/20">·</span>
             <a
-              href="https://github.com/atulpahal"
+              href={PORTFOLIO_DATA.social.find((s) => s.icon === "github")?.href ?? "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-amber-400/60 hover:text-amber-300 transition-colors"

@@ -4,7 +4,6 @@ import { clsx } from "clsx";
 import type { WindowState, WindowId, AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
-import { Power } from "lucide-react";
 
 interface DockProps {
   windows: WindowState[];
@@ -15,8 +14,7 @@ interface DockProps {
 /**
  * GNOME-style dock (left-side, vertical, centered).
  * Mirrors GNOME Shell's dash behavior: favorite apps at the top,
- * running windows below, with a system-action separator at the bottom.
- *
+ * running windows below.
  * Behavior:
  * — Icons zoom on hover (transform scale-110)
  * — Running windows have a coloured indicator dot
@@ -106,27 +104,6 @@ export function Dock({ windows, onFocusWindow, onOpenApp }: DockProps) {
             </button>
           );
         })}
-      </div>
-
-      {/* System actions: Power button */}
-      <div className="flex flex-col items-center gap-2 p-1.5 bg-background/60 backdrop-blur border border-border/50 rounded-xl shadow-xl">
-        <button
-          type="button"
-          onClick={() => {
-            if (
-              window.confirm(
-                "Are you sure you want to sign out? (simulated)"
-              )
-            ) {
-              window.location.reload();
-            }
-          }}
-          aria-label="Power"
-          title="Power"
-          className="flex items-center justify-center w-12 h-12 rounded-xl text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10 hover:scale-110 transition-all duration-200 ease-out"
-        >
-          <Power className="w-6 h-6" />
-        </button>
       </div>
     </div>
   );

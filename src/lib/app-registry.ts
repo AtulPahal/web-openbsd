@@ -33,7 +33,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     id: "about",
     name: "About",
     icon: "Info",
-    defaultSize: { width: 420, height: 340 },
+    defaultSize: { width: 420, height: 480 },
     minSize: { width: 320, height: 280 },
   },
   firefox: {

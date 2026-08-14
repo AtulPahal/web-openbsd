@@ -36,15 +36,15 @@ export function About({ windowId }: { windowId: string }) {
       <div className="flex flex-col gap-1 text-xs text-foreground/80">
         <div className="flex items-center justify-center gap-2">
           <MapPin className="h-3 w-3 text-amber-400" />
-          <span>{SYSTEM_CONFIG.userLocation}</span>
+          <span>{PORTFOLIO_DATA.location}</span>
         </div>
         <div className="flex items-center justify-center gap-2">
           <Mail className="h-3 w-3 text-amber-400" />
-          <span>{SYSTEM_CONFIG.userEmail}</span>
+          <span>{PORTFOLIO_DATA.email}</span>
         </div>
         <div className="flex items-center justify-center gap-2">
           <Phone className="h-3 w-3 text-amber-400" />
-          <span>{SYSTEM_CONFIG.userPhone}</span>
+          <span>{PORTFOLIO_DATA.phone}</span>
         </div>
       </div>
 

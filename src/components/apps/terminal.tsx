@@ -11,6 +11,7 @@ interface TerminalLine {
   content: string;
 }
 
+const MAX_LINES = 500;
 
 export function Terminal({ windowId }: { windowId: string }) {
   // Stable instances — useMemo avoids react-hooks/refs lint errors
@@ -45,6 +46,16 @@ export function Terminal({ windowId }: { windowId: string }) {
   // Focus input when clicking anywhere inside the terminal area
   const handleTerminalClick = () => {
     inputRef.current?.focus();
+  };
+
+  /** Append output lines, capping total to MAX_LINES (oldest dropped) */
+  const appendLines = (newLines: TerminalLine[]) => {
+    setLines((prev) => {
+      const combined = [...prev, ...newLines];
+      return combined.length > MAX_LINES
+        ? combined.slice(combined.length - MAX_LINES)
+        : combined;
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -84,9 +95,7 @@ export function Terminal({ windowId }: { windowId: string }) {
       }
 
       if (typeof result === "string") {
-        // Synchronous result — append immediately
-        setLines((prev) => [
-          ...prev,
+        appendLines([
           {
             id: `in-${Date.now()}-${Math.random()}`,
             type: "input" as const,
@@ -105,8 +114,7 @@ export function Terminal({ windowId }: { windowId: string }) {
       } else {
         // Async result — show pending line, replace when resolved
         const pendingId = `pending-${Date.now()}-${Math.random()}`;
-        setLines((prev) => [
-          ...prev,
+        appendLines([
           {
             id: `in-${Date.now()}-${Math.random()}`,
             type: "input" as const,
@@ -119,7 +127,7 @@ export function Terminal({ windowId }: { windowId: string }) {
             setLines((prev) =>
               prev.map((l) =>
                 l.id === pendingId
-                  ? { ...l, type: "output" as const, content: output || "(empty response)" }
+                  ? { ...l, type: "output", content: output || "(empty response)" }
                   : l
               )
             );
@@ -128,7 +136,7 @@ export function Terminal({ windowId }: { windowId: string }) {
             setLines((prev) =>
               prev.map((l) =>
                 l.id === pendingId
-                  ? { ...l, type: "output" as const, content: `Error: ${String(err)}` }
+                  ? { ...l, type: "output", content: `Error: ${String(err)}` }
                   : l
               )
             );
@@ -166,25 +174,24 @@ export function Terminal({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="h-full w-full bg-background text-primary font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
+      className="h-full w-full bg-background text-foreground font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
       onClick={handleTerminalClick}
     >
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-3 pb-2 scrollbar-thin">
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {lines.map((line) => (
-            <div key={line.id} className="whitespace-pre-wrap leading-relaxed">
-              {line.type === "input" ? (
-                <span className="text-amber-400 font-semibold">
-                  {line.content}
-                </span>
-              ) : line.type === "pending" ? (
-                <span className="text-muted-foreground italic animate-pulse">
-                  {line.content}
-                </span>
-              ) : (
-                <span className="text-foreground/90">{line.content}</span>
-              )}
-            </div>
+            <pre
+              key={line.id}
+              className={`whitespace-pre-wrap leading-relaxed text-xs ${
+                line.type === "input"
+                  ? "text-amber-400 font-semibold"
+                  : line.type === "pending"
+                  ? "text-muted-foreground italic animate-pulse"
+                  : "text-foreground/85"
+              }`}
+            >
+              {line.content}
+            </pre>
           ))}
 
           {/* Current Active Input Line */}

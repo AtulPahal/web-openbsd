@@ -85,7 +85,9 @@ export class CommandInterpreter {
       case "date": return new Date().toString();
       case "help": return this.cmdHelp();
       case "fastfetch":
-      case "screenfetch": return buildFastfetch(this.cwd, (Date.now() - this.startTime) / 1000);
+      case "screenfetch":
+      case "neofetch": return buildFastfetch(this.cwd, (Date.now() - this.startTime) / 1000);
+      case "banner": return this.cmdBanner(args);
       case "man": return this.cmdMan(args);
       case "env":
       case "printenv": return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join("\n");
@@ -259,31 +261,30 @@ export class CommandInterpreter {
     return SYSTEM_CONFIG.name;
   }
 
+  private cmdBanner(args: string[]): string {
+    if (args.length === 0) return "Usage: banner <text>";
+    const text = args.join(" ").toUpperCase();
+    const lines = text.split("\n");
+    const result = lines.map((line) => {
+      if (line.length === 0) return "";
+      const border = `*${"*".repeat(line.length + 2)}*`;
+      return `${border}\n* ${line} *\n${border}`;
+    }).join("\n");
+    return result;
+  }
+
   private cmdHelp(): string {
     return `Available commands:
-  ls [-la]           List directory contents
-  cd <dir>           Change directory
-  pwd                Print working directory
+  help               Show available commands
+  fastfetch          Display system info & specs (neofetch)
+  portfolio          Print portfolio & project summary
+  resume             Print resume & technical skills
+  ls [-l]            List directory contents
+  cd <dir>           Change working directory
   cat <file>         Print file contents
-  echo <text>        Print text
-  clear              Clear screen
-  whoami             Print current user
-  hostname           Print hostname
-  uname [-a]         Print system information
-  date               Print current date/time
-  reboot             Reboot the system
-  shutdown           Shutdown the system
-  man <cmd>          Manual page
-  fastfetch          System information
-  curl <url>         Fetch a URL
-  touch <file>       Create or update file
-  mkdir <dir>        Create directory
-  rm [-r] <path>     Remove file or directory
-  history            Show command history
-  grep <pat> <file>  Search file for pattern
-  wc <file>          Count lines/words/chars
-  head/tail <file>   First/last lines of file
-  help               This help message`;
+  pwd                Print working directory path
+  clear              Clear terminal screen
+  exit               Close terminal window`;
   }
 
   private cmdMan(args: string[]): string {

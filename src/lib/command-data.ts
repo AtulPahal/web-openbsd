@@ -16,34 +16,31 @@ export const PUFFY_ASCII = `
              \`--,_____,--'
                   Puffy`;
 
-export const INITIAL_MOTD = `OpenBSD 7.5 (GENERIC.MP) #1: Sat Apr  6 12:00:00 MDT 2024
-
-Welcome to OpenBSD: The proactively secure Unix-like operating system.
-
-Please use the sendbug(1) utility to report bugs in the system.
-Type 'help' for a list of available commands or 'fastfetch' for system info.
+export const INITIAL_MOTD = `${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (GENERIC.MP)
+Welcome to ${SYSTEM_CONFIG.name}: Proactively secure web environment.
+Type 'help' for available commands or 'fastfetch' for system info.
 `;
 
 export function buildFastfetch(cwd: string, elapsedSeconds = 0): string {
   const elapsed = Math.max(0, Math.floor(elapsedSeconds));
   const hours = Math.floor(elapsed / 3600);
   const minutes = Math.floor((elapsed % 3600) / 60);
+  const seconds = elapsed % 60;
+  const uptime = hours > 0
+    ? `${hours}h ${minutes}m ${seconds}s`
+    : `${minutes}m ${seconds}s`;
   return `${PUFFY_ASCII}
 
-  ${SYSTEM_CONFIG.username}@${SYSTEM_CONFIG.hostname}
-  ------------------
-  OS:       ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} GENERIC.MP ${SYSTEM_CONFIG.architecture}
-  Host:     Web Desktop 1.0
-  Kernel:   ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion}
-  Uptime:   ${hours} hours, ${minutes} mins
-  Packages: 42 (pkg_info)
-  Shell:    ksh 5.2.14
-  Terminal: ${SYSTEM_CONFIG.terminal}
-  CPU:      Virtual CPU @ 3.00GHz
-  Memory:   128MiB / 2048MiB
-  Disk:     420MiB / 8192MiB (5%)
-  Local IP: ${SYSTEM_CONFIG.localIp}
-  CWD:      ${cwd}`;
+ \x1b[38;5;220m${SYSTEM_CONFIG.username}\x1b[0m@\x1b[38;5;81m${SYSTEM_CONFIG.hostname.split('.')[0]}\x1b[0m
+ \x1b[38;5;240m${'─'.repeat(uptime.length + 1)}\x1b[0m
+ \x1b[1;38;5;220mOS:\x1b[0m          ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (GENERIC.MP) ${SYSTEM_CONFIG.architecture}
+ \x1b[1;38;5;220mHost:\x1b[0m        Web Desktop
+ \x1b[1;38;5;220mKernel:\x1b[0m      ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} GENERIC.MP#1
+ \x1b[1;38;5;220mUptime:\x1b[0m      ${uptime}
+ \x1b[1;38;5;220mShell:\x1b[0m       ${SYSTEM_CONFIG.shell.split('/').pop()} ${SYSTEM_CONFIG.desktopVersion}
+ \x1b[1;38;5;220mTerminal:\x1b[0m     ${SYSTEM_CONFIG.terminal}
+ \x1b[1;38;5;220mLocal IP:\x1b[0m     ${SYSTEM_CONFIG.localIp}
+ \x1b[1;38;5;220mCWD:\x1b[0m          ${cwd}`;
 }
 
 export const MAN_PAGES: Record<string, string> = {
@@ -210,6 +207,29 @@ SYNOPSIS
 
 DESCRIPTION
      Display a list of all available built-in commands.`,
+  banner: `BANNER(1)                 General Commands Manual                 BANNER(1)
+
+NAME
+     banner - display a message in a text banner
+
+SYNOPSIS
+     banner text
+
+DESCRIPTION
+     The banner utility prints text surrounded by a box of asterisks.`,
+
+  neofetch: `NEOFETCH(1)               General Commands Manual               NEOFETCH(1)
+
+NAME
+     neofetch - display system information with ASCII art
+
+SYNOPSIS
+     neofetch
+
+DESCRIPTION
+     The neofetch utility prints system information including OS,
+     hostname, kernel version, uptime, shell, and terminal details.
+     An alias for the fastfetch command.`,
 
   man: `MAN(1)                    General Commands Manual                   MAN(1)
 

@@ -33,7 +33,16 @@ export interface WindowState {
   isMinimized: boolean;
   isMaximized: boolean;
   isFocused: boolean;
+  workspace?: number;
   appState?: AppState;
+}
+
+export interface DesktopNotification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  appId?: AppId;
 }
 
 /** Registered application identifiers */

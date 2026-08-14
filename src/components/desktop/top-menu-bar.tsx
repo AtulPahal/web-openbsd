@@ -1,107 +1,83 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Shield, Clock, Monitor } from "lucide-react";
-import { SystemTray } from "@/components/desktop/system-tray";
-import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { AppLauncher } from "./app-launcher";
+import { SystemTray } from "./system-tray";
+import type { AppId, WindowState } from "@/types";
 
-export function TopMenuBar() {
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
+interface TopMenuBarProps {
+  onOpenApp: (appId: AppId) => void;
+  activeWorkspace: number;
+  onSelectWorkspace: (ws: number) => void;
+  windows?: WindowState[];
+  onToggleNotificationCenter: () => void;
+  unreadCount?: number;
+}
 
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTime(
-        now.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-      setDate(
-        now.toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-        })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+export function TopMenuBar({
+  onOpenApp,
+  activeWorkspace,
+  onSelectWorkspace,
+  windows = [],
+  onToggleNotificationCenter,
+  unreadCount = 0,
+}: TopMenuBarProps) {
+  const workspaces = [1, 2, 3, 4];
 
-  const menuItems = [
-    { name: "Portfolio", action: "portfolio" },
-    { name: "Resume", action: "resume" },
-    { name: "Projects", action: "projects" },
-    { name: "Contact", action: "contact" },
-  ];
-
-  const handleMenuClick = (action: string) => {
-    if (action === "resume") {
-      window.open("/resume.pdf", "_blank");
-    } else if (action === "portfolio") {
-      window.dispatchEvent(
-        new CustomEvent("open-app", { detail: { appId: "portfolio" } })
-      );
-    } else if (action === "projects") {
-      window.dispatchEvent(
-        new CustomEvent("open-app", { detail: { appId: "portfolio" } })
-      );
-    } else if (action === "contact") {
-      window.dispatchEvent(
-        new CustomEvent("open-app", { detail: { appId: "about" } })
-      );
-    }
+  // Count active windows per workspace
+  const getWorkspaceWindowCount = (ws: number) => {
+    return windows.filter((w) => (w.workspace ?? 1) === ws).length;
   };
 
   return (
-    <div className="h-7 bg-background/80 backdrop-blur border-b border-border/30 flex items-center justify-between px-3 text-xs font-mono text-muted-foreground shrink-0 z-50">
-      {/* Left: App menu */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
-          <Shield className="w-3.5 h-3.5" />
-          <span>OpenBSD</span>
-        </div>
+    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none">
+      {/* Left: OpenBSD App Launcher + Workspaces 1-4 */}
+      <div className="flex items-center gap-2">
+        {/* OpenBSD Option */}
+        <AppLauncher onOpenApp={onOpenApp} />
+
+        <div className="text-border/80 text-xs px-0.5">|</div>
+
+        {/* 4 Workspaces Switcher */}
         <div className="flex items-center gap-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={() => handleMenuClick(item.action)}
-              className="px-2 py-0.5 hover:text-amber-400 hover:bg-amber-500/10 transition-colors rounded-none"
-            >
-              {item.name}
-            </button>
-          ))}
+          {workspaces.map((ws) => {
+            const isActive = activeWorkspace === ws;
+            const count = getWorkspaceWindowCount(ws);
+
+            return (
+              <button
+                key={ws}
+                type="button"
+                onClick={() => onSelectWorkspace(ws)}
+                className={`h-5 px-2 flex items-center gap-1 text-[11px] font-mono border transition-all duration-150 rounded-none cursor-pointer ${
+                  isActive
+                    ? "bg-amber-500/20 border-amber-500/60 text-amber-300 font-bold shadow-sm"
+                    : "bg-background/40 border-border/40 text-muted-foreground hover:bg-amber-500/10 hover:text-foreground"
+                }`}
+                title={`Switch to Workspace ${ws}${count > 0 ? ` (${count} open)` : ""}`}
+              >
+                <span>{ws}</span>
+                {count > 0 && (
+                  <span
+                    className={`w-1 h-1 rounded-full ${
+                      isActive ? "bg-amber-400" : "bg-muted-foreground/60"
+                    }`}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="text-amber-400/40">|</div>
-        <span className="text-xs">
-          {SYSTEM_CONFIG.name} {SYSTEM_CONFIG.osVersion}
-        </span>
       </div>
 
-      {/* Center: Empty */}
-      <div className="flex-1"></div>
+      {/* Center: Clean Spacer */}
+      <div className="flex-1" />
 
-      {/* Right: System Tray + Status */}
+      {/* Right: System Tray (Time area triggers macOS-style Notification Center) */}
       <div className="flex items-center gap-2">
-        <SystemTray />
-        <div className="flex items-center gap-1 text-emerald-400" title="PF Firewall Active">
-          <Shield className="w-3.5 h-3.5" />
-          <span>PF</span>
-        </div>
-        <div className="flex items-center gap-1 text-sky-400" title={`${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.desktopVersion}`}>
-          <Monitor className="w-3.5 h-3.5" />
-          <span>{SYSTEM_CONFIG.hostname}</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-background/50 px-2 py-0.5 border border-border/50 text-foreground font-semibold min-w-[130px] justify-center">
-          <Clock className="w-3.5 h-3.5 text-amber-400" />
-          <span>{date}</span>
-          <span className="text-amber-400">{time}</span>
-        </div>
+        <SystemTray
+          onToggleNotificationCenter={onToggleNotificationCenter}
+          unreadCount={unreadCount}
+        />
       </div>
     </div>
   );
