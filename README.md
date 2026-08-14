@@ -1,135 +1,147 @@
-# Atul Pahal — Portfolio
+# openBSD-Portfolio — Atul Pahal
 
-An interactive OpenBSD-inspired terminal desktop environment showcasing my AI/ML and full-stack development portfolio. Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and Bun.
+An interactive, browser-native OpenBSD & macOS-inspired web desktop environment showcasing the AI/ML and full-stack engineering portfolio of **Atul Pahal**. Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and Bun.
 
-**Login password:** `2026` (demo only — opens the desktop to explore)
+**Live GitHub Profile:** [https://github.com/AtulPahal](https://github.com/AtulPahal)  
+**Login Password:** `2026`
 
-## Screenshots
+---
 
-> Open apps from the panel launcher or right-click the desktop. Launch the **Portfolio** app to see projects/skills/experience, or the **Resume** app to view the full PDF resume.
+## 🌟 Key Features
 
-## What's Here
+### 🖥️ Desktop Shell & Multitasking
+- **SDDM-Style Login Screen** — Password-gated entry (`2026`) with live clock and wallpaper.
+- **4 Workspaces (1, 2, 3, 4)** — Top bar workspace switcher; windows are isolated per workspace with running window indicators.
+- **GNOME / macOS Fisheye Dock** — Vertical right-side dock featuring proximity fisheye magnification (`1.45x` zoom on hover, `1.25x` neighbor scale), running indicators, and window count badges. Toggleable magnification setting in System Settings.
+- **macOS Notification & Control Center Drawer** — Interactive flyout drawer triggered by clicking the top Date/Time area:
+  - **Live Date & Clock Card** — Clickable date header that opens the **Calendar App**.
+  - **Quick Settings Grid** — Wi-Fi status, Bluetooth status, Dark Mode toggle, and Do Not Disturb (`DND`) mode toggle.
+  - **Display Brightness & Sound Master Volume Sliders** — Real-time screen dimming overlay and 100% 2-way synchronized master volume control across all playing media.
+- **Global Light & Dark Mode Themes** — Toggle between Dark Mode and precision off-white Light Mode (`#f5f3ef` Command Center color palette).
+- **Desktop Context Menu** — Right-click anywhere on the desktop wallpaper to open applications.
 
-This isn't a static resume page — it's a *browser-based desktop environment* built as a living showcase of full-stack engineering. Navigate a login screen, window manager, panel, and terminal — all running purely client-side.
+---
 
-### Desktop Shell
-- **SDDM-style login screen** — password-gated entry with clock and wallpaper
-- **Window manager** — draggable, resizable windows with minimize / maximize / close; z-index stacking and cascade placement
-- **Panel taskbar** — app launcher, open-window buttons with active state, system tray
-- **System tray** — live clock, PF firewall indicator, hostname chip (now showing your name)
-- **Right-click context menu** — launch any app from the desktop
+## 🚀 Interactive Desktop Applications
 
-### Portfolio Apps
-| App | Description |
-|-----|-------------|
-| **Portfolio** | Interactive showcase of projects, technical skills, education, certifications, and interests — tabbed interface with project detail view |
-| **Resume** | Embedded PDF viewer for the full resume with download and pop-out links |
-| **About** | Personal info card with social links, Puffy ASCII art, and tech stack |
+| Icon | App | Description |
+|:---:|-----|-------------|
+| ⚙️ | **System Settings** | macOS-style settings application with sidebar navigation for **Wi-Fi & Network**, **Sound & Audio**, **Display & Brightness**, **Security & PF Firewall**, **Appearance & Dock**, and **System & About** (containing the full developer profile, contact details, system specs, and tech stack). |
+| 👤 | **Portfolio** | Developer OS dashboard with profile hero header, 4 quick metric cards (*4+ SOTA Projects*, *94.7% KNN Diagnostic Model*, *100% ONNX Web Inference*), interactive contact cards, categorized skills progress bars, project cards, and education timeline. |
+| 📅 | **Calendar** | Modern desktop calendar app with month navigation (`August 2026`), micro event preview pills rendered directly inside calendar day cells, agenda schedule, and form to add reminders. |
+| 📈 | **System Monitor** | `btop`/`htop` styled monitor with real-time SVG sparkline history charts for CPU, RAM, and Network throughput. Includes process search filter, interactive column sorting (`PID`, `CPU%`, `MEM%`), and process kill action. |
+| 💻 | **Terminal** | `ksh`-style terminal running against an in-memory VirtualFS. Includes commands: `help`, `fastfetch`, `neofetch`, `portfolio`, `resume`, `ls`, `cd`, `cat`, `pwd`, `clear`, `exit`, `banner`. |
+| 📄 | **Resume** | Embedded PDF viewer for full resume with download (`/resume.pdf`) and pop-out links. |
+| 📂 | **File Manager** | Directory tree sidebar, sortable file table, breadcrumb navigation, and `resume.txt` file viewing. |
+| 📝 | **Text Editor** | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS. |
+| 🌐 | **Firefox** | Iframe web browser with URL bar, Proxy Mode to strip `X-Frame-Options` headers, fallback handling, and external tab shortcuts (`https://github.com/AtulPahal`). |
+| 🎵 | **Music App** | Local music player scanning `/home/user/Music` with Lucide transport controls, seeking bar, and 2-way master volume synchronization. |
+| 🎬 | **mpv Video App** | Video player supporting HTML5 video, YouTube embeds, and drag-and-drop file playback. |
 
-### System Apps
-| App | Description |
-|-----|-------------|
-| **Terminal** | ksh-style shell against a virtual filesystem. Run `resume` or `portfolio` commands for quick summaries |
-| **File Manager** | Directory tree sidebar, sortable file listing, breadcrumb navigation — includes a `resume.txt` file |
-| **Text Editor** | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS |
-| **System Monitor** | Live process table with simulated CPU/memory jitter, uptime counter, network RX/TX graph |
-| **Firefox** | iframe browser with back/forward/reload, proxy mode to bypass X-Frame-Options headers |
-| **Music** | Auto-scans `/home/user/Music`, tabular tracklist, prev/next/play/pause controls |
-| **Video** | HTML5 video, YouTube embed, drag-and-drop files/URLs, Nerd Font OSC controls |
+---
 
-### Terminal Commands (Portfolio additions)
+## 🛠️ Tech Stack
 
-```
-resume          Print contact info, skills, and project summary
-portfolio       Print projects, education, and certifications summary
-```
+| Technology | Role |
+|------------|------|
+| **Next.js 16** | Framework (App Router & Turbopack) |
+| **React 19** | UI Library & Hooks State Management |
+| **TypeScript 5** | Strict Type System |
+| **Tailwind CSS v4** | Utility Styling & Custom Theme Variables |
+| **shadcn/ui** | UI Primitives |
+| **Lucide React** | Vector SVG Icons |
+| **Bun** | Fast Runtime & Package Manager |
 
-All the original OpenBSD-style commands also work (`ls`, `cd`, `cat`, `fastfetch`, `man`, etc.).
+---
 
-## Tech Stack
-
-| Technology    | Version | Role                       |
-|---------------|---------|----------------------------|
-| Next.js       | 16      | Framework (App Router)     |
-| React         | 19      | UI library                 |
-| TypeScript    | 5       | Language (strict mode)     |
-| Tailwind CSS  | 4       | Styling                    |
-| shadcn/ui     | 4       | UI primitives (base-nova)  |
-| Lucide React  | 1       | Icons                      |
-| Geist         | —       | Typography (Sans + Mono)   |
-| **Bun**      | 1.x     | **Runtime & package manager** |
-
-> Developed with **Bun** instead of npm. All dependency management and execution uses `bun`.
-
-## Getting Started
+## 💻 Terminal Commands
 
 ```bash
+help               # Show available commands
+fastfetch          # Display system info & specs with ASCII art (neofetch)
+portfolio          # Print portfolio & project summary
+resume             # Print resume & technical skills summary
+banner <text>      # Render text banner surrounded by asterisks
+ls [-l]            # List directory contents
+cd <dir>           # Change working directory
+cat <file>         # Print file contents
+pwd                # Print working directory path
+clear              # Clear terminal screen
+exit               # Close terminal window
+```
+
+---
+
+## 🏃 Getting Started
+
+### Installation & Development
+
+```bash
+# Install dependencies using Bun
 bun install
+
+# Run Next.js development server
 bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) — log in with password `2026`.
 
-## Build & Lint
+### Build & Typecheck
 
 ```bash
-bun run build     # production build
-bun run lint      # ESLint via Next.js
-bun run typecheck # TypeScript strict check
+# Production Build
+bun run build
+
+# TypeScript Strict Check
+bun run typecheck
 ```
 
-## Resume
+---
 
-The full resume PDF is available:
-- **In the app:** Open the **Resume** application from the panel launcher
-- **Directly:** [`/resume.pdf`](public/resume.pdf) (served from `public/resume.pdf`)
-- **In the terminal:** Run `cat ~/Documents/resume.txt` or the `resume` command
-
-## Project Structure
+## 📂 Project Architecture
 
 ```
 src/
   app/
-    api/proxy/      Next.js route — strips X-Frame-Options for Firefox proxy mode
-    globals.css     Theme tokens, Nerd Font @font-face, .nf helper class
-    layout.tsx      Root layout with fonts, metadata, OG tags
-    page.tsx        Entry point — login gate + Desktop
+    api/proxy/              Next.js route — proxies external URLs and strips X-Frame-Options
+    globals.css             Theme CSS tokens (Light & Dark mode definitions)
+    layout.tsx              Root layout with metadata and styling
+    page.tsx                App entry point (Login gate + Desktop)
   components/
-    apps/           Terminal, FileManager, TextEditor, Music, Video, Firefox,
-                    SystemMonitor, About, Portfolio, Resume
-    desktop/        Desktop, Panel, AppLauncher, SystemTray
-    login/          SDDMLogin
-    ui/             shadcn/ui primitives
-    window/         WindowFrame (drag, resize, z-index)
+    apps/                   Calendar, SystemSettings, Portfolio, SystemMonitor,
+                            Terminal, FileManager, TextEditor, Firefox, Music, Video, Resume
+    desktop/                Desktop, TopMenuBar, Dock, AppLauncher, SystemTray, NotificationCenter
+    login/                  SDDMLogin
+    ui/                     shadcn/ui primitives (Tabs, ContextMenu, DropdownMenu, Button, Separator)
+    window/                 WindowFrame (drag, resize, focus, z-index, traffic lights)
   features/
-    virtual-fs/     In-memory VirtualFS (normalizePath, resolve, read, write,
-                    mkdir, remove, exists, list, getNode, listDirectory)
-    command-interpreter.ts   ksh command parser + executor (async curl support,
-                             plus portfolio/resume commands)
+    virtual-fs/             In-memory virtual filesystem tree & navigation methods
+    command-interpreter.ts  Terminal shell parser & execution engine
   hooks/
-    use-window-manager.ts    Window state (open, close, focus, minimize, maximize,
-                             move, resize, cascade)
+    use-window-manager.ts   Window state manager (open, close, focus, minimize, maximize, move, resize, workspaces)
   lib/
-    app-registry.ts          App metadata (id, name, icon, defaultSize, minSize)
-    portfolio-data.ts        Structured resume/portfolio data (skills, projects,
-                             education, certifications)
-    system-config.ts         System + user config (name, contact, branding)
-    virtual-fs-seed.ts       Virtual filesystem tree (with resume.txt)
-    command-data.ts          MOTD, fastfetch, man pages
-    browser-config.ts        Firefox proxy URL builder
-    media-config.ts          Music/video Nerd Font glyphs
+    app-icons.ts            Lucide icon mapping for registered desktop apps
+    app-registry.ts         Application definitions & window geometry configs
+    browser-config.ts       Firefox proxy URL builder
+    command-data.ts         MOTD banner, fastfetch formatting, man pages
+    media-config.ts         Audio/video configuration
+    portfolio-data.ts       Single source of truth for portfolio, projects, skills, education
+    social-icons.tsx        SVG icons for GitHub, LinkedIn, Email
+    system-config.ts        System configuration (OS version, user info, website)
+    system-monitor-config.ts Initial processes, network interfaces (em0, lo0)
+    utils.ts                Tailwind utility helpers and notification dispatchers
+  types/
+    index.ts                Core TypeScript interfaces (WindowState, AppId, DesktopNotification, FSNode)
 ```
 
-## API Routes
+---
 
-| Route | Purpose |
-|-------|---------|
-| `GET /api/proxy?url=<url>` | Fetches the target URL server-side, strips `X-Frame-Options` / CSP headers, injects a `<base>` tag, and returns the body. Used by Firefox proxy mode and the terminal `curl` command. |
+## 📜 License
 
-## License
+ISC License
 
-ISC
+---
 
-## Disclaimer
+## ⚠️ Disclaimer
 
-Not affiliated with, endorsed by, or connected to the OpenBSD project or the OpenBSD Foundation. The OpenBSD name and aesthetic are referenced for inspiration only.
+Not affiliated with, endorsed by, or connected to the OpenBSD project or the OpenBSD Foundation. The OpenBSD name and aesthetic are referenced for design inspiration only.
