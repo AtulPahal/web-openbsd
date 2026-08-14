@@ -48,6 +48,7 @@ export function Desktop() {
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [dockMagnification, setDockMagnification] = useState(true);
   const [masterVolume, setMasterVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
@@ -150,12 +151,19 @@ export function Desktop() {
         setIsDarkMode(customEvent.detail.isDark);
       }
     };
+    const handleDockMagnify = (e: Event) => {
+      const customEvent = e as CustomEvent<{ enabled: boolean }>;
+      if (typeof customEvent.detail?.enabled === "boolean") {
+        setDockMagnification(customEvent.detail.enabled);
+      }
+    };
 
     window.addEventListener("close-window", handleClose as EventListener);
     window.addEventListener("open-app", handleOpen as EventListener);
     window.addEventListener("show-notification", handleNotify as EventListener);
     window.addEventListener("master-volume-change", handleMasterVol);
     window.addEventListener("theme-change", handleThemeChange);
+    window.addEventListener("dock-magnification-change", handleDockMagnify);
 
     return () => {
       window.removeEventListener("close-window", handleClose as EventListener);
@@ -163,6 +171,7 @@ export function Desktop() {
       window.removeEventListener("show-notification", handleNotify as EventListener);
       window.removeEventListener("master-volume-change", handleMasterVol);
       window.removeEventListener("theme-change", handleThemeChange);
+      window.removeEventListener("dock-magnification-change", handleDockMagnify);
     };
   }, [closeWindow, activeWorkspace]);
   // Filter windows by current workspace
@@ -258,6 +267,7 @@ export function Desktop() {
               focusWindow(id);
             }}
             onOpenApp={(appId) => handleOpenApp(appId)}
+            dockMagnification={dockMagnification}
           />
 
           {/* Toast Notification Toasts — Top Right corner */}

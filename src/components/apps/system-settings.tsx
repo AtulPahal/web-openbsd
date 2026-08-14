@@ -356,7 +356,18 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <div className="font-bold text-xs">Dock Proximity Magnification</div>
                 <div className="text-[10px] text-muted-foreground">Fisheye zoom on dock icon hover</div>
               </div>
-              <ToggleSwitch checked={dockMagnify} onChange={setDockMagnify} activeColor="bg-amber-500" />
+              <ToggleSwitch
+                checked={dockMagnify}
+                onChange={(val) => {
+                  setDockMagnify(val);
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(
+                      new CustomEvent("dock-magnification-change", { detail: { enabled: val } })
+                    );
+                  }
+                }}
+                activeColor="bg-amber-500"
+              />
             </div>
           </div>
         )}

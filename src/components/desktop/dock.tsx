@@ -10,12 +10,13 @@ interface DockProps {
   windows: WindowState[];
   onFocusWindow: (id: WindowId) => void;
   onOpenApp: (appId: AppId) => void;
+  dockMagnification?: boolean;
 }
 
 /**
  * macOS-style Dock (vertical, right-side) with fisheye proximity magnification.
  */
-export function Dock({ windows, onFocusWindow, onOpenApp }: DockProps) {
+export function Dock({ windows, onFocusWindow, onOpenApp, dockMagnification = true }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Apps that have at least one open window — used to show running indicators
@@ -30,7 +31,7 @@ export function Dock({ windows, onFocusWindow, onOpenApp }: DockProps) {
   const appList = Object.values(APP_REGISTRY);
 
   const getScale = (index: number) => {
-    if (hoveredIndex === null) return 1.0;
+    if (!dockMagnification || hoveredIndex === null) return 1.0;
     const dist = Math.abs(index - hoveredIndex);
     if (dist === 0) return 1.45;
     if (dist === 1) return 1.25;
