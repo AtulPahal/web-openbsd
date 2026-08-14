@@ -336,7 +336,7 @@ export function SystemTray({
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Master Volume</span>
               <span className="font-bold text-amber-400 tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
@@ -349,6 +349,35 @@ export function SystemTray({
               onChange={(e) => onVolumeChange?.(Number(e.target.value), false)}
               className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
             />
+
+            {/* Audio Output Device Selection List */}
+            <div className="text-[10px] font-bold text-muted-foreground uppercase pt-1 border-t border-border/40">
+              OUTPUT DEVICE
+            </div>
+            <div className="space-y-1">
+              {[
+                { id: "Built-in Speakers", name: "Built-in Speakers" },
+                { id: "AirPods Pro (Bluetooth)", name: "AirPods Pro (Bluetooth)" },
+                { id: "Headphones (3.5mm Jack)", name: "Headphones (3.5mm Jack)" },
+              ].map((dev) => {
+                const isSelected = outputDevice === dev.id;
+                return (
+                  <button
+                    key={dev.id}
+                    type="button"
+                    onClick={() => setOutputDevice(dev.id)}
+                    className={`w-full p-2 text-left rounded flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                      isSelected
+                        ? "bg-amber-500/15 text-amber-300 font-bold border border-amber-500/40"
+                        : "hover:bg-muted/60 text-foreground border border-transparent"
+                    }`}
+                  >
+                    <span className="truncate">{dev.name}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
