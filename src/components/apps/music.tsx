@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import {
+  Music,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { MEDIA_CONFIG } from "@/lib/media-config";
 import { VirtualFS } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
-
-const { glyphs: MEDIA_GLYPHS } = MEDIA_CONFIG;
 
 function formatTime(seconds: number) {
   if (isNaN(seconds) || seconds <= 0) return "0:00";
@@ -21,37 +28,70 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   const [playlist, setPlaylist] = useState<FSNode[]>([]);
   const [audioUrl, setAudioUrl] = useState<string>("");
   const [title, setTitle] = useState("");
-
-  // Absolute path of the file currently loaded into the player.
   const [currentTrackPath, setCurrentTrackPath] = useState<string>("");
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [durations, setDurations] = useState<Record<string, number>>({});
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0.75);
   const [isMuted, setIsMuted] = useState(false);
 
   const targetPath = path || "";
 
+  // Listen for global master volume changes from Top Bar System Tray & Control Center
+  useEffect(() => {
+    const handleMasterVolume = (e: Event) => {
+      const customEvent = e as CustomEvent<{ volume: number; isMuted: boolean; level: number }>;
+      const newVol = customEvent.detail.volume;
+      const muted = customEvent.detail.isMuted;
+      setVolume(customEvent.detail.level / 100);
+      setIsMuted(muted);
+      if (audioRef.current) {
+        audioRef.current.volume = muted ? 0 : newVol;
+      }
+    };
+
+    window.addEventListener("master-volume-change", handleMasterVolume);
+    return () => {
+      window.removeEventListener("master-volume-change", handleMasterVolume);
+    };
+  }, []);
+
   // Build the local music library from the virtual filesystem (once).
   useEffect(() => {
-    const songs = fsRef.current
-      .listDirectory(MEDIA_CONFIG.musicDirectory)
-      .filter((n) => n.type === "file" && n.name.toLowerCase().endsWith(MEDIA_CONFIG.musicExtension));
-    setPlaylist(songs);
-  }, []);
+    const musicFolder = fsRef.current.getNode(MEDIA_CONFIG.musicDirectory);
+    if (musicFolder && musicFolder.type === "directory" && musicFolder.children) {
+      const files = musicFolder.children.filter((node) =>
+        node.name.endsWith(MEDIA_CONFIG.musicExtension)
+      );
+      setPlaylist(files);
+
+      // Preload audio duration metadata for tracklist
+      files.forEach((file) => {
+        if (file.content) {
+          const tempAudio = new Audio(file.content);
+          tempAudio.onloadedmetadata = () => {
+            setDurations((prev) => ({
+              ...prev,
+              [file.path]: tempAudio.duration,
+            }));
+          };
+        }
+      });
+
+      if (!path && files.length > 0) {
+        loadTrack(files[0]);
+      }
+    }
+  }, [path]);
 
   // When a path prop is supplied (open a file from the desktop), load it.
   useEffect(() => {
     if (targetPath) {
-      const node = fsRef.current.getNode(targetPath);
-      if (node && node.type === "file" && node.content) {
-        setAudioUrl(node.content);
-        setTitle(node.name.replace(/_/g, " ").replace(new RegExp(`\\${MEDIA_CONFIG.musicExtension}$`, "i"), ""));
-        setCurrentTrackPath(node.path);
-        setProgress(0);
-        setDuration(0);
+      const fileNode = fsRef.current.getNode(targetPath);
+      if (fileNode && fileNode.type === "file" && fileNode.content) {
+        loadTrack(fileNode);
       }
     }
   }, [targetPath]);
@@ -59,7 +99,11 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   // Auto-play when a new source is loaded.
   useEffect(() => {
     if (audioUrl && audioRef.current) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
     }
   }, [audioUrl]);
 
@@ -68,110 +112,118 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   };
 
   const handleLoadedMetadata = () => {
-    if (audioRef.current && currentTrackPath) {
-      const d = audioRef.current.duration;
-      setDuration(d);
-      setDurations((prev) => ({ ...prev, [currentTrackPath]: d }));
-    }
+    if (audioRef.current) setDuration(audioRef.current.duration);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = Number(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setProgress(time);
-    }
+    const nextTime = Number(e.target.value);
+    setProgress(nextTime);
+    if (audioRef.current) audioRef.current.currentTime = nextTime;
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vol = Number(e.target.value);
-    setVolume(vol);
-    if (audioRef.current) {
-      audioRef.current.volume = vol;
-      if (vol > 0 && isMuted) {
-        setIsMuted(false);
-        audioRef.current.muted = false;
-      }
+    const val = Number(e.target.value);
+    setVolume(val);
+    if (isMuted && val > 0) setIsMuted(false);
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : val;
+
+    // Dispatch to system tray to keep top bar volume slider in sync!
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("master-volume-change", {
+          detail: { volume: val, isMuted: false, level: Math.round(val * 100) },
+        })
+      );
     }
   };
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) audioRef.current.pause();
-    else audioRef.current.play();
-    setIsPlaying(!isPlaying);
+    if (!audioRef.current || !audioUrl) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
+    }
   };
 
   const toggleMute = () => {
-    if (!audioRef.current) return;
-    const next = !isMuted;
-    setIsMuted(next);
-    audioRef.current.muted = next;
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    if (audioRef.current) audioRef.current.volume = nextMute ? 0 : volume;
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("master-volume-change", {
+          detail: { volume: nextMute ? 0 : volume, isMuted: nextMute, level: Math.round(volume * 100) },
+        })
+      );
+    }
   };
 
   const loadTrack = (node: FSNode) => {
     if (!node.content) return;
-    // Re-clicking the loaded track restarts it from the top.
-    if (node.path === currentTrackPath) {
-      if (audioRef.current) audioRef.current.currentTime = 0;
-      setProgress(0);
-      setDuration(0);
-      if (audioRef.current) audioRef.current.play().then(() => setIsPlaying(true));
-      return;
-    }
     setAudioUrl(node.content);
-    setTitle(node.name.replace(/_/g, " ").replace(new RegExp(`\\${MEDIA_CONFIG.musicExtension}$`, "i"), ""));
+    setTitle(node.name.replace(/\.[^/.]+$/, ""));
     setCurrentTrackPath(node.path);
-    setProgress(0);
-    setDuration(0);
   };
 
   const currentIndex = playlist.findIndex((n) => n.path === currentTrackPath);
 
   const nextTrack = () => {
-    if (!playlist.length) return;
-    loadTrack(playlist[(currentIndex + 1) % playlist.length]);
+    if (playlist.length === 0) return;
+    const nextIdx = (currentIndex + 1) % playlist.length;
+    loadTrack(playlist[nextIdx]);
   };
 
   const prevTrack = () => {
-    if (!playlist.length) return;
-    loadTrack(playlist[(currentIndex - 1 + playlist.length) % playlist.length]);
+    if (playlist.length === 0) return;
+    const prevIdx = (currentIndex - 1 + playlist.length) % playlist.length;
+    loadTrack(playlist[prevIdx]);
   };
 
   const currentTime = formatTime(progress);
   const remaining = formatTime(Math.max(0, (duration || 0) - progress));
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground font-mono select-none" data-window-id={windowId}>
+    <div
+      className="flex flex-col h-full bg-background text-foreground font-mono select-none"
+      data-window-id={windowId}
+    >
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
         src={audioUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={nextTrack}
       />
 
-      {/* Header / Now Playing */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border text-sm">
-        <span className="nf text-amber-400" aria-hidden="true">{MEDIA_GLYPHS.music}</span>
-        <span className="text-amber-400">Now Playing:</span>{" "}
-        <span className="text-foreground">{title || "idle"}</span>
+      {/* Header / Now Playing Banner */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border text-xs bg-card/40">
+        <Music className="w-4 h-4 text-amber-400 shrink-0" />
+        <span className="text-amber-400 font-bold">Now Playing:</span>
+        <span className="text-foreground truncate font-semibold">
+          {title || "No track loaded"}
+        </span>
       </div>
 
-      {/* Tracklist (library) */}
+      {/* Tracklist Library */}
       <div className="flex-1 overflow-y-auto p-4">
         {playlist.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No files found in {MEDIA_CONFIG.musicDirectory}
+          <p className="text-xs text-muted-foreground">
+            No audio files found in {MEDIA_CONFIG.musicDirectory}
           </p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="text-left text-muted-foreground">
-                <th className="pb-2 font-normal">Track</th>
-                <th className="pb-2 font-normal">Duration</th>
-                <th className="pb-2 font-normal">Status</th>
+              <tr className="text-left text-muted-foreground border-b border-border/60 uppercase text-[10px]">
+                <th className="pb-2 font-bold">Track</th>
+                <th className="pb-2 font-bold">Duration</th>
+                <th className="pb-2 font-bold">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -182,16 +234,28 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
                   <tr
                     key={node.path}
                     onClick={() => loadTrack(node)}
-                    className="cursor-pointer border-b border-border/30 last:border-0 hover:bg-secondary/50"
+                    className={`cursor-pointer border-b border-border/30 last:border-0 hover:bg-amber-500/10 transition-colors ${
+                      isCurrent ? "bg-amber-500/15" : ""
+                    }`}
                   >
-                    <td className={`py-1.5 ${isCurrent ? "text-amber-400" : "text-foreground"}`}>
+                    <td className={`py-2 px-1 font-semibold ${isCurrent ? "text-amber-400" : "text-foreground"}`}>
                       {node.name}
                     </td>
-                    <td className="py-1.5 text-muted-foreground">
+                    <td className="py-2 px-1 text-muted-foreground">
                       {durations[node.path] ? formatTime(durations[node.path]) : "—"}
                     </td>
-                    <td className="py-1.5 text-muted-foreground">
-                      {isPlayingThis ? "playing" : isCurrent ? "paused" : "—"}
+                    <td className="py-2 px-1">
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          isPlayingThis
+                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            : isCurrent
+                            ? "bg-muted text-muted-foreground"
+                            : "text-muted-foreground/60"
+                        }`}
+                      >
+                        {isPlayingThis ? "PLAYING" : isCurrent ? "PAUSED" : "—"}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -201,60 +265,79 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
         )}
       </div>
 
-      {/* Progress bar */}
-      <div className="shrink-0 px-4 py-2 border-t border-border text-xs text-muted-foreground flex items-center gap-2">
-        <span className="w-10 text-right">{currentTime}</span>
+      {/* Progress Bar */}
+      <div className="shrink-0 px-4 py-2 border-t border-border/60 text-xs text-muted-foreground flex items-center gap-3 bg-card/20">
+        <span className="w-10 text-right tabular-nums">{currentTime}</span>
         <input
           type="range"
           min={0}
           max={duration || 1}
           value={progress}
           onChange={handleSeek}
-          className="flex-1 h-1 accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-2 [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:rounded-none"
+          className="flex-1 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
         />
-        <span className="w-10 text-left">-{remaining}</span>
+        <span className="w-10 text-left tabular-nums">-{remaining}</span>
       </div>
 
-      {/* Transport controls + volume */}
-      <div className="shrink-0 px-4 py-2 border-t border-border flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1">
+      {/* Transport Controls + Volume Bar */}
+      <div className="shrink-0 px-4 py-3 border-t border-border flex items-center justify-between gap-4 bg-card/40">
+        {/* Playback Controls (Lucide icons replacing broken text glyphs) */}
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={prevTrack}
             disabled={playlist.length === 0}
             aria-label="Previous track"
-            className="px-2 py-1 border border-border text-foreground disabled:opacity-40"
+            className="p-2 bg-card hover:bg-amber-500/20 border border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40 rounded transition-colors"
+            title="Previous Track"
           >
-            [<span className="nf" aria-hidden="true">{MEDIA_GLYPHS.previous}</span>]
+            <SkipBack className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={togglePlay}
             disabled={!audioUrl}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className={`px-2 py-1 border border-border disabled:opacity-40 ${isPlaying ? "text-amber-400" : ""}`}
+            className={`p-2 border rounded transition-all ${
+              isPlaying
+                ? "bg-amber-500/25 border-amber-500/60 text-amber-300 shadow-sm"
+                : "bg-card hover:bg-amber-500/20 border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40"
+            }`}
+            title={isPlaying ? "Pause" : "Play"}
           >
-            [<span className="nf" aria-hidden="true">{isPlaying ? MEDIA_GLYPHS.pause : MEDIA_GLYPHS.play}</span>]
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
           </button>
           <button
             type="button"
             onClick={nextTrack}
             disabled={playlist.length === 0}
             aria-label="Next track"
-            className="px-2 py-1 border border-border text-foreground disabled:opacity-40"
+            className="p-2 bg-card hover:bg-amber-500/20 border border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40 rounded transition-colors"
+            title="Next Track"
           >
-            [<span className="nf" aria-hidden="true">{MEDIA_GLYPHS.next}</span>]
+            <SkipForward className="w-4 h-4" />
           </button>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Local Volume Bar */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={toggleMute}
             disabled={!audioUrl}
             aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
-            className={`px-2 py-1 border border-border disabled:opacity-40 ${isMuted || volume === 0 ? "text-amber-400" : ""}`}
+            className={`p-1.5 border rounded transition-colors ${
+              isMuted || volume === 0
+                ? "bg-red-500/20 text-red-300 border-red-500/40"
+                : "bg-card hover:bg-amber-500/20 border-border/80 text-foreground hover:text-amber-300"
+            }`}
+            title={isMuted ? "Unmute" : "Mute"}
           >
-            [<span className="nf" aria-hidden="true">{isMuted || volume === 0 ? MEDIA_GLYPHS.mute : MEDIA_GLYPHS.volume}</span>]
+            {isMuted || volume === 0 ? (
+              <VolumeX className="w-4 h-4" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-amber-400" />
+            )}
           </button>
           <input
             type="range"
@@ -263,7 +346,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             step={0.01}
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-32 h-1 accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-2 [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:rounded-none"
+            className="w-28 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
           />
         </div>
       </div>

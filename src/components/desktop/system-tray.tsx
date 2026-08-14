@@ -77,11 +77,20 @@ export function SystemTray({
     { id: "3", name: "MX Master 3S Mouse", type: "input", connected: false },
   ]);
 
-  // Audio State
+  // Audio State & Master Volume Sync
   const [volume, setVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [outputDevice, setOutputDevice] = useState("Built-in Speakers");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("master-volume-change", {
+          detail: { volume: isMuted ? 0 : volume / 100, isMuted, level: volume },
+        })
+      );
+    }
+  }, [volume, isMuted]);
   // Control Center State
   const [brightness, setBrightness] = useState(90);
   const [darkMode, setDarkMode] = useState(true);
