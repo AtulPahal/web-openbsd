@@ -47,6 +47,8 @@ export function Desktop() {
   } = useWindowManager();
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
+  const [masterVolume, setMasterVolume] = useState(75);
+  const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
@@ -101,6 +103,18 @@ export function Desktop() {
     }
   };
 
+  const handleVolumeChange = (newLevel: number, muted = isMuted) => {
+    setMasterVolume(newLevel);
+    setIsMuted(muted);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("master-volume-change", {
+          detail: { volume: muted ? 0 : newLevel / 100, isMuted: muted, level: newLevel },
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
     const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: AppState }>) => {
@@ -114,15 +128,26 @@ export function Desktop() {
         e.detail.duration
       );
     };
+    const handleMasterVol = (e: Event) => {
+      const customEvent = e as CustomEvent<{ volume: number; isMuted: boolean; level: number }>;
+      if (typeof customEvent.detail?.level === "number") {
+        setMasterVolume(customEvent.detail.level);
+      }
+      if (typeof customEvent.detail?.isMuted === "boolean") {
+        setIsMuted(customEvent.detail.isMuted);
+      }
+    };
 
     window.addEventListener("close-window", handleClose as EventListener);
     window.addEventListener("open-app", handleOpen as EventListener);
     window.addEventListener("show-notification", handleNotify as EventListener);
+    window.addEventListener("master-volume-change", handleMasterVol);
 
     return () => {
       window.removeEventListener("close-window", handleClose as EventListener);
       window.removeEventListener("open-app", handleOpen as EventListener);
       window.removeEventListener("show-notification", handleNotify as EventListener);
+      window.removeEventListener("master-volume-change", handleMasterVol);
     };
   }, [closeWindow, activeWorkspace]);
 
@@ -167,7 +192,6 @@ export function Desktop() {
   return (
     <ContextMenu>
       <ContextMenuTrigger className="w-full h-full">
-        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden relative select-none">
           {/* Top Menu Bar */}
           <TopMenuBar
             onOpenApp={handleOpenApp}
@@ -176,8 +200,10 @@ export function Desktop() {
             windows={windows}
             onToggleNotificationCenter={() => setIsNotificationCenterOpen((prev) => !prev)}
             unreadCount={notificationHistory.length}
+            volume={masterVolume}
+            isMuted={isMuted}
+            onVolumeChange={handleVolumeChange}
           />
-
           {/* Desktop Wallpaper */}
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center"
@@ -254,8 +280,10 @@ export function Desktop() {
             }}
             isDndOn={isDndOn}
             onToggleDnd={() => setIsDndOn((prev) => !prev)}
+            volume={masterVolume}
+            isMuted={isMuted}
+            onVolumeChange={handleVolumeChange}
           />
-        </div>
       </ContextMenuTrigger>
 
       {/* Desktop Context Menu */}

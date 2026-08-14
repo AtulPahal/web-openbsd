@@ -11,6 +11,9 @@ interface TopMenuBarProps {
   windows?: WindowState[];
   onToggleNotificationCenter: () => void;
   unreadCount?: number;
+  volume: number;
+  isMuted: boolean;
+  onVolumeChange: (newLevel: number, muted?: boolean) => void;
 }
 
 export function TopMenuBar({
@@ -20,6 +23,9 @@ export function TopMenuBar({
   windows = [],
   onToggleNotificationCenter,
   unreadCount = 0,
+  volume,
+  isMuted,
+  onVolumeChange,
 }: TopMenuBarProps) {
   const workspaces = [1, 2, 3, 4];
 
@@ -72,11 +78,14 @@ export function TopMenuBar({
       {/* Center: Clean Spacer */}
       <div className="flex-1" />
 
-      {/* Right: System Tray (Time area triggers macOS-style Notification Center) */}
+      {/* Right: System Tray */}
       <div className="flex items-center gap-2">
         <SystemTray
           onToggleNotificationCenter={onToggleNotificationCenter}
           unreadCount={unreadCount}
+          volume={volume}
+          isMuted={isMuted}
+          onVolumeChange={onVolumeChange}
         />
       </div>
     </div>

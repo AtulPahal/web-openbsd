@@ -24,8 +24,6 @@ import {
   Info,
   User,
   SlidersHorizontal,
-  Headphones,
-  Speaker,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import type { DesktopNotification } from "@/types";
@@ -41,6 +39,9 @@ interface NotificationCenterProps {
   onOpenCalendar?: () => void;
   isDndOn?: boolean;
   onToggleDnd?: () => void;
+  volume: number;
+  isMuted: boolean;
+  onVolumeChange: (newLevel: number, muted?: boolean) => void;
 }
 
 export function NotificationCenter({
@@ -54,6 +55,9 @@ export function NotificationCenter({
   onOpenCalendar,
   isDndOn = false,
   onToggleDnd,
+  volume = 75,
+  isMuted = false,
+  onVolumeChange,
 }: NotificationCenterProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [time, setTime] = useState("");
@@ -64,9 +68,6 @@ export function NotificationCenter({
   const [wifiOn, setWifiOn] = useState(true);
   const [btOn, setBtOn] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
-  const [volume, setVolume] = useState(75);
-  const [isMuted, setIsMuted] = useState(false);
-  const [outputDevice, setOutputDevice] = useState("Built-in Speakers");
 
   useEffect(() => {
     const updateTime = () => {
@@ -97,31 +98,6 @@ export function NotificationCenter({
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // Sync master volume changes with system
-  const handleVolumeChange = (val: number) => {
-    setVolume(val);
-    if (isMuted) setIsMuted(false);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("master-volume-change", {
-          detail: { volume: val / 100, isMuted: false, level: val },
-        })
-      );
-    }
-  };
-
-  const handleToggleMute = () => {
-    const nextMute = !isMuted;
-    setIsMuted(nextMute);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("master-volume-change", {
-          detail: { volume: nextMute ? 0 : volume / 100, isMuted: nextMute, level: volume },
-        })
-      );
-    }
-  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -174,7 +150,7 @@ export function NotificationCenter({
 
       {/* Main Scrollable Body */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-        {/* macOS-style Date & Clock Card (Clickable to open Calendar App) */}
+        {/* macOS-style Date & Clock Card */}
         <div
           onClick={onOpenCalendar}
           className="p-3 bg-background/60 hover:bg-amber-500/10 border border-border/60 hover:border-amber-500/60 rounded-xl flex flex-col gap-1 shadow-sm cursor-pointer transition-all group"
@@ -301,19 +277,19 @@ export function NotificationCenter({
               />
             </div>
 
-            {/* Audio Output Device Volume Slider */}
+            {/* Audio Volume Slider */}
             <div className="space-y-1.5 pt-1 border-t border-border/30">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="flex items-center gap-1 font-semibold text-amber-400 truncate max-w-[170px]" title={outputDevice}>
-                  {isMuted ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-amber-400" />}
-                  <span>{outputDevice}</span>
+                <span className="flex items-center gap-1 font-semibold text-amber-400">
+                  {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-amber-400" />}
+                  <span>Sound Volume</span>
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={handleToggleMute}
+                    onClick={() => onVolumeChange(volume, !isMuted)}
                     className={`px-1.5 py-0.5 text-[9px] font-bold rounded border ${
-                      isMuted ? "bg-red-500/20 text-red-300 border-red-500/40" : "bg-muted text-muted-foreground border-border"
+                      isMuted ? "bg-red-500/20 text-red-300 border-red-500/40" : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
                     }`}
                   >
                     {isMuted ? "Muted" : "Mute"}
@@ -326,30 +302,9 @@ export function NotificationCenter({
                 min="0"
                 max="100"
                 value={isMuted ? 0 : volume}
-                onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                onChange={(e) => onVolumeChange(Number(e.target.value), false)}
                 className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
               />
-
-              {/* Output Device Selector Buttons */}
-              <div className="flex gap-1 pt-1">
-                {["Built-in Speakers", "AirPods Pro", "Headphones"].map((dev) => {
-                  const isSel = outputDevice === dev;
-                  return (
-                    <button
-                      key={dev}
-                      type="button"
-                      onClick={() => setOutputDevice(dev)}
-                      className={`flex-1 py-1 px-1 text-[9px] font-semibold rounded border truncate transition-colors ${
-                        isSel
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
-                          : "bg-background/40 border-border/40 text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {dev === "Built-in Speakers" ? "Speakers" : dev}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>

@@ -9,22 +9,23 @@ import {
   BluetoothOff,
   Volume2,
   VolumeX,
-  SlidersHorizontal,
   Check,
   Sun,
   Moon,
-  BatteryCharging,
-  Music,
-  ChevronRight,
   Shield,
+  Monitor,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
+
 interface SystemTrayProps {
   onToggleNotificationCenter?: () => void;
   unreadCount?: number;
+  volume?: number;
+  isMuted?: boolean;
+  onVolumeChange?: (newLevel: number, muted?: boolean) => void;
 }
 
-type ActivePopover = "wifi" | "bluetooth" | "audio" | "control-center" | null;
+type ActivePopover = "wifi" | "bluetooth" | "audio" | null;
 
 function ToggleSwitch({
   checked,
@@ -56,10 +57,15 @@ function ToggleSwitch({
 export function SystemTray({
   onToggleNotificationCenter,
   unreadCount = 0,
+  volume = 75,
+  isMuted = false,
+  onVolumeChange,
 }: SystemTrayProps) {
   const [time, setTime] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
+
+  // Wi-Fi State
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [connectedWifi, setConnectedWifi] = useState("OpenBSD-5G");
   const [wifiNetworks, setWifiNetworks] = useState([
@@ -77,25 +83,7 @@ export function SystemTray({
     { id: "3", name: "MX Master 3S Mouse", type: "input", connected: false },
   ]);
 
-  // Audio State & Master Volume Sync
-  const [volume, setVolume] = useState(75);
-  const [isMuted, setIsMuted] = useState(false);
   const [outputDevice, setOutputDevice] = useState("Built-in Speakers");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("master-volume-change", {
-          detail: { volume: isMuted ? 0 : volume / 100, isMuted, level: volume },
-        })
-      );
-    }
-  }, [volume, isMuted]);
-  // Control Center State
-  const [brightness, setBrightness] = useState(90);
-  const [darkMode, setDarkMode] = useState(true);
-  const [nightLight, setNightLight] = useState(false);
-
   const trayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -197,11 +185,10 @@ export function SystemTray({
         )}
       </button>
 
-
       {/* Divider */}
       <div className="text-border/80 text-xs px-0.5">|</div>
 
-      {/* 5. Clickable macOS-style Time/Date area */}
+      {/* 4. Clickable macOS-style Time/Date area */}
       <button
         type="button"
         data-time-trigger
@@ -227,7 +214,7 @@ export function SystemTray({
 
       {/* Wi-Fi Popover */}
       {activePopover === "wifi" && (
-        <div className="absolute top-8 right-32 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-24 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Wifi className="w-4 h-4 text-emerald-400" />
@@ -279,7 +266,7 @@ export function SystemTray({
 
       {/* Bluetooth Popover */}
       {activePopover === "bluetooth" && (
-        <div className="absolute top-8 right-24 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-16 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Bluetooth className="w-4 h-4 text-sky-400" />
@@ -332,7 +319,7 @@ export function SystemTray({
 
       {/* Audio Popover */}
       {activePopover === "audio" && (
-        <div className="absolute top-8 right-16 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-8 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Volume2 className="w-4 h-4 text-amber-400" />
@@ -340,8 +327,8 @@ export function SystemTray({
             </div>
             <button
               type="button"
-              onClick={() => setIsMuted(!isMuted)}
-              className={`px-2 py-0.5 text-[10px] rounded border ${
+              onClick={() => onVolumeChange?.(volume, !isMuted)}
+              className={`px-2 py-0.5 text-[10px] rounded border font-semibold ${
                 isMuted ? "bg-red-500/20 text-red-300 border-red-500/40" : "bg-muted text-foreground border-border"
               }`}
             >
@@ -351,156 +338,17 @@ export function SystemTray({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Volume Level</span>
-              <span className="font-bold text-amber-400">{isMuted ? "Muted" : `${volume}%`}</span>
+              <span className="text-muted-foreground">Master Volume</span>
+              <span className="font-bold text-amber-400 tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
             </div>
             <input
               type="range"
               min="0"
               max="100"
               value={isMuted ? 0 : volume}
-              onChange={(e) => {
-                setVolume(Number(e.target.value));
-                if (isMuted) setIsMuted(false);
-              }}
+              onChange={(e) => onVolumeChange?.(Number(e.target.value), false)}
               className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
             />
-
-            <div className="text-[10px] font-bold text-muted-foreground uppercase pt-1">
-              OUTPUT DEVICE
-            </div>
-            {["Built-in Speakers", "Headphones (3.5mm)", "AirPods Pro"].map((dev) => (
-              <button
-                key={dev}
-                type="button"
-                onClick={() => setOutputDevice(dev)}
-                className={`w-full p-2 text-left rounded flex items-center justify-between text-xs transition-colors ${
-                  outputDevice === dev
-                    ? "bg-amber-500/15 text-amber-300 font-bold border border-amber-500/40"
-                    : "hover:bg-muted/60 text-foreground"
-                }`}
-              >
-                <span>{dev}</span>
-                {outputDevice === dev && <Check className="w-3.5 h-3.5 text-amber-400" />}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* macOS Control Center Popover */}
-      {activePopover === "control-center" && (
-        <div className="absolute top-8 right-8 z-50 w-72 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
-          <div className="grid grid-cols-2 gap-2">
-            {/* Wi-Fi Card */}
-            <button
-              type="button"
-              onClick={() => setWifiEnabled(!wifiEnabled)}
-              className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
-                wifiEnabled
-                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
-                  : "bg-background/40 border-border/60 text-muted-foreground"
-              }`}
-            >
-              <div className={`p-1.5 rounded-full ${wifiEnabled ? "bg-emerald-500 text-black" : "bg-muted text-muted-foreground"}`}>
-                <Wifi className="w-3.5 h-3.5" />
-              </div>
-              <div className="truncate">
-                <div className="font-bold text-xs">Wi-Fi</div>
-                <div className="text-[10px] opacity-80 truncate">{wifiEnabled ? connectedWifi : "Off"}</div>
-              </div>
-            </button>
-
-            {/* Bluetooth Card */}
-            <button
-              type="button"
-              onClick={() => setBluetoothEnabled(!bluetoothEnabled)}
-              className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
-                bluetoothEnabled
-                  ? "bg-sky-500/15 border-sky-500/40 text-sky-400"
-                  : "bg-background/40 border-border/60 text-muted-foreground"
-              }`}
-            >
-              <div className={`p-1.5 rounded-full ${bluetoothEnabled ? "bg-sky-500 text-black" : "bg-muted text-muted-foreground"}`}>
-                <Bluetooth className="w-3.5 h-3.5" />
-              </div>
-              <div className="truncate">
-                <div className="font-bold text-xs">Bluetooth</div>
-                <div className="text-[10px] opacity-80 truncate">{bluetoothEnabled ? "On" : "Off"}</div>
-              </div>
-            </button>
-
-            {/* Dark Mode Card */}
-            <button
-              type="button"
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
-                darkMode
-                  ? "bg-amber-500/15 border-amber-500/40 text-amber-400"
-                  : "bg-background/40 border-border/60 text-muted-foreground"
-              }`}
-            >
-              <div className={`p-1.5 rounded-full ${darkMode ? "bg-amber-500 text-black" : "bg-muted text-muted-foreground"}`}>
-                {darkMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-              </div>
-              <div className="truncate">
-                <div className="font-bold text-xs">Dark Mode</div>
-                <div className="text-[10px] opacity-80 truncate">{darkMode ? "On" : "Off"}</div>
-              </div>
-            </button>
-
-            {/* Battery / PF Firewall */}
-            <div className="p-2.5 bg-background/40 border border-border/60 rounded-xl flex items-center gap-2.5 text-left">
-              <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                <Shield className="w-3.5 h-3.5" />
-              </div>
-              <div className="truncate">
-                <div className="font-bold text-xs text-emerald-400">PF Active</div>
-                <div className="text-[10px] text-muted-foreground">10.0.0.2</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sliders Section */}
-          <div className="space-y-2 p-2 bg-background/40 border border-border/50 rounded-xl">
-            {/* Display Brightness Slider */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Sun className="w-3 h-3 text-amber-400" /> Brightness
-                </span>
-                <span className="font-bold text-foreground">{brightness}%</span>
-              </div>
-              <input
-                type="range"
-                min="10"
-                max="100"
-                value={brightness}
-                onChange={(e) => setBrightness(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
-              />
-            </div>
-
-            {/* Sound Volume Slider */}
-            <div className="space-y-1 pt-1">
-              <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Volume2 className="w-3 h-3 text-amber-400" /> Sound Volume
-                </span>
-                <span className="font-bold text-foreground">{isMuted ? "Muted" : `${volume}%`}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={isMuted ? 0 : volume}
-                onChange={(e) => {
-                  setVolume(Number(e.target.value));
-                  if (isMuted) setIsMuted(false);
-                }}
-                className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
-              />
-            </div>
           </div>
         </div>
       )}
