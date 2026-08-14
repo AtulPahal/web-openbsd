@@ -71,4 +71,11 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     defaultSize: { width: 760, height: 600 },
     minSize: { width: 400, height: 300 },
   },
+  calendar: {
+    id: "calendar",
+    name: "Calendar",
+    icon: "Calendar",
+    defaultSize: { width: 680, height: 480 },
+    minSize: { width: 420, height: 320 },
+  },
 };

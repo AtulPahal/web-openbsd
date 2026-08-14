@@ -16,6 +16,7 @@ import { VideoApp } from "@/components/apps/video";
 import { Portfolio } from "@/components/apps/portfolio";
 import { Resume } from "@/components/apps/resume";
 import { SystemMonitor } from "@/components/apps/system-monitor";
+import { CalendarApp } from "@/components/apps/calendar";
 import type { AppId, AppState, DesktopNotification } from "@/types";
 import {
   ContextMenu,
@@ -44,8 +45,8 @@ export function Desktop() {
     moveWindow,
     resizeWindow,
   } = useWindowManager();
-
   const [activeWorkspace, setActiveWorkspace] = useState(1);
+  const [brightness, setBrightness] = useState(100);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
     {
@@ -149,6 +150,8 @@ export function Desktop() {
         return <Portfolio windowId={windowId} />;
       case "resume":
         return <Resume windowId={windowId} />;
+      case "calendar":
+        return <CalendarApp windowId={windowId} />;
       default:
         return (
           <div className="p-4 font-mono text-sm text-foreground">
@@ -223,6 +226,14 @@ export function Desktop() {
             ))}
           </div>
 
+          {/* Brightness Dimming Overlay */}
+          {brightness < 100 && (
+            <div
+              className="fixed inset-0 pointer-events-none z-[45] bg-black transition-opacity duration-100"
+              style={{ opacity: ((100 - brightness) / 100) * 0.75 }}
+            />
+          )}
+
           {/* macOS-style Notification Center Drawer */}
           <NotificationCenter
             isOpen={isNotificationCenterOpen}
@@ -232,6 +243,12 @@ export function Desktop() {
             onRemoveNotification={(id) =>
               setNotificationHistory((prev) => prev.filter((n) => n.id !== id))
             }
+            brightness={brightness}
+            onBrightnessChange={(b) => setBrightness(b)}
+            onOpenCalendar={() => {
+              setIsNotificationCenterOpen(false);
+              handleOpenApp("calendar");
+            }}
           />
         </div>
       </ContextMenuTrigger>

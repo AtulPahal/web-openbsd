@@ -2,6 +2,7 @@ import type { ElementType } from "react";
 import {
   Activity,
   AudioLines,
+  Calendar,
   Clapperboard,
   FileText,
   Folder,
@@ -22,4 +23,5 @@ export const APP_ICON_MAP: Record<string, ElementType> = {
   AudioLines,
   Clapperboard,
   User,
+  Calendar,
 };
