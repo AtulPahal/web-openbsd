@@ -222,16 +222,12 @@ export function Desktop() {
           />
 
           {/* Desktop Wallpaper */}
-          {isDarkMode ? (
-            <div
-              className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"
-              style={{
-                backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
-              }}
-            />
-          ) : (
-            <div className="absolute inset-0 pointer-events-none bg-[#f8f6f2] transition-all duration-300" />
-          )}
+          <div
+            className="absolute inset-0 pointer-events-none bg-cover bg-center"
+            style={{
+              backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
+            }}
+          />
 
           {/* Window Canvas */}
           <div className="flex-1 relative overflow-hidden pr-14">
