@@ -294,9 +294,20 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs">Dark Mode Theme</div>
-                <div className="text-[10px] text-muted-foreground">OpenBSD Dark Amber Theme</div>
+                <div className="text-[10px] text-muted-foreground">Toggle between Light and Dark Mode</div>
               </div>
-              <ToggleSwitch checked={darkMode} onChange={setDarkMode} activeColor="bg-amber-500" />
+              <ToggleSwitch
+                checked={darkMode}
+                onChange={(val) => {
+                  setDarkMode(val);
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(
+                      new CustomEvent("theme-change", { detail: { isDark: val } })
+                    );
+                  }
+                }}
+                activeColor="bg-amber-500"
+              />
             </div>
           </div>
         )}

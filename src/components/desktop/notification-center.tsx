@@ -221,7 +221,15 @@ export function NotificationCenter({
             {/* Dark Mode Quick Card */}
             <button
               type="button"
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => {
+                const nextDark = !darkMode;
+                setDarkMode(nextDark);
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(
+                    new CustomEvent("theme-change", { detail: { isDark: nextDark } })
+                  );
+                }
+              }}
               className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
                 darkMode
                   ? "bg-amber-500/15 border-amber-500/40 text-amber-400"
@@ -236,7 +244,6 @@ export function NotificationCenter({
                 <div className="text-[10px] opacity-80 truncate">{darkMode ? "On" : "Off"}</div>
               </div>
             </button>
-
             {/* Do Not Disturb Quick Card */}
             <button
               type="button"

@@ -47,6 +47,7 @@ export function Desktop() {
   } = useWindowManager();
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [masterVolume, setMasterVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
@@ -116,6 +117,12 @@ export function Desktop() {
   };
 
   useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", isDarkMode);
+    }
+  }, [isDarkMode]);
+
+  useEffect(() => {
     const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
     const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: AppState }>) => {
       handleOpenApp(e.detail.appId, e.detail.appState);
@@ -137,20 +144,27 @@ export function Desktop() {
         setIsMuted(customEvent.detail.isMuted);
       }
     };
+    const handleThemeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isDark: boolean }>;
+      if (typeof customEvent.detail?.isDark === "boolean") {
+        setIsDarkMode(customEvent.detail.isDark);
+      }
+    };
 
     window.addEventListener("close-window", handleClose as EventListener);
     window.addEventListener("open-app", handleOpen as EventListener);
     window.addEventListener("show-notification", handleNotify as EventListener);
     window.addEventListener("master-volume-change", handleMasterVol);
+    window.addEventListener("theme-change", handleThemeChange);
 
     return () => {
       window.removeEventListener("close-window", handleClose as EventListener);
       window.removeEventListener("open-app", handleOpen as EventListener);
       window.removeEventListener("show-notification", handleNotify as EventListener);
       window.removeEventListener("master-volume-change", handleMasterVol);
+      window.removeEventListener("theme-change", handleThemeChange);
     };
   }, [closeWindow, activeWorkspace]);
-
   // Filter windows by current workspace
   const visibleWindows = windows.filter(
     (w) => (w.workspace ?? 1) === activeWorkspace
