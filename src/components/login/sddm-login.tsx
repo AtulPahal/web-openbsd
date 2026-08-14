@@ -71,7 +71,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
             <User className="w-12 h-12 text-white/80" />
           </div>
 
-          <h2 className="text-xl text-white font-semibold mb-6">{SYSTEM_CONFIG.username}</h2>
+          <h2 className="text-xl text-white font-semibold mb-6">AtulPahal</h2>
 
           <form onSubmit={handleSubmit} className="w-full relative" suppressHydrationWarning>
             <input
@@ -81,7 +81,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
                 setPassword(e.target.value);
                 if (error) setError(false);
               }}
-              placeholder={`Enter password (demo: ${SYSTEM_CONFIG.loginPassword})...`}
+              placeholder="Enter password..."
               className={`w-full bg-white/10 border ${
                 error ? "border-red-500/80" : "border-white/20"
               } text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500/50 transition-all placeholder:text-white/40`}
