@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
+  BellOff,
   Trash2,
   X,
   Shield,
@@ -12,6 +13,7 @@ import {
   Wifi,
   Bluetooth,
   Volume2,
+  VolumeX,
   Sun,
   Moon,
   Check,
@@ -22,6 +24,8 @@ import {
   Info,
   User,
   SlidersHorizontal,
+  Headphones,
+  Speaker,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import type { DesktopNotification } from "@/types";
@@ -35,6 +39,8 @@ interface NotificationCenterProps {
   brightness?: number;
   onBrightnessChange?: (b: number) => void;
   onOpenCalendar?: () => void;
+  isDndOn?: boolean;
+  onToggleDnd?: () => void;
 }
 
 export function NotificationCenter({
@@ -46,6 +52,8 @@ export function NotificationCenter({
   brightness = 100,
   onBrightnessChange,
   onOpenCalendar,
+  isDndOn = false,
+  onToggleDnd,
 }: NotificationCenterProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [time, setTime] = useState("");
@@ -58,6 +66,8 @@ export function NotificationCenter({
   const [darkMode, setDarkMode] = useState(true);
   const [volume, setVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
+  const [outputDevice, setOutputDevice] = useState("Built-in Speakers");
+
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -96,6 +106,18 @@ export function NotificationCenter({
       window.dispatchEvent(
         new CustomEvent("master-volume-change", {
           detail: { volume: val / 100, isMuted: false, level: val },
+        })
+      );
+    }
+  };
+
+  const handleToggleMute = () => {
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("master-volume-change", {
+          detail: { volume: nextMute ? 0 : volume / 100, isMuted: nextMute, level: volume },
         })
       );
     }
@@ -152,7 +174,6 @@ export function NotificationCenter({
 
       {/* Main Scrollable Body */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-        {/* macOS-style Date & Clock Card */}
         {/* macOS-style Date & Clock Card (Clickable to open Calendar App) */}
         <div
           onClick={onOpenCalendar}
@@ -164,7 +185,7 @@ export function NotificationCenter({
               <Calendar className="w-3 h-3 text-amber-400" />
               {dayOfWeek}
             </span>
-            <span className="text-amber-400 group-hover:underline">Open Calendar ↗</span>
+            <span className="text-amber-400 font-bold">{SYSTEM_CONFIG.name}</span>
           </div>
           <div className="text-xl font-bold text-foreground tracking-wide mt-0.5 group-hover:text-amber-300 transition-colors">
             {time}
@@ -240,25 +261,33 @@ export function NotificationCenter({
               </div>
             </button>
 
-            {/* PF Firewall Card */}
-            <div className="p-2.5 bg-background/40 border border-border/60 rounded-xl flex items-center gap-2 text-left">
-              <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                <Shield className="w-3.5 h-3.5" />
+            {/* Do Not Disturb Quick Card */}
+            <button
+              type="button"
+              onClick={onToggleDnd}
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
+                isDndOn
+                  ? "bg-purple-500/20 border-purple-500/50 text-purple-300 font-bold shadow-sm"
+                  : "bg-background/40 border-border/60 text-muted-foreground hover:bg-muted/40"
+              }`}
+            >
+              <div className={`p-1.5 rounded-full ${isDndOn ? "bg-purple-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                <BellOff className="w-3.5 h-3.5" />
               </div>
               <div className="truncate">
-                <div className="font-bold text-xs text-emerald-400">PF Active</div>
-                <div className="text-[10px] text-muted-foreground">{SYSTEM_CONFIG.localIp}</div>
+                <div className="font-bold text-xs">Do Not Disturb</div>
+                <div className="text-[10px] opacity-80 truncate">{isDndOn ? "On" : "Off"}</div>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Interactive Sliders Panel */}
-          <div className="space-y-2 p-2.5 bg-background/40 border border-border/50 rounded-xl">
+          <div className="space-y-2.5 p-2.5 bg-background/40 border border-border/50 rounded-xl">
             {/* Display Brightness Slider */}
             <div className="space-y-1">
               <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Sun className="w-3 h-3 text-amber-400" /> Brightness
+                <span className="flex items-center gap-1 font-semibold text-foreground">
+                  <Sun className="w-3.5 h-3.5 text-amber-400" /> Brightness
                 </span>
                 <span className="font-bold text-foreground">{brightness}%</span>
               </div>
@@ -272,22 +301,55 @@ export function NotificationCenter({
               />
             </div>
 
-            {/* Sound Master Volume Slider */}
-            <div className="space-y-1 pt-1">
-              <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Volume2 className="w-3 h-3 text-amber-400" /> Master Volume
+            {/* Audio Output Device Volume Slider */}
+            <div className="space-y-1.5 pt-1 border-t border-border/30">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="flex items-center gap-1 font-semibold text-amber-400 truncate max-w-[170px]" title={outputDevice}>
+                  {isMuted ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-amber-400" />}
+                  <span>{outputDevice}</span>
                 </span>
-                <span className="font-bold text-foreground">{volume}%</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleToggleMute}
+                    className={`px-1.5 py-0.5 text-[9px] font-bold rounded border ${
+                      isMuted ? "bg-red-500/20 text-red-300 border-red-500/40" : "bg-muted text-muted-foreground border-border"
+                    }`}
+                  >
+                    {isMuted ? "Muted" : "Mute"}
+                  </button>
+                  <span className="font-bold text-foreground tabular-nums">{isMuted ? "0%" : `${volume}%`}</span>
+                </div>
               </div>
               <input
                 type="range"
                 min="0"
                 max="100"
-                value={volume}
+                value={isMuted ? 0 : volume}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
               />
+
+              {/* Output Device Selector Buttons */}
+              <div className="flex gap-1 pt-1">
+                {["Built-in Speakers", "AirPods Pro", "Headphones"].map((dev) => {
+                  const isSel = outputDevice === dev;
+                  return (
+                    <button
+                      key={dev}
+                      type="button"
+                      onClick={() => setOutputDevice(dev)}
+                      className={`flex-1 py-1 px-1 text-[9px] font-semibold rounded border truncate transition-colors ${
+                        isSel
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
+                          : "bg-background/40 border-border/40 text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {dev === "Built-in Speakers" ? "Speakers" : dev}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -296,6 +358,11 @@ export function NotificationCenter({
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             <span>NOTIFICATIONS ({notifications.length})</span>
+            {isDndOn && (
+              <span className="text-purple-400 font-normal normal-case flex items-center gap-1">
+                <BellOff className="w-3 h-3" /> DND On
+              </span>
+            )}
           </div>
 
           {notifications.length === 0 ? (

@@ -47,6 +47,7 @@ export function Desktop() {
   } = useWindowManager();
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
+  const [isDndOn, setIsDndOn] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
     {
@@ -82,12 +83,14 @@ export function Desktop() {
 
     setNotificationHistory((prev) => [item, ...prev]);
 
-    // Show temporary floating toast
-    const toast: Toast = { id, message };
-    setToasts((prev) => [...prev, toast]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, duration);
+    // Show temporary floating toast (suppressed when Do Not Disturb is ON)
+    if (!isDndOn) {
+      const toast: Toast = { id, message };
+      setToasts((prev) => [...prev, toast]);
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, duration);
+    }
   };
 
   const handleOpenApp = (appId: AppId, appState?: AppState) => {
@@ -249,6 +252,8 @@ export function Desktop() {
               setIsNotificationCenterOpen(false);
               handleOpenApp("calendar");
             }}
+            isDndOn={isDndOn}
+            onToggleDnd={() => setIsDndOn((prev) => !prev)}
           />
         </div>
       </ContextMenuTrigger>
