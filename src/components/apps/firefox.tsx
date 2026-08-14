@@ -162,19 +162,6 @@ export function Firefox({ windowId }: { windowId: string }) {
         </label>
       </div>
 
-      {/* Info Banner */}
-      <div className="bg-amber-500/10 border-b border-amber-500/20 px-3 py-1 text-[10px] text-amber-400 font-mono flex items-center justify-between shrink-0">
-        <span>Proxy Mode active (bypasses X-Frame-Options headers)</span>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-amber-300 transition-colors flex items-center gap-1 font-bold"
-        >
-          Open in New Tab ↗
-        </a>
-      </div>
-
       {/* Content Area */}
       <div className="flex-1 bg-white relative">
         <iframe
