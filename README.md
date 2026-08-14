@@ -7,9 +7,9 @@ An interactive, browser-native OpenBSD & macOS-inspired web desktop environment 
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 🖥️ Desktop Shell & Multitasking
+### Desktop Shell & Multitasking
 - **SDDM-Style Login Screen** — Password-gated entry (`2026`) with live clock and wallpaper.
 - **4 Workspaces (1, 2, 3, 4)** — Top bar workspace switcher; windows are isolated per workspace with running window indicators.
 - **GNOME / macOS Fisheye Dock** — Vertical right-side dock featuring proximity fisheye magnification (`1.45x` zoom on hover, `1.25x` neighbor scale), running indicators, and window count badges. Toggleable magnification setting in System Settings.
@@ -22,25 +22,25 @@ An interactive, browser-native OpenBSD & macOS-inspired web desktop environment 
 
 ---
 
-## 🚀 Interactive Desktop Applications
+## Interactive Desktop Applications
 
-| Icon | App | Description |
-|:---:|-----|-------------|
-| ⚙️ | **System Settings** | macOS-style settings application with sidebar navigation for **Wi-Fi & Network**, **Sound & Audio**, **Display & Brightness**, **Security & PF Firewall**, **Appearance & Dock**, and **System & About** (containing the full developer profile, contact details, system specs, and tech stack). |
-| 👤 | **Portfolio** | Developer OS dashboard with profile hero header, 4 quick metric cards (*4+ SOTA Projects*, *94.7% KNN Diagnostic Model*, *100% ONNX Web Inference*), interactive contact cards, categorized skills progress bars, project cards, and education timeline. |
-| 📅 | **Calendar** | Modern desktop calendar app with month navigation (`August 2026`), micro event preview pills rendered directly inside calendar day cells, agenda schedule, and form to add reminders. |
-| 📈 | **System Monitor** | `btop`/`htop` styled monitor with real-time SVG sparkline history charts for CPU, RAM, and Network throughput. Includes process search filter, interactive column sorting (`PID`, `CPU%`, `MEM%`), and process kill action. |
-| 💻 | **Terminal** | `ksh`-style terminal running against an in-memory VirtualFS. Includes commands: `help`, `fastfetch`, `neofetch`, `portfolio`, `resume`, `ls`, `cd`, `cat`, `pwd`, `clear`, `exit`, `banner`. |
-| 📄 | **Resume** | Embedded PDF viewer for full resume with download (`/resume.pdf`) and pop-out links. |
-| 📂 | **File Manager** | Directory tree sidebar, sortable file table, breadcrumb navigation, and `resume.txt` file viewing. |
-| 📝 | **Text Editor** | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS. |
-| 🌐 | **Firefox** | Iframe web browser with URL bar, Proxy Mode to strip `X-Frame-Options` headers, fallback handling, and external tab shortcuts (`https://github.com/AtulPahal`). |
-| 🎵 | **Music App** | Local music player scanning `/home/user/Music` with Lucide transport controls, seeking bar, and 2-way master volume synchronization. |
-| 🎬 | **mpv Video App** | Video player supporting HTML5 video, YouTube embeds, and drag-and-drop file playback. |
+| App | Description |
+|-----|-------------|
+| System Settings | macOS-style settings application with sidebar navigation for **Wi-Fi & Network**, **Sound & Audio**, **Display & Brightness**, **Security & PF Firewall**, **Appearance & Dock**, and **System & About** (containing the full developer profile, contact details, system specs, and tech stack). |
+| Portfolio | Developer OS dashboard with profile hero header, 4 quick metric cards (*4+ SOTA Projects*, *94.7% KNN Diagnostic Model*, *100% ONNX Web Inference*), interactive contact cards, categorized skills progress bars, project cards, and education timeline. |
+| Calendar | Modern desktop calendar app with month navigation (`August 2026`), micro event preview pills rendered directly inside calendar day cells, agenda schedule, and form to add reminders. |
+| System Monitor | `btop`/`htop` styled monitor with real-time SVG sparkline history charts for CPU, RAM, and Network throughput. Includes process search filter, interactive column sorting (`PID`, `CPU%`, `MEM%`), and process kill action. |
+| Terminal | `ksh`-style terminal running against an in-memory VirtualFS. Includes commands: `help`, `fastfetch`, `neofetch`, `portfolio`, `resume`, `ls`, `cd`, `cat`, `pwd`, `clear`, `exit`, `banner`. |
+| Resume | Embedded PDF viewer for full resume with download (`/resume.pdf`) and pop-out links. |
+| File Manager | Directory tree sidebar, sortable file table, breadcrumb navigation, and `resume.txt` file viewing. |
+| Text Editor | Line numbers, word wrap toggle, cursor position, Ctrl+S save to VirtualFS. |
+| Firefox | Iframe web browser with URL bar, Proxy Mode to strip `X-Frame-Options` headers, fallback handling, and external tab shortcuts (`https://github.com/AtulPahal`). |
+| Music App | Local music player scanning `/home/user/Music` with Lucide transport controls, seeking bar, and 2-way master volume synchronization. |
+| mpv Video App | Video player supporting HTML5 video, YouTube embeds, and drag-and-drop file playback. |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Technology | Role |
 |------------|------|
@@ -54,7 +54,7 @@ An interactive, browser-native OpenBSD & macOS-inspired web desktop environment 
 
 ---
 
-## 💻 Terminal Commands
+## Terminal Commands
 
 ```bash
 help               # Show available commands
@@ -72,7 +72,7 @@ exit               # Close terminal window
 
 ---
 
-## 🏃 Getting Started
+## Getting Started
 
 ### Installation & Development
 
@@ -98,7 +98,7 @@ bun run typecheck
 
 ---
 
-## 📂 Project Architecture
+## Project Architecture
 
 ```
 src/
@@ -136,12 +136,12 @@ src/
 
 ---
 
-## 📜 License
+## License
 
 ISC License
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 Not affiliated with, endorsed by, or connected to the OpenBSD project or the OpenBSD Foundation. The OpenBSD name and aesthetic are referenced for design inspiration only.
