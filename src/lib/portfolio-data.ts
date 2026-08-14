@@ -91,7 +91,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       description:
         "Architected a privacy-first vision app using YOLOv5 Nano, performing real-time inference locally in the browser via ONNX Runtime Web. Implemented support for image, video, and live webcam analysis, achieving high-frame-rate detection without server-side processing.",
       links: [
-        { label: "GitHub", href: "https://github.com/atulpahal" },
+        { label: "GitHub", href: "https://github.com/AtulPahal" },
       ],
     },
     {
@@ -102,7 +102,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       description:
         "Developed a Precision Agriculture model utilizing a Random Forest Classifier to monitor crop health with 92% accuracy based on multispectral vegetation indices (NDVI, SAVI, EVI). Engineered a data pipeline to analyze spectral data and generate heatmaps for identifying 'Healthy' vs. 'Stressed' zones.",
       links: [
-        { label: "GitHub", href: "https://github.com/atulpahal" },
+        { label: "GitHub", href: "https://github.com/AtulPahal" },
       ],
     },
     {
@@ -113,7 +113,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       description:
         "Developed a responsive recommendation engine utilizing vector similarity scores from a local dataset to suggest movies based on user selection. Integrated TMDB API for dynamic metadata fetching and poster rendering, optimized with Vite for fast production builds.",
       links: [
-        { label: "GitHub", href: "https://github.com/atulpahal" },
+        { label: "GitHub", href: "https://github.com/AtulPahal" },
       ],
     },
     {
@@ -124,7 +124,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       description:
         "Trained a K-Nearest Neighbors (KNN) classifier achieving 94.74% accuracy on medical diagnostic data through feature engineering and standard scaling. Deployed the model via an interactive Gradio web interface for real-time diagnosis prediction.",
       links: [
-        { label: "GitHub", href: "https://github.com/atulpahal" },
+        { label: "GitHub", href: "https://github.com/AtulPahal" },
       ],
     },
   ],
@@ -164,7 +164,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
   ],
 
   social: [
-    { label: "GitHub", href: "https://github.com/atulpahal", icon: "github" },
+    { label: "GitHub", href: "https://github.com/AtulPahal", icon: "github" },
     { label: "LinkedIn", href: "https://linkedin.com/in/atulpahal", icon: "linkedin" },
     { label: "Email", href: "mailto:atulpahal@gmail.com", icon: "mail" },
   ],
