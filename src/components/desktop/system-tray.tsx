@@ -17,16 +17,41 @@ import {
   Music,
   ChevronRight,
   Shield,
-  Monitor,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
-
 interface SystemTrayProps {
   onToggleNotificationCenter?: () => void;
   unreadCount?: number;
 }
 
 type ActivePopover = "wifi" | "bluetooth" | "audio" | "control-center" | null;
+
+function ToggleSwitch({
+  checked,
+  onChange,
+  activeColor = "bg-emerald-500",
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  activeColor?: string;
+}) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+        checked ? activeColor : "bg-muted/80"
+      }`}
+    >
+      <span
+        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+          checked ? "translate-x-4" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+}
 
 export function SystemTray({
   onToggleNotificationCenter,
@@ -35,8 +60,6 @@ export function SystemTray({
   const [time, setTime] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
-
-  // Wi-Fi State
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [connectedWifi, setConnectedWifi] = useState("OpenBSD-5G");
   const [wifiNetworks, setWifiNetworks] = useState([
@@ -212,15 +235,11 @@ export function SystemTray({
               <Wifi className="w-4 h-4 text-emerald-400" />
               <span>Wi-Fi Network</span>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={wifiEnabled}
-                onChange={(e) => setWifiEnabled(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-8 h-4 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500" />
-            </label>
+            <ToggleSwitch
+              checked={wifiEnabled}
+              onChange={(val) => setWifiEnabled(val)}
+              activeColor="bg-emerald-500"
+            />
           </div>
 
           {wifiEnabled ? (
@@ -268,15 +287,11 @@ export function SystemTray({
               <Bluetooth className="w-4 h-4 text-sky-400" />
               <span>Bluetooth</span>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={bluetoothEnabled}
-                onChange={(e) => setBluetoothEnabled(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-8 h-4 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-sky-500" />
-            </label>
+            <ToggleSwitch
+              checked={bluetoothEnabled}
+              onChange={(val) => setBluetoothEnabled(val)}
+              activeColor="bg-sky-500"
+            />
           </div>
 
           {bluetoothEnabled ? (
