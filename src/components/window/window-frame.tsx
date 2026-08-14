@@ -196,16 +196,22 @@ export function WindowFrame({
     >
       {/* Title bar */}
       <div
-        className={`flex items-center justify-between px-3 h-8 shrink-0 select-none font-mono text-xs font-bold tracking-wide ${
+        className={`flex items-center justify-between px-3 h-8 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 ${
           win.isFocused
-            ? "bg-amber-500 text-black shadow-sm"
-            : "bg-card/90 text-muted-foreground border-b border-border/60"
+            ? "bg-card text-foreground font-bold border-amber-500/50 shadow-sm"
+            : "bg-muted/70 text-muted-foreground border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
         onDoubleClick={handleTitleDoubleClick}
       >
-        <span className="truncate pr-2">{win.title}</span>
-        {/* Traffic-light window controls (macOS-style, amber-accented) */}
+        <div className="flex items-center gap-2 truncate pr-2">
+          <span
+            className={`w-2 h-2 rounded-full transition-all ${
+              win.isFocused ? "bg-amber-400 shadow-sm shadow-amber-400/50" : "bg-muted-foreground/30"
+            }`}
+          />
+          <span className="truncate">{win.title}</span>
+        </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"

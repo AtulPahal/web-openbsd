@@ -196,11 +196,11 @@ export function SystemTray({
         className="flex items-center gap-1.5 bg-background/50 hover:bg-amber-500/10 px-2 py-0.5 border border-border/50 hover:border-amber-500/50 text-foreground font-semibold min-w-[130px] justify-center transition-all duration-200 cursor-pointer rounded-none group relative"
         title="Click for Notification Center"
       >
-        <Clock className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
         {time ? (
           <>
             <span>{date}</span>
-            <span className="text-amber-400">{time}</span>
+            <span className="text-amber-600 dark:text-amber-400">{time}</span>
           </>
         ) : (
           <span className="text-muted-foreground">--:--:--</span>

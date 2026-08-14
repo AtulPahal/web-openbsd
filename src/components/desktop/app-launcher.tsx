@@ -22,8 +22,8 @@ interface AppLauncherProps {
 export function AppLauncher({ onOpenApp }: AppLauncherProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="h-5 px-2 gap-1.5 border border-amber-500/40 bg-amber-950/30 text-amber-400 hover:bg-amber-500/30 hover:text-amber-300 font-mono font-bold text-[11px] shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-200 outline-none focus:ring-1 focus:ring-amber-400 rounded-none">
-        <Shield className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+      <DropdownMenuTrigger className="h-5 px-2 gap-1.5 border border-amber-500/50 bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/30 hover:text-amber-800 dark:hover:text-amber-300 font-mono font-bold text-[11px] shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-200 outline-none focus:ring-1 focus:ring-amber-400 rounded-none">
+        <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400/20" />
         <span>{SYSTEM_CONFIG.name}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
