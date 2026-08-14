@@ -17,6 +17,7 @@ import { Portfolio } from "@/components/apps/portfolio";
 import { Resume } from "@/components/apps/resume";
 import { SystemMonitor } from "@/components/apps/system-monitor";
 import { CalendarApp } from "@/components/apps/calendar";
+import { SystemSettings } from "@/components/apps/system-settings";
 import type { AppId, AppState, DesktopNotification } from "@/types";
 import {
   ContextMenu,
@@ -180,6 +181,8 @@ export function Desktop() {
         return <Resume windowId={windowId} />;
       case "calendar":
         return <CalendarApp windowId={windowId} />;
+      case "settings":
+        return <SystemSettings windowId={windowId} />;
       default:
         return (
           <div className="p-4 font-mono text-sm text-foreground">

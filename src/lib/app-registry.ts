@@ -78,4 +78,11 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     defaultSize: { width: 680, height: 480 },
     minSize: { width: 420, height: 320 },
   },
+  settings: {
+    id: "settings",
+    name: "Settings",
+    icon: "Settings",
+    defaultSize: { width: 740, height: 500 },
+    minSize: { width: 480, height: 350 },
+  },
 };

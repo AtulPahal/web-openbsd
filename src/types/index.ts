@@ -57,7 +57,8 @@ export type AppId =
   | "video"
   | "portfolio"
   | "resume"
-  | "calendar";
+  | "calendar"
+  | "settings";
 /** Application metadata for the launcher / taskbar */
 export interface AppDefinition {
   id: AppId;

@@ -8,6 +8,7 @@ import {
   Folder,
   Globe,
   Info,
+  Settings,
   Terminal,
   User,
 } from "lucide-react";
@@ -24,4 +25,5 @@ export const APP_ICON_MAP: Record<string, ElementType> = {
   Clapperboard,
   User,
   Calendar,
+  Settings,
 };
