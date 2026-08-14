@@ -7,10 +7,11 @@ import {
   ChevronRight,
   Plus,
   Clock,
-  CheckCircle2,
-  Tag,
   Sparkles,
   Trash2,
+  Tag,
+  CheckCircle2,
+  Layers,
 } from "lucide-react";
 
 interface EventItem {
@@ -50,7 +51,28 @@ const INITIAL_EVENTS: EventItem[] = [
     time: "04:00 PM",
     category: "Work",
   },
+  {
+    id: "evt-5",
+    dateStr: "2026-09-01",
+    title: "Quarterly AI Research Review",
+    time: "09:00 AM",
+    category: "Milestone",
+  },
+  {
+    id: "evt-6",
+    dateStr: "2026-09-15",
+    title: "YOLOv5 Vision Pipeline Optimization",
+    time: "03:00 PM",
+    category: "Project",
+  },
 ];
+
+const CATEGORY_COLORS: Record<EventItem["category"], { bg: string; text: string; border: string; dot: string }> = {
+  Milestone: { bg: "bg-emerald-500/15", text: "text-emerald-400", border: "border-emerald-500/30", dot: "bg-emerald-400" },
+  Work: { bg: "bg-amber-500/15", text: "text-amber-300", border: "border-amber-500/30", dot: "bg-amber-400" },
+  Project: { bg: "bg-sky-500/15", text: "text-sky-400", border: "border-sky-500/30", dot: "bg-sky-400" },
+  Personal: { bg: "bg-purple-500/15", text: "text-purple-300", border: "border-purple-500/30", dot: "bg-purple-400" },
+};
 
 export function CalendarApp({ windowId }: { windowId: string }) {
   const [currentDate, setCurrentDate] = useState(() => new Date(2026, 7, 14)); // Aug 14, 2026
@@ -80,10 +102,10 @@ export function CalendarApp({ windowId }: { windowId: string }) {
     "December",
   ];
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   // Calculate days in month and starting day offset
-  const { calendarDays, firstDayIndex } = useMemo(() => {
+  const { calendarDays } = useMemo(() => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const totalDays = lastDay.getDate();
@@ -113,7 +135,17 @@ export function CalendarApp({ windowId }: { windowId: string }) {
       });
     }
 
-    return { calendarDays: days, firstDayIndex: startIdx };
+    // Next month padding to fill grid to 35 or 42 cells
+    const remainingCells = (7 - (days.length % 7)) % 7;
+    for (let i = 1; i <= remainingCells; i++) {
+      days.push({
+        dayNum: i,
+        dateStr: "",
+        isCurrentMonth: false,
+      });
+    }
+
+    return { calendarDays: days };
   }, [year, month]);
 
   const selectedDateStr = useMemo(() => {
@@ -173,9 +205,9 @@ export function CalendarApp({ windowId }: { windowId: string }) {
     );
   };
 
-  const hasEventOnDate = (dateStr: string) => {
-    if (!dateStr) return false;
-    return events.some((e) => e.dateStr === dateStr);
+  const getEventsForDate = (dateStr: string) => {
+    if (!dateStr) return [];
+    return events.filter((e) => e.dateStr === dateStr);
   };
 
   return (
@@ -183,58 +215,61 @@ export function CalendarApp({ windowId }: { windowId: string }) {
       className="flex h-full w-full flex-col bg-background font-mono text-foreground text-xs select-none"
       data-window-id={windowId}
     >
-      {/* Top App Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-card/40">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-amber-400" />
-          <span className="font-bold text-xs text-foreground">
+      {/* App Header Bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 bg-card/60">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400">
+            <CalendarIcon className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-sm text-foreground tracking-wide">
             {monthNames[month]} {year}
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded border border-border/40 transition-colors"
+            className="p-1.5 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded-md border border-border/50 transition-colors"
             title="Previous Month"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={handleResetToday}
-            className="px-2 py-0.5 text-[11px] font-semibold bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded transition-colors"
+            className="px-3 py-1 text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-md transition-colors shadow-sm"
           >
             Today
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded border border-border/40 transition-colors"
+            className="p-1.5 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded-md border border-border/50 transition-colors"
             title="Next Month"
           >
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Main 2-Column Layout */}
+      {/* Main 2-Column Grid */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left: Month Grid */}
-        <div className="w-7/12 border-r border-border/60 p-3 flex flex-col gap-2 overflow-y-auto">
-          {/* Days of Week Header */}
-          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted-foreground uppercase pb-1 border-b border-border/40">
+        {/* Left Column: Full-Height Month Grid */}
+        <div className="w-7/12 border-r border-border/60 p-3 flex flex-col gap-2 overflow-hidden bg-card/10">
+          {/* Days of Week Row */}
+          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted-foreground tracking-wider uppercase pb-1.5 border-b border-border/40 shrink-0">
             {daysOfWeek.map((d) => (
               <div key={d}>{d}</div>
             ))}
           </div>
 
-          {/* Month Days Grid */}
-          <div className="grid grid-cols-7 gap-1">
+          {/* Flexible Days Grid */}
+          <div className="flex-1 grid grid-cols-7 gap-1.5 overflow-y-auto pr-1 scrollbar-thin">
             {calendarDays.map((item, idx) => {
               const active = isSelected(item.dayNum, item.isCurrentMonth);
               const today = isToday(item.dayNum, item.isCurrentMonth);
-              const hasEvents = hasEventOnDate(item.dateStr);
+              const dayEvts = getEventsForDate(item.dateStr);
 
               return (
                 <button
@@ -246,23 +281,52 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                       setSelectedDate(new Date(year, month, item.dayNum));
                     }
                   }}
-                  className={`h-10 rounded-lg flex flex-col items-center justify-center relative transition-all cursor-pointer ${
+                  className={`min-h-[56px] p-1.5 rounded-lg flex flex-col justify-between transition-all cursor-pointer text-left relative group ${
                     !item.isCurrentMonth
-                      ? "opacity-20 cursor-default"
+                      ? "opacity-20 cursor-default bg-background/20"
                       : active
-                      ? "bg-amber-500/25 border-2 border-amber-500 text-amber-300 font-bold shadow-md shadow-amber-500/10"
+                      ? "bg-amber-500/20 border-2 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10"
                       : today
-                      ? "bg-amber-500 text-black font-bold shadow"
+                      ? "bg-card border-2 border-amber-400/80 text-foreground"
                       : "bg-card/40 hover:bg-amber-500/10 border border-border/40 text-foreground"
                   }`}
                 >
-                  <span className="text-xs">{item.dayNum}</span>
-                  {hasEvents && item.isCurrentMonth && (
+                  <div className="flex items-center justify-between">
                     <span
-                      className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${
-                        today ? "bg-black" : "bg-amber-400"
+                      className={`text-xs font-bold ${
+                        today
+                          ? "w-5 h-5 rounded-full bg-amber-400 text-black flex items-center justify-center text-[11px]"
+                          : active
+                          ? "text-amber-400"
+                          : item.isCurrentMonth
+                          ? "text-foreground"
+                          : "text-muted-foreground"
                       }`}
-                    />
+                    >
+                      {item.dayNum}
+                    </span>
+                  </div>
+
+                  {/* Render Micro Event Pills inside Day Cell */}
+                  {item.isCurrentMonth && dayEvts.length > 0 && (
+                    <div className="space-y-0.5 mt-1 w-full">
+                      {dayEvts.slice(0, 2).map((evt) => {
+                        const style = CATEGORY_COLORS[evt.category] || CATEGORY_COLORS.Work;
+                        return (
+                          <div
+                            key={evt.id}
+                            className={`px-1 py-0.5 rounded text-[8px] font-semibold truncate border ${style.bg} ${style.text} ${style.border}`}
+                          >
+                            {evt.title}
+                          </div>
+                        );
+                      })}
+                      {dayEvts.length > 2 && (
+                        <div className="text-[8px] text-muted-foreground/80 font-bold text-right">
+                          +{dayEvts.length - 2} more
+                        </div>
+                      )}
+                    </div>
                   )}
                 </button>
               );
@@ -270,89 +334,107 @@ export function CalendarApp({ windowId }: { windowId: string }) {
           </div>
         </div>
 
-        {/* Right: Agenda Schedule & Add Event */}
-        <div className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto bg-card/20">
-          {/* Selected Date Header */}
-          <div className="p-2.5 bg-card/60 border border-border/60 rounded-lg flex items-center justify-between">
-            <div className="font-bold text-amber-400">
-              {selectedDate.toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              })}
+        {/* Right Column: Schedule & Add Event Panel */}
+        <div className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto bg-card/30">
+          {/* Selected Date Banner */}
+          <div className="p-3 bg-card/60 border border-border/60 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                SELECTED DATE
+              </div>
+              <div className="text-sm font-bold text-amber-400 mt-0.5">
+                {selectedDate.toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </div>
             </div>
-            <span className="text-[10px] text-muted-foreground">
-              {selectedEvents.length} events
+            <span className="px-2 py-1 rounded-md text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              {selectedEvents.length} {selectedEvents.length === 1 ? "event" : "events"}
             </span>
           </div>
 
-          {/* Events List */}
-          <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin">
+          {/* Events Schedule List */}
+          <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin pr-1">
             {selectedEvents.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground/60 space-y-1 bg-background/30 rounded-lg border border-border/40">
-                <Sparkles className="w-5 h-5 mx-auto text-muted-foreground/30" />
-                <p className="text-xs">No events scheduled</p>
+              <div className="p-8 text-center text-muted-foreground/60 space-y-2 bg-background/30 rounded-xl border border-border/40">
+                <Sparkles className="w-6 h-6 mx-auto text-muted-foreground/30" />
+                <p className="text-xs">No events scheduled for this day</p>
+                <p className="text-[10px] text-muted-foreground/40">
+                  Use the form below to add a reminder or milestone.
+                </p>
               </div>
             ) : (
-              selectedEvents.map((evt) => (
-                <div
-                  key={evt.id}
-                  className="group p-2.5 bg-card/60 hover:bg-card border border-border/60 rounded-lg flex flex-col gap-1 transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-foreground truncate max-w-[180px]">
-                      {evt.title}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteEvent(evt.id)}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-400 transition-opacity p-0.5"
-                      title="Delete event"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+              selectedEvents.map((evt) => {
+                const style = CATEGORY_COLORS[evt.category] || CATEGORY_COLORS.Work;
+                return (
+                  <div
+                    key={evt.id}
+                    className="group relative p-3 bg-card/60 hover:bg-card border border-border/60 hover:border-amber-500/50 rounded-xl flex flex-col gap-1.5 transition-all shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-xs text-foreground group-hover:text-amber-400 transition-colors">
+                        {evt.title}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEvent(evt.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-400 transition-opacity"
+                        title="Delete event"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="w-3 h-3 text-amber-400" />
+                        {evt.time}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[9px] font-bold border ${style.bg} ${style.text} ${style.border}`}
+                      >
+                        {evt.category}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-amber-400" />
-                      {evt.time}
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                      {evt.category}
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
-          {/* Add Event Form */}
+          {/* Add Event Form Card */}
           <form
             onSubmit={handleAddEvent}
-            className="p-2.5 bg-card/50 border border-border/60 rounded-lg space-y-2 shrink-0"
+            className="p-3 bg-card/60 border border-border/60 rounded-xl space-y-2.5 shrink-0 shadow-sm"
           >
-            <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-              Add Event
+            <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+              <span>ADD EVENT</span>
+              <Tag className="w-3 h-3 opacity-60" />
             </div>
+
             <input
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Event title..."
-              className="w-full px-2 py-1 bg-background/60 border border-border/60 rounded text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
+              placeholder="Event title (e.g. AI Model Benchmark)..."
+              className="w-full px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
             />
+
             <div className="flex gap-2">
               <input
                 type="text"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
-                placeholder="Time (e.g. 2:00 PM)"
-                className="w-1/2 px-2 py-1 bg-background/60 border border-border/60 rounded text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
+                placeholder="Time (12:00 PM)"
+                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
               />
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as EventItem["category"])}
-                className="w-1/2 px-2 py-1 bg-background/60 border border-border/60 rounded text-xs text-foreground outline-none focus:border-amber-400"
+                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground outline-none focus:border-amber-400"
               >
                 <option value="Work">Work</option>
                 <option value="Personal">Personal</option>
@@ -360,9 +442,10 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                 <option value="Milestone">Milestone</option>
               </select>
             </div>
+
             <button
               type="submit"
-              className="w-full py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded font-semibold text-xs transition-colors flex items-center justify-center gap-1"
+              className="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Event</span>
