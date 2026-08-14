@@ -51,7 +51,6 @@ export type AppId =
   | "file-manager"
   | "text-editor"
   | "system-monitor"
-  | "about"
   | "firefox"
   | "music"
   | "video"

@@ -18,10 +18,32 @@ import {
   Globe,
   Sliders,
   ChevronRight,
+  Mail,
+  Phone,
+  MapPin,
+  ExternalLink,
+  Code,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
+import { GitHubIcon, LinkedInIcon, EmailIcon } from "@/lib/social-icons";
 
 type SettingsSection = "wifi" | "sound" | "display" | "security" | "appearance" | "system";
+
+const PUFFY_ASCII = `
+     _____
+    /     \\
+   | () () |
+    \\  ^  /
+     |||||
+     |||||
+`;
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  github: GitHubIcon,
+  linkedin: LinkedInIcon,
+  mail: Mail,
+};
 
 function ToggleSwitch({
   checked,
@@ -332,11 +354,60 @@ export function SystemSettings({ windowId }: { windowId: string }) {
         {activeSection === "system" && (
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
-              <h2 className="text-sm font-bold text-foreground">System Specifications</h2>
-              <p className="text-[10px] text-muted-foreground">Hardware, operating system, and build details.</p>
+              <h2 className="text-sm font-bold text-foreground">System & About</h2>
+              <p className="text-[10px] text-muted-foreground">System specifications, developer profile, and build details.</p>
             </div>
 
+            {/* Developer About Profile Card */}
+            <div className="p-4 bg-card/40 border border-border/60 rounded-xl flex flex-col items-center text-center space-y-3 shadow-sm">
+              <pre className="text-amber-400 text-xs leading-tight font-mono">{PUFFY_ASCII}</pre>
+              <div>
+                <h3 className="text-base font-bold text-foreground">{PORTFOLIO_DATA.name}</h3>
+                <p className="text-xs text-amber-400/90 font-medium mt-0.5">{PORTFOLIO_DATA.title}</p>
+              </div>
+
+              <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                <div className="flex items-center justify-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{PORTFOLIO_DATA.location}</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{PORTFOLIO_DATA.email}</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{PORTFOLIO_DATA.phone}</span>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                {PORTFOLIO_DATA.social.map((s) => {
+                  const Icon = ICON_MAP[s.icon] ?? Mail;
+                  return (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded flex items-center gap-1.5 transition-colors"
+                      title={s.label}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{s.label}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* System Hardware Specifications Card */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2 text-xs">
+              <div className="font-bold text-xs text-amber-400 border-b border-border/40 pb-1.5 flex items-center justify-between">
+                <span>System Specs</span>
+                <span className="text-[10px] text-muted-foreground font-normal">v{SYSTEM_CONFIG.desktopVersion}</span>
+              </div>
               <div className="flex justify-between py-1 border-b border-border/40">
                 <span className="text-muted-foreground">OS Name:</span>
                 <span className="font-bold text-amber-400">{SYSTEM_CONFIG.name}</span>
@@ -361,6 +432,14 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <span className="text-muted-foreground">Shell:</span>
                 <span className="font-semibold text-foreground">{SYSTEM_CONFIG.shell}</span>
               </div>
+            </div>
+
+            {/* Build & Copyright Footer Card */}
+            <div className="p-3 bg-card/30 border border-border/40 rounded-xl text-center text-xs text-muted-foreground space-y-1">
+              <p className="text-foreground/80 font-medium">Built with Next.js 16 • React 19 • TypeScript • Tailwind CSS v4 • Bun</p>
+              <p className="text-[10px] text-muted-foreground/60">
+                &copy; {new Date().getFullYear()} {PORTFOLIO_DATA.name}. All rights reserved.
+              </p>
             </div>
           </div>
         )}

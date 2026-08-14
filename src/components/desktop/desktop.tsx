@@ -9,7 +9,6 @@ import { NotificationCenter } from "@/components/desktop/notification-center";
 import { Terminal } from "@/components/apps/terminal";
 import { FileManager } from "@/components/apps/file-manager";
 import { TextEditor } from "@/components/apps/text-editor";
-import { About } from "@/components/apps/about";
 import { Firefox } from "@/components/apps/firefox";
 import { MusicApp } from "@/components/apps/music";
 import { VideoApp } from "@/components/apps/video";
@@ -167,8 +166,6 @@ export function Desktop() {
         return <TextEditor windowId={windowId} path={appState?.path} />;
       case "system-monitor":
         return <SystemMonitor windowId={windowId} />;
-      case "about":
-        return <About windowId={windowId} />;
       case "firefox":
         return <Firefox windowId={windowId} />;
       case "music":
