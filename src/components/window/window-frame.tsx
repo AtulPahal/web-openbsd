@@ -180,7 +180,11 @@ export function WindowFrame({
 
   return (
     <div
-      className="absolute flex flex-col border border-border"
+      className={`absolute flex flex-col border rounded-t-lg overflow-hidden transition-shadow duration-150 ${
+        win.isFocused
+          ? "border-amber-500/60 shadow-xl shadow-black/10 dark:shadow-black/50"
+          : "border-border/80 shadow-md shadow-black/5"
+      }`}
       style={{
         left: win.position.x,
         top: win.position.y,
@@ -192,10 +196,10 @@ export function WindowFrame({
     >
       {/* Title bar */}
       <div
-        className={`flex items-center justify-between px-2 h-8 shrink-0 select-none font-mono text-sm ${
+        className={`flex items-center justify-between px-3 h-8 shrink-0 select-none font-mono text-xs font-bold tracking-wide ${
           win.isFocused
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground"
+            ? "bg-amber-500 text-black shadow-sm"
+            : "bg-card/90 text-muted-foreground border-b border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
         onDoubleClick={handleTitleDoubleClick}
