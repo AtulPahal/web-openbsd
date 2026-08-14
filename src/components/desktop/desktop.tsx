@@ -192,6 +192,8 @@ export function Desktop() {
   return (
     <ContextMenu>
       <ContextMenuTrigger className="w-full h-full">
+        {/* Desktop Container Wrapper */}
+        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden relative select-none">
           {/* Top Menu Bar */}
           <TopMenuBar
             onOpenApp={handleOpenApp}
@@ -204,6 +206,7 @@ export function Desktop() {
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
           />
+
           {/* Desktop Wallpaper */}
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center"
@@ -284,6 +287,7 @@ export function Desktop() {
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
           />
+        </div>
       </ContextMenuTrigger>
 
       {/* Desktop Context Menu */}
