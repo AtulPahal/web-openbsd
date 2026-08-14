@@ -106,31 +106,6 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           </div>
         </div>
 
-        {/* Portfolio Hint */}
-        <div className="flex flex-col items-center gap-1.5 mt-3 pt-2 border-t border-white/5">
-          <div className="text-center text-white/40 text-[10px]">
-            Password: {SYSTEM_CONFIG.loginPassword} (demo)
-          </div>
-          <div className="flex gap-3 text-[10px]">
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-amber-400/60 hover:text-amber-300 transition-colors"
-            >
-              View Resume (PDF)
-            </a>
-            <span className="text-white/20">·</span>
-            <a
-              href={PORTFOLIO_DATA.social.find((s) => s.icon === "github")?.href ?? "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-amber-400/60 hover:text-amber-300 transition-colors"
-            >
-              GitHub
-            </a>
-          </div>
-        </div>
       </div>
 
       {/* Bottom section: Power Controls */}

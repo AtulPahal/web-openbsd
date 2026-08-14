@@ -222,15 +222,15 @@ export function Desktop() {
           />
 
           {/* Desktop Wallpaper */}
-          <div
-            className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"
-            style={{
-              backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
-              filter: !isDarkMode ? "brightness(1.1) contrast(0.95)" : "none",
-            }}
-          />
-          {!isDarkMode && (
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-[#f5f3ef]/90 via-[#e7e5e0]/80 to-[#f0ece4]/90 backdrop-blur-md transition-all duration-300" />
+          {isDarkMode ? (
+            <div
+              className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"
+              style={{
+                backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 pointer-events-none bg-[#f8f6f2] transition-all duration-300" />
           )}
 
           {/* Window Canvas */}
