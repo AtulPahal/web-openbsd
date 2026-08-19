@@ -117,7 +117,7 @@
   --sidebar-ring: #f0c040;
 }
 
-/* Nerd Fonts Symbols Only — subset for media icons (see src/components/apps/music.tsx). */
+/* Nerd Fonts Symbols Only — subset for media icons */
 @font-face {
   font-family: "Symbols Nerd Font";
   src: url("/fonts/SymbolsNerdFont.woff2") format("woff2");
@@ -133,9 +133,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
   }
   html {
     @apply font-sans;
@@ -165,24 +169,21 @@
   transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 
-/* Dock-style hover magnification for panel buttons */
-.panel-app-btn {
-  @apply transition-all duration-200 ease-out;
-}
-
 /* Custom scrollbar for terminal and app content */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--muted-foreground) var(--background);
+  -webkit-overflow-scrolling: touch;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
   background: var(--background);
-  border: 1px solid var(--muted-foreground);
+  border: 1px solid var(--border);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
@@ -192,4 +193,13 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

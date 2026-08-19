@@ -145,41 +145,41 @@ function ProcessesTab({
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto border border-border/60 rounded-md bg-card/30">
+      <div className="flex-1 overflow-auto border border-border/60 rounded-md bg-card/30 scrollbar-thin">
         <table className="w-full text-xs font-mono">
           <thead>
             <tr className="border-b border-border/60 bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider select-none">
-              <th onClick={() => handleSort("pid")} className="px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("pid")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
                 PID {sortKey === "pid" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("name")} className="px-3 py-1.5 text-left cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("name")} className="px-2 sm:px-3 py-1.5 text-left cursor-pointer hover:text-amber-400">
                 PROCESS {sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("cpu")} className="px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("cpu")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
                 CPU % {sortKey === "cpu" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("memory")} className="px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("memory")} className="hidden sm:table-cell px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
                 MEM % {sortKey === "memory" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th className="px-3 py-1.5 text-left">STATE</th>
-              <th className="px-3 py-1.5 text-left">USER</th>
-              <th className="px-3 py-1.5 text-center">ACTION</th>
+              <th className="hidden md:table-cell px-3 py-1.5 text-left">STATE</th>
+              <th className="hidden lg:table-cell px-3 py-1.5 text-left">USER</th>
+              <th className="px-2 sm:px-3 py-1.5 text-center">ACTION</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((p) => (
               <tr key={p.pid} className="border-b border-border/40 hover:bg-amber-500/10 transition-colors group">
-                <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{p.pid}</td>
-                <td className="px-3 py-1.5 font-bold text-foreground flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 text-amber-400 opacity-60 group-hover:opacity-100" />
-                  <span>{p.name}</span>
+                <td className="px-2 sm:px-3 py-1.5 text-right tabular-nums text-muted-foreground">{p.pid}</td>
+                <td className="px-2 sm:px-3 py-1.5 font-bold text-foreground flex items-center gap-1.5 truncate max-w-[140px] sm:max-w-none">
+                  <Zap className="w-3 h-3 text-amber-400 opacity-60 shrink-0" />
+                  <span className="truncate">{p.name}</span>
                 </td>
-                <td className="px-3 py-1.5 text-right tabular-nums">
-                  <div className="flex items-center justify-end gap-2">
+                <td className="px-2 sm:px-3 py-1.5 text-right tabular-nums">
+                  <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                     <span className={p.cpu > 2 ? "text-amber-400 font-semibold" : "text-foreground/80"}>
                       {p.cpu.toFixed(1)}%
                     </span>
-                    <div className="w-12 h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                    <div className="w-8 sm:w-12 h-1.5 bg-muted/40 rounded-full overflow-hidden shrink-0">
                       <div
                         className={`h-full ${p.cpu > 2 ? "bg-amber-400" : "bg-emerald-400"}`}
                         style={{ width: `${Math.min(100, p.cpu * 20)}%` }}
@@ -187,10 +187,10 @@ function ProcessesTab({
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-1.5 text-right tabular-nums text-foreground/80">
+                <td className="hidden sm:table-cell px-3 py-1.5 text-right tabular-nums text-foreground/80">
                   {p.memory.toFixed(1)}%
                 </td>
-                <td className="px-3 py-1.5">
+                <td className="hidden md:table-cell px-3 py-1.5">
                   <span
                     className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                       p.state === "running"
@@ -202,12 +202,12 @@ function ProcessesTab({
                     {p.state}
                   </span>
                 </td>
-                <td className="px-3 py-1.5 text-muted-foreground/80">{p.user}</td>
-                <td className="px-3 py-1.5 text-center">
+                <td className="hidden lg:table-cell px-3 py-1.5 text-muted-foreground/80">{p.user}</td>
+                <td className="px-2 sm:px-3 py-1.5 text-center">
                   <button
                     type="button"
                     onClick={() => onKillProcess(p.pid)}
-                    className="opacity-0 group-hover:opacity-100 px-2 py-0.5 text-[10px] bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/40 rounded transition-all"
+                    className="sm:opacity-0 group-hover:opacity-100 px-1.5 sm:px-2 py-0.5 text-[10px] bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/40 rounded transition-all cursor-pointer"
                     title={`Kill process ${p.name} (${p.pid})`}
                   >
                     Kill

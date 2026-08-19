@@ -32,19 +32,19 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 function HeroHeader() {
   return (
-    <div className="p-4 bg-gradient-to-r from-card via-card/80 to-card border-b border-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="p-3 sm:p-4 bg-gradient-to-r from-card via-card/80 to-card border-b border-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
       <div className="flex items-center gap-3">
         {/* Avatar Ring */}
-        <div className="w-12 h-12 rounded-full bg-amber-500/10 border-2 border-amber-500/50 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
-          <User className="w-6 h-6 text-amber-400" />
+        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-500/10 border-2 border-amber-500/50 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
+          <User className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
         </div>
 
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-bold text-foreground tracking-wide">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-sm sm:text-base font-bold text-foreground tracking-wide">
               {PORTFOLIO_DATA.name}
             </h1>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Available for AI/ML Roles
             </span>
@@ -60,19 +60,19 @@ function HeroHeader() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
         <a
           href="/resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 rounded font-semibold transition-all shadow-sm"
+          className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 rounded font-semibold transition-all shadow-sm"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Resume (PDF)</span>
         </a>
         <a
           href={`mailto:${PORTFOLIO_DATA.email}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-card hover:bg-muted border border-border/80 text-foreground rounded transition-colors"
+          className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-card hover:bg-muted border border-border/80 text-foreground rounded transition-colors"
         >
           <Mail className="w-3.5 h-3.5 text-amber-400" />
           <span>Contact</span>
@@ -404,20 +404,20 @@ export function Portfolio({ windowId }: { windowId: string }) {
       <HeroHeader />
 
       <Tabs defaultValue="about" className="flex flex-1 flex-col overflow-hidden">
-        <TabsList className="shrink-0 rounded-none border-b border-border/60 bg-muted/40">
-          <TabsTrigger value="about" className="gap-1.5">
+        <TabsList className="flex w-full shrink-0 rounded-none border-b border-border/60 bg-muted/40 overflow-x-auto justify-start sm:justify-center scrollbar-none">
+          <TabsTrigger value="about" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
             <User className="w-3.5 h-3.5 text-amber-400" />
             <span>About</span>
           </TabsTrigger>
-          <TabsTrigger value="skills" className="gap-1.5">
+          <TabsTrigger value="skills" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
             <Code className="w-3.5 h-3.5 text-sky-400" />
             <span>Skills</span>
           </TabsTrigger>
-          <TabsTrigger value="projects" className="gap-1.5">
+          <TabsTrigger value="projects" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
             <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
             <span>Projects</span>
           </TabsTrigger>
-          <TabsTrigger value="education" className="gap-1.5">
+          <TabsTrigger value="education" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
             <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
             <span>Education</span>
           </TabsTrigger>

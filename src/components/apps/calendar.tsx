@@ -253,11 +253,10 @@ export function CalendarApp({ windowId }: { windowId: string }) {
         </div>
       </div>
 
-      {/* Main 2-Column Grid */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Column: Full-Height Month Grid */}
-        <div className="w-7/12 border-r border-border/60 p-3 flex flex-col gap-2 overflow-hidden bg-card/10">
-          {/* Days of Week Row */}
+      {/* Main Responsive Grid */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+        {/* Left Column: Month Grid */}
+        <div className="w-full md:w-7/12 border-b md:border-b-0 md:border-r border-border/60 p-2.5 sm:p-3 flex flex-col gap-2 shrink-0 md:shrink md:overflow-hidden bg-card/10">
           <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted-foreground tracking-wider uppercase pb-1.5 border-b border-border/40 shrink-0">
             {daysOfWeek.map((d) => (
               <div key={d}>{d}</div>
@@ -281,7 +280,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                       setSelectedDate(new Date(year, month, item.dayNum));
                     }
                   }}
-                  className={`min-h-[56px] p-1.5 rounded-lg flex flex-col justify-between transition-all cursor-pointer text-left relative group ${
+                  className={`min-h-[48px] sm:min-h-[56px] p-1 sm:p-1.5 rounded-lg flex flex-col justify-between transition-all cursor-pointer text-left relative group ${
                     !item.isCurrentMonth
                       ? "opacity-20 cursor-default bg-background/20"
                       : active
@@ -291,8 +290,8 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                       : "bg-card/40 hover:bg-amber-500/10 border border-border/40 text-foreground"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span
+                    <div className="flex items-center justify-between">
+                      <span
                       className={`text-xs font-bold ${
                         today
                           ? "w-5 h-5 rounded-full bg-amber-400 text-black flex items-center justify-center text-[11px]"
@@ -335,7 +334,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
         </div>
 
         {/* Right Column: Schedule & Add Event Panel */}
-        <div className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto bg-card/30">
+        <div className="w-full md:w-5/12 p-3 flex flex-col gap-3 overflow-y-auto bg-card/30">
           {/* Selected Date Banner */}
           <div className="p-3 bg-card/60 border border-border/60 rounded-xl flex items-center justify-between shadow-sm">
             <div>

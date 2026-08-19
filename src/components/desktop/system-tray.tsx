@@ -193,7 +193,7 @@ export function SystemTray({
         type="button"
         data-time-trigger
         onClick={onToggleNotificationCenter}
-        className="flex items-center gap-1.5 bg-background/50 hover:bg-amber-500/10 px-2 py-0.5 border border-border/50 hover:border-amber-500/50 text-foreground font-semibold min-w-[130px] justify-center transition-all duration-200 cursor-pointer rounded-none group relative"
+        className="flex items-center gap-1.5 bg-background/50 hover:bg-amber-500/10 px-1.5 sm:px-2 py-0.5 border border-border/50 hover:border-amber-500/50 text-foreground font-semibold min-w-0 sm:min-w-[130px] justify-center transition-all duration-200 cursor-pointer rounded-none group relative"
         title="Click for Notification Center"
       >
         <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
@@ -214,7 +214,7 @@ export function SystemTray({
 
       {/* Wi-Fi Popover */}
       {activePopover === "wifi" && (
-        <div className="absolute top-8 right-24 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Wifi className="w-4 h-4 text-emerald-400" />
@@ -266,7 +266,7 @@ export function SystemTray({
 
       {/* Bluetooth Popover */}
       {activePopover === "bluetooth" && (
-        <div className="absolute top-8 right-16 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Bluetooth className="w-4 h-4 text-sky-400" />
@@ -319,7 +319,7 @@ export function SystemTray({
 
       {/* Audio Popover */}
       {activePopover === "audio" && (
-        <div className="absolute top-8 right-8 z-50 w-64 p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Volume2 className="w-4 h-4 text-amber-400" />

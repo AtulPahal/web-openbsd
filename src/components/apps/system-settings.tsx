@@ -114,13 +114,13 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="flex h-full w-full bg-background font-mono text-foreground text-xs select-none"
+      className="flex flex-col sm:flex-row h-full w-full bg-background font-mono text-foreground text-xs select-none overflow-hidden"
       data-window-id={windowId}
     >
-      {/* Left Sidebar */}
-      <div className="w-56 border-r border-border/60 bg-card/40 flex flex-col p-2.5 space-y-3 shrink-0">
-        {/* Account Profile Header */}
-        <div className="p-2.5 bg-background/60 border border-border/50 rounded-xl flex items-center gap-2.5">
+      {/* Left / Top Navigation Bar */}
+      <div className="w-full sm:w-52 border-b sm:border-b-0 sm:border-r border-border/60 bg-card/40 flex flex-row sm:flex-col p-2 sm:p-2.5 gap-2 sm:space-y-3 shrink-0 overflow-x-auto sm:overflow-x-visible scrollbar-none">
+        {/* Account Profile Header (Desktop only or compact on mobile) */}
+        <div className="hidden sm:flex p-2.5 bg-background/60 border border-border/50 rounded-xl items-center gap-2.5 shrink-0">
           <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
             <User className="w-4 h-4" />
           </div>
@@ -130,8 +130,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
-        <div className="flex-1 space-y-1 overflow-y-auto scrollbar-thin pr-1">
+        {/* Navigation Items */}
+        <div className="flex flex-row sm:flex-col gap-1 sm:space-y-1 sm:overflow-y-auto scrollbar-thin sm:pr-1 w-full shrink-0 sm:shrink">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -140,7 +140,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 key={item.id}
                 type="button"
                 onClick={() => setActiveSection(item.id)}
-                className={`w-full p-2 rounded-lg flex items-center justify-between text-xs transition-all cursor-pointer ${
+                className={`p-2 rounded-lg flex items-center justify-between text-xs transition-all cursor-pointer shrink-0 sm:w-full ${
                   isActive
                     ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-sm"
                     : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
@@ -150,7 +150,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   <Icon className={`w-4 h-4 ${item.color}`} />
                   <span className="truncate">{item.label}</span>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                <ChevronRight className="hidden sm:block w-3.5 h-3.5 opacity-40 shrink-0" />
               </button>
             );
           })}

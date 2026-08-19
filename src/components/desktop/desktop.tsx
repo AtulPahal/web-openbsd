@@ -216,7 +216,7 @@ export function Desktop() {
     <ContextMenu>
       <ContextMenuTrigger className="w-full h-full">
         {/* Desktop Container Wrapper */}
-        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden relative select-none">
+        <div className="h-full min-h-[100dvh] w-full bg-background flex flex-col overflow-hidden relative select-none">
           {/* Top Menu Bar */}
           <TopMenuBar
             onOpenApp={handleOpenApp}
@@ -239,7 +239,7 @@ export function Desktop() {
           />
 
           {/* Window Canvas */}
-          <div className="flex-1 relative overflow-hidden pr-14">
+          <div className="flex-1 relative overflow-hidden pr-0 pb-12 md:pb-0 md:pr-14">
             {visibleWindows.map((win) => (
               <WindowFrame
                 key={win.id}

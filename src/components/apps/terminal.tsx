@@ -14,7 +14,7 @@ interface TerminalLine {
 const MAX_LINES = 500;
 
 export function Terminal({ windowId }: { windowId: string }) {
-  // Stable instances — useMemo avoids react-hooks/refs lint errors
+  // Stable instances
   const fs = useMemo(() => new VirtualFS(), []);
   const interpreter = useMemo(() => new CommandInterpreter(fs), [fs]);
 
@@ -28,9 +28,7 @@ export function Terminal({ windowId }: { windowId: string }) {
   const [inputVal, setInputVal] = useState("");
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [prompt, setPrompt] = useState(() =>
-    interpreter.getPrompt()
-  );
+  const [prompt, setPrompt] = useState(() => interpreter.getPrompt());
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -48,20 +46,20 @@ export function Terminal({ windowId }: { windowId: string }) {
     inputRef.current?.focus();
   };
 
-  /** Append output lines, capping total to MAX_LINES (oldest dropped) */
-  const appendLines = (newLines: TerminalLine[]) => {
+  /** Append output lines, capping total to MAX_LINES */
+  const appendLines = useCallback((newLines: TerminalLine[]) => {
     setLines((prev) => {
       const combined = [...prev, ...newLines];
       return combined.length > MAX_LINES
         ? combined.slice(combined.length - MAX_LINES)
         : combined;
     });
-  };
+  }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const trimmed = inputVal.trim();
+  const runCommand = useCallback(
+    (rawCmd: string) => {
+      const trimmed = rawCmd.trim();
+      if (!trimmed) return;
 
       if (trimmed === "clear") {
         setLines([]);
@@ -71,14 +69,13 @@ export function Terminal({ windowId }: { windowId: string }) {
       }
 
       if (trimmed === "exit") {
-        window.dispatchEvent(new CustomEvent('close-window', { detail: windowId }));
+        window.dispatchEvent(new CustomEvent("close-window", { detail: windowId }));
         return;
       }
       if (trimmed === "reboot") {
         window.location.reload();
         return;
       }
-
       if (trimmed === "shutdown") {
         window.close();
         return;
@@ -86,20 +83,18 @@ export function Terminal({ windowId }: { windowId: string }) {
 
       const currentPrompt = interpreter.getPrompt();
 
-      // Execute command — may return string or Promise<string>
-      const result = interpreter.execute(inputVal);
+      // Add to command history
+      setCommandHistory((prev) => [...prev, trimmed]);
 
-      // Add to command history if not empty
-      if (trimmed) {
-        setCommandHistory((prev) => [...prev, trimmed]);
-      }
+      // Execute command
+      const result = interpreter.execute(trimmed);
 
       if (typeof result === "string") {
         appendLines([
           {
             id: `in-${Date.now()}-${Math.random()}`,
             type: "input" as const,
-            content: `${currentPrompt}${inputVal}`,
+            content: `${currentPrompt}${trimmed}`,
           },
           ...(result
             ? [
@@ -112,13 +107,12 @@ export function Terminal({ windowId }: { windowId: string }) {
             : []),
         ]);
       } else {
-        // Async result — show pending line, replace when resolved
         const pendingId = `pending-${Date.now()}-${Math.random()}`;
         appendLines([
           {
             id: `in-${Date.now()}-${Math.random()}`,
             type: "input" as const,
-            content: `${currentPrompt}${inputVal}`,
+            content: `${currentPrompt}${trimmed}`,
           },
           { id: pendingId, type: "pending" as const, content: "Fetching..." },
         ]);
@@ -146,6 +140,14 @@ export function Terminal({ windowId }: { windowId: string }) {
       setInputVal("");
       setHistoryIndex(null);
       setPrompt(interpreter.getPrompt());
+    },
+    [interpreter, windowId, appendLines]
+  );
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      runCommand(inputVal);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
@@ -172,12 +174,14 @@ export function Terminal({ windowId }: { windowId: string }) {
     }
   };
 
+  const quickCommands = ["help", "fastfetch", "portfolio", "resume", "ls -la", "clear"];
+
   return (
     <div
-      className="h-full w-full bg-background text-foreground font-mono text-sm flex flex-col select-text p-3 overflow-hidden"
+      className="h-full w-full bg-background text-foreground font-mono text-sm flex flex-col select-text p-2.5 sm:p-3 overflow-hidden"
       onClick={handleTerminalClick}
     >
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-3 pb-2 scrollbar-thin">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-2 pb-2 scrollbar-thin">
         <div className="space-y-0.5">
           {lines.map((line) => (
             <pre
@@ -196,7 +200,7 @@ export function Terminal({ windowId }: { windowId: string }) {
 
           {/* Current Active Input Line */}
           <div className="flex items-center gap-2 pt-1">
-            <span className="text-amber-400 font-semibold shrink-0">
+            <span className="text-amber-400 font-semibold shrink-0 text-xs sm:text-sm">
               {prompt}
             </span>
             <input
@@ -205,7 +209,7 @@ export function Terminal({ windowId }: { windowId: string }) {
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent outline-none border-none text-foreground caret-amber-400 font-mono text-sm p-0 m-0 focus:ring-0"
+              className="flex-1 bg-transparent outline-none border-none text-foreground caret-amber-400 font-mono text-base sm:text-sm p-0 m-0 focus:ring-0"
               autoFocus
               spellCheck={false}
               autoComplete="off"
@@ -213,6 +217,26 @@ export function Terminal({ windowId }: { windowId: string }) {
           </div>
           <div ref={bottomRef} />
         </div>
+      </div>
+
+      {/* Mobile-Friendly Quick Command Toolbar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 border-t border-border/40 scrollbar-none shrink-0">
+        <span className="text-[10px] text-muted-foreground uppercase font-bold shrink-0 mr-1 hidden sm:inline">
+          Quick:
+        </span>
+        {quickCommands.map((cmd) => (
+          <button
+            key={cmd}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              runCommand(cmd);
+            }}
+            className="px-2 py-1 text-[11px] font-mono bg-card/60 hover:bg-amber-500/20 text-foreground hover:text-amber-300 border border-border/60 hover:border-amber-500/40 rounded transition-all shrink-0 cursor-pointer"
+          >
+            {cmd}
+          </button>
+        ))}
       </div>
     </div>
   );

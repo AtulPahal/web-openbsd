@@ -228,7 +228,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
           onKeyDown={handleKeyDown}
           onScroll={handleScroll}
           spellCheck={false}
-          className={`flex-1 bg-background text-foreground p-2 leading-5 text-xs resize-none focus:outline-none ${
+          className={`flex-1 bg-background text-foreground p-2 leading-5 text-base sm:text-xs resize-none focus:outline-none ${
             wordWrap ? "whitespace-pre-wrap break-words" : "whitespace-pre overflow-x-auto"
           }`}
           style={{
@@ -251,7 +251,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
       </div>
 
       {/* Shortcut hints — nano style */}
-      <div className="grid grid-cols-4 bg-card border-t border-border text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-4 bg-card border-t border-border text-[11px] sm:text-xs">
         {[
           ["^O", "Save"],
           ["^X", "Close"],
@@ -260,11 +260,10 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
         ].map(([key, label]) => (
           <div
             key={key}
-            className="flex items-center justify-center gap-1 py-1 border-r border-border last:border-r-0"
+            className="flex items-center justify-center gap-1 py-1 border-r border-b sm:border-b-0 border-border last:border-r-0"
           >
             <span
-              className="font-bold"
-              style={{ color: "oklch(0.82 0.15 85)" }}
+              className="font-bold text-amber-400"
             >
               {key}
             </span>

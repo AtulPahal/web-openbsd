@@ -287,7 +287,7 @@ export function FileManager({ windowId }: { windowId: string }) {
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar — Places */}
-        <div className="w-40 shrink-0 border-r border-border bg-muted/10 flex flex-col py-2">
+        <div className="w-32 sm:w-40 shrink-0 border-r border-border bg-muted/10 hidden sm:flex flex-col py-2">
           <div className="px-3 pb-1 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
             Places
           </div>
@@ -328,14 +328,14 @@ export function FileManager({ windowId }: { windowId: string }) {
             <button
               type="button"
               onClick={() => handleSort("permissions")}
-              className="flex w-24 items-center px-2 py-1 text-left hover:text-foreground"
+              className="hidden md:flex w-24 items-center px-2 py-1 text-left hover:text-foreground"
             >
               Perms <SortIndicator column="permissions" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("modified")}
-              className="flex w-32 items-center px-2 py-1 text-left hover:text-foreground"
+              className="hidden lg:flex w-32 items-center px-2 py-1 text-left hover:text-foreground"
             >
               Modified <SortIndicator column="modified" currentKey={sortKey} direction={sortDir} />
             </button>
@@ -377,12 +377,18 @@ export function FileManager({ windowId }: { windowId: string }) {
                   <button
                     key={node.path}
                     type="button"
-                    className={`flex w-full items-center border-b border-border/20 px-2 py-1 text-left text-xs ${
+                    className={`flex w-full items-center border-b border-border/20 px-2 py-1.5 text-left text-xs transition-colors cursor-pointer ${
                       isSelected
                         ? "bg-amber-400/15 text-foreground"
                         : "hover:bg-accent/20"
                     }`}
-                    onClick={() => setSelectedPath(node.path)}
+                    onClick={() => {
+                      if (selectedPath === node.path) {
+                        handleDoubleClick(node);
+                      } else {
+                        setSelectedPath(node.path);
+                      }
+                    }}
                     onDoubleClick={() => handleDoubleClick(node)}
                   >
                     <div className="flex flex-1 items-center gap-2 overflow-hidden">
@@ -395,19 +401,19 @@ export function FileManager({ windowId }: { windowId: string }) {
                       />
                       <span
                         className={`truncate ${
-                          isDir ? "text-amber-400/90" : "text-foreground/80"
+                          isDir ? "text-amber-400/90 font-semibold" : "text-foreground/80"
                         }`}
                       >
                         {node.name}
                       </span>
                     </div>
-                    <div className="w-20 shrink-0 text-right font-mono text-muted-foreground">
+                    <div className="w-16 sm:w-20 shrink-0 text-right font-mono text-muted-foreground text-[11px]">
                       {isDir ? "-" : formatSize(node.size)}
                     </div>
-                    <div className="w-24 shrink-0 px-2 font-mono text-muted-foreground">
+                    <div className="hidden md:block w-24 shrink-0 px-2 font-mono text-muted-foreground text-[11px]">
                       {node.permissions}
                     </div>
-                    <div className="w-32 shrink-0 font-mono text-muted-foreground">
+                    <div className="hidden lg:block w-32 shrink-0 font-mono text-muted-foreground text-[11px]">
                       {formatDate(node.modified)}
                     </div>
                   </button>

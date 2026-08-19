@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 
@@ -19,6 +19,15 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0a0a0a",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,7 +39,10 @@ export default function RootLayout({
       className="dark h-full antialiased"
       suppressHydrationWarning
     >
-      <body className="h-screen overflow-hidden bg-background text-foreground font-mono" suppressHydrationWarning>
+      <body
+        className="h-full min-h-[100dvh] w-full overflow-hidden bg-background text-foreground font-mono select-none touch-manipulation"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
