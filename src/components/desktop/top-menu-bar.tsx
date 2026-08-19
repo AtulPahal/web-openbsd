@@ -35,16 +35,16 @@ export function TopMenuBar({
   };
 
   return (
-    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none">
-      {/* Left: OpenBSD App Launcher + Workspaces 1-4 */}
-      <div className="flex items-center gap-2">
+    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-1.5 sm:px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-hidden">
+      {/* Left: OpenBSD App Launcher + Workspaces */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* OpenBSD Option */}
         <AppLauncher onOpenApp={onOpenApp} />
 
-        <div className="text-border/80 text-xs px-0.5">|</div>
+        <div className="text-border/80 text-xs px-0.5 hidden xs:inline">|</div>
 
         {/* 4 Workspaces Switcher */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {workspaces.map((ws) => {
             const isActive = activeWorkspace === ws;
             const count = getWorkspaceWindowCount(ws);
@@ -54,7 +54,7 @@ export function TopMenuBar({
                 key={ws}
                 type="button"
                 onClick={() => onSelectWorkspace(ws)}
-                className={`h-5 px-2 flex items-center gap-1 text-[11px] font-mono border transition-all duration-150 rounded-none cursor-pointer ${
+                className={`h-5 px-1.5 sm:px-2 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono border transition-all duration-150 rounded-none cursor-pointer ${
                   isActive
                     ? "bg-amber-500/20 border-amber-500/60 text-amber-700 dark:text-amber-300 font-bold shadow-sm"
                     : "bg-background/40 border-border/40 text-muted-foreground hover:bg-amber-500/10 hover:text-foreground"
@@ -76,10 +76,10 @@ export function TopMenuBar({
       </div>
 
       {/* Center: Clean Spacer */}
-      <div className="flex-1" />
+      <div className="flex-1 min-w-1" />
 
       {/* Right: System Tray */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <SystemTray
           onToggleNotificationCenter={onToggleNotificationCenter}
           unreadCount={unreadCount}

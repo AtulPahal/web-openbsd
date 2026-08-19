@@ -62,7 +62,6 @@ export function Desktop() {
   const [masterVolume, setMasterVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
-  const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
     {
@@ -110,7 +109,6 @@ export function Desktop() {
 
   const handleOpenApp = (appId: AppId, appState?: AppState) => {
     openWindow(appId, appState, activeWorkspace);
-    setIsAppSwitcherOpen(false);
     const app = APP_REGISTRY[appId];
     if (app) {
       addNotification(app.name, `Opened ${app.name}`, appId);
@@ -269,8 +267,8 @@ export function Desktop() {
             }}
           />
 
-          {/* Window Canvas (with room for Ubuntu Touch launcher on mobile and Dock on desktop) */}
-          <div className="flex-1 relative overflow-hidden pl-11 md:pl-0 pr-0 md:pr-14">
+          {/* Window Canvas */}
+          <div className="flex-1 relative overflow-hidden pl-0 pr-9 sm:pr-11 md:pr-14">
             {visibleWindows.map((win) => (
               <WindowFrame
                 key={win.id}
@@ -287,7 +285,7 @@ export function Desktop() {
             ))}
           </div>
 
-          {/* Ubuntu Touch Left Edge Launcher (Mobile) & GNOME Right Dock (Desktop) */}
+          {/* OpenBSD Right-Side Dock */}
           <Dock
             windows={windows}
             onFocusWindow={(id) => {
@@ -296,124 +294,11 @@ export function Desktop() {
                 setActiveWorkspace(targetWin.workspace);
               }
               focusWindow(id);
-              setIsAppSwitcherOpen(false);
             }}
             onMinimizeWindow={(id) => minimizeWindow(id)}
             onOpenApp={(appId) => handleOpenApp(appId)}
             dockMagnification={dockMagnification}
-            onToggleAppSwitcher={() => setIsAppSwitcherOpen((prev) => !prev)}
           />
-
-          {/* Ubuntu Touch Mobile Bottom Gesture Navigation Indicator */}
-          <div
-            onClick={() => setIsAppSwitcherOpen(true)}
-            className="flex md:hidden fixed bottom-1 left-1/2 -translate-x-1/2 w-28 h-1.5 bg-white/40 hover:bg-amber-400 rounded-full z-40 cursor-pointer active:scale-95 transition-all shadow"
-            title="Swipe / Tap for Ubuntu Touch App Switcher"
-          />
-
-          {/* --- UBUNTU TOUCH APP SWITCHER MODAL --- */}
-          {isAppSwitcherOpen && (
-            <div className="fixed inset-0 z-[80] bg-black/85 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 animate-in fade-in-0 duration-200 select-none">
-              {/* Header */}
-              <div className="flex items-center justify-between text-xs font-mono text-white/80 border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2 font-bold text-amber-400">
-                  <Layers className="w-4 h-4" />
-                  <span>Ubuntu Touch App Switcher</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {visibleWindows.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        visibleWindows.forEach((w) => closeWindow(w.id));
-                        setIsAppSwitcherOpen(false);
-                      }}
-                      className="px-2.5 py-1 text-[11px] bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-lg transition-colors cursor-pointer"
-                    >
-                      Close All
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setIsAppSwitcherOpen(false)}
-                    className="p-1 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Running Application Cards Carousel */}
-              <div className="flex-1 flex items-center justify-start gap-4 overflow-x-auto py-6 px-2 scrollbar-none">
-                {visibleWindows.length === 0 ? (
-                  <div className="w-full text-center space-y-3">
-                    <Smartphone className="w-12 h-12 mx-auto text-white/30" />
-                    <p className="text-sm font-semibold text-white/80">No Running Applications</p>
-                    <p className="text-xs text-white/50">Tap any icon on the left edge launcher to launch an app.</p>
-                  </div>
-                ) : (
-                  visibleWindows.map((win) => {
-                    const appDef = APP_REGISTRY[win.appId];
-                    const IconComp = appDef ? APP_ICON_MAP[appDef.icon] ?? APP_ICON_MAP.Terminal : APP_ICON_MAP.Terminal;
-                    return (
-                      <div
-                        key={win.id}
-                        onClick={() => {
-                          focusWindow(win.id);
-                          setIsAppSwitcherOpen(false);
-                        }}
-                        className="group relative flex-shrink-0 w-64 h-84 bg-card/90 border border-border/80 hover:border-amber-500/60 rounded-2xl p-4 flex flex-col justify-between shadow-2xl transition-all hover:scale-[1.02] cursor-pointer"
-                      >
-                        {/* App Card Header */}
-                        <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                          <div className="flex items-center gap-2">
-                            <IconComp className="w-4 h-4 text-amber-400" />
-                            <span className="font-bold text-xs text-foreground truncate">{win.title}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              closeWindow(win.id);
-                            }}
-                            className="p-1 rounded-full text-muted-foreground hover:text-red-400 hover:bg-red-500/20 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        {/* App Preview Placeholder */}
-                        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-                          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-md">
-                            <IconComp className="w-7 h-7" />
-                          </div>
-                          <span className="text-xs font-semibold text-muted-foreground mt-3">
-                            {appDef?.name}
-                          </span>
-                        </div>
-
-                        {/* Switch Button */}
-                        <div className="w-full py-2 bg-amber-500/15 group-hover:bg-amber-500/25 border border-amber-500/40 rounded-xl text-center text-xs font-bold text-amber-300 transition-colors">
-                          Switch to App
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* Bottom Quick Launch Bar */}
-              <div className="flex items-center justify-center gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setIsAppSwitcherOpen(false)}
-                  className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all cursor-pointer"
-                >
-                  Return to Desktop
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Toast Notification Toasts — Top Right corner */}
           <div className="fixed top-9 right-4 z-40 flex flex-col gap-1.5 pointer-events-none">
