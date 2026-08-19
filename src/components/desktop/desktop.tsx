@@ -266,6 +266,7 @@ export function Desktop() {
               }
               focusWindow(id);
             }}
+            onMinimizeWindow={(id) => minimizeWindow(id)}
             onOpenApp={(appId) => handleOpenApp(appId)}
             dockMagnification={dockMagnification}
           />

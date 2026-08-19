@@ -174,8 +174,6 @@ export function Terminal({ windowId }: { windowId: string }) {
     }
   };
 
-  const quickCommands = ["help", "fastfetch", "portfolio", "resume", "ls -la", "clear"];
-
   return (
     <div
       className="h-full w-full bg-background text-foreground font-mono text-sm flex flex-col select-text p-2.5 sm:p-3 overflow-hidden"
@@ -217,26 +215,6 @@ export function Terminal({ windowId }: { windowId: string }) {
           </div>
           <div ref={bottomRef} />
         </div>
-      </div>
-
-      {/* Mobile-Friendly Quick Command Toolbar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 border-t border-border/40 scrollbar-none shrink-0">
-        <span className="text-[10px] text-muted-foreground uppercase font-bold shrink-0 mr-1 hidden sm:inline">
-          Quick:
-        </span>
-        {quickCommands.map((cmd) => (
-          <button
-            key={cmd}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              runCommand(cmd);
-            }}
-            className="px-2 py-1 text-[11px] font-mono bg-card/60 hover:bg-amber-500/20 text-foreground hover:text-amber-300 border border-border/60 hover:border-amber-500/40 rounded transition-all shrink-0 cursor-pointer"
-          >
-            {cmd}
-          </button>
-        ))}
       </div>
     </div>
   );

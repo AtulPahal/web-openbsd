@@ -9,6 +9,7 @@ import { APP_ICON_MAP } from "@/lib/app-icons";
 interface DockProps {
   windows: WindowState[];
   onFocusWindow: (id: WindowId) => void;
+  onMinimizeWindow?: (id: WindowId) => void;
   onOpenApp: (appId: AppId) => void;
   dockMagnification?: boolean;
 }
@@ -18,16 +19,21 @@ interface DockProps {
  * - Desktop (md:): Vertical right-side dock with proximity fisheye magnification.
  * - Mobile (<md): Horizontal bottom dock with scrollable app icons.
  * - Layering (z-30): Positioned below top bar popovers, menus, and notification center (z-50 to z-70).
+ * - State preservation: Restores minimized windows with full history/state intact.
  */
-export function Dock({ windows, onFocusWindow, onOpenApp, dockMagnification = true }: DockProps) {
+export function Dock({
+  windows,
+  onFocusWindow,
+  onMinimizeWindow,
+  onOpenApp,
+  dockMagnification = true,
+}: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Apps that have at least one open window
-  const openAppIds = new Set(
-    windows.filter((w) => !w.isMinimized).map((w) => w.appId)
-  );
+  // Apps that have at least one open window (including minimized)
+  const openAppIds = new Set(windows.map((w) => w.appId));
 
-  // Active window's app id
+  // Active window's app id (currently focused and visible)
   const activeAppId =
     windows.find((w) => w.isFocused && !w.isMinimized)?.appId ?? null;
 
@@ -55,16 +61,12 @@ export function Dock({ windows, onFocusWindow, onOpenApp, dockMagnification = tr
           const isActive = activeAppId === app.id;
           const scale = getScale(index);
 
-          // Count how many windows of this app are open
-          const winCount = windows.filter(
-            (w) => w.appId === app.id && !w.isMinimized
-          ).length;
-
-          // Find the most-recently-focused window for this app
+          // Get all open windows for this app (minimized or visible)
           const appWindows = windows
-            .filter((w) => w.appId === app.id && !w.isMinimized)
+            .filter((w) => w.appId === app.id)
             .sort((a, b) => b.zIndex - a.zIndex);
-          const mostRecentWin = appWindows[0];
+          const winCount = appWindows.length;
+          const targetWin = appWindows[0];
 
           return (
             <button
@@ -72,9 +74,16 @@ export function Dock({ windows, onFocusWindow, onOpenApp, dockMagnification = tr
               type="button"
               onMouseEnter={() => setHoveredIndex(index)}
               onClick={() => {
-                if (mostRecentWin) {
-                  onFocusWindow(mostRecentWin.id);
+                if (targetWin) {
+                  if (targetWin.isFocused && !targetWin.isMinimized && onMinimizeWindow) {
+                    // If currently focused and visible, clicking dock minimizes it
+                    onMinimizeWindow(targetWin.id);
+                  } else {
+                    // Minimized or behind other windows -> restore/unminimize & focus!
+                    onFocusWindow(targetWin.id);
+                  }
                 } else {
+                  // No window open yet -> open fresh window
                   onOpenApp(app.id);
                 }
               }}
