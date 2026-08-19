@@ -56,6 +56,7 @@ export function Desktop() {
   } = useWindowManager();
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
+  const [wallpaper, setWallpaper] = useState<string>(SYSTEM_CONFIG.wallpaper);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [dockMagnification, setDockMagnification] = useState(true);
   const [masterVolume, setMasterVolume] = useState(75);
@@ -168,6 +169,18 @@ export function Desktop() {
         setDockMagnification(customEvent.detail.enabled);
       }
     };
+    const handleWallpaperChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ wallpaper: string }>;
+      if (customEvent.detail?.wallpaper) {
+        setWallpaper(customEvent.detail.wallpaper);
+      }
+    };
+    const handleBrightnessEvt = (e: Event) => {
+      const customEvent = e as CustomEvent<{ brightness: number }>;
+      if (typeof customEvent.detail?.brightness === "number") {
+        setBrightness(customEvent.detail.brightness);
+      }
+    };
 
     window.addEventListener("close-window", handleClose as EventListener);
     window.addEventListener("open-app", handleOpen as EventListener);
@@ -175,6 +188,8 @@ export function Desktop() {
     window.addEventListener("master-volume-change", handleMasterVol);
     window.addEventListener("theme-change", handleThemeChange);
     window.addEventListener("dock-magnification-change", handleDockMagnify);
+    window.addEventListener("wallpaper-change", handleWallpaperChange);
+    window.addEventListener("brightness-change", handleBrightnessEvt);
 
     return () => {
       window.removeEventListener("close-window", handleClose as EventListener);
@@ -183,6 +198,8 @@ export function Desktop() {
       window.removeEventListener("master-volume-change", handleMasterVol);
       window.removeEventListener("theme-change", handleThemeChange);
       window.removeEventListener("dock-magnification-change", handleDockMagnify);
+      window.removeEventListener("wallpaper-change", handleWallpaperChange);
+      window.removeEventListener("brightness-change", handleBrightnessEvt);
     };
   }, [closeWindow, activeWorkspace]);
 
@@ -246,9 +263,9 @@ export function Desktop() {
 
           {/* Desktop Wallpaper */}
           <div
-            className="absolute inset-0 pointer-events-none bg-cover bg-center"
+            className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"
             style={{
-              backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')`,
+              backgroundImage: `url('${wallpaper}')`,
             }}
           />
 
