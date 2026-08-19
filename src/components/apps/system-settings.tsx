@@ -191,19 +191,19 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   <div className="text-[10px] font-bold text-muted-foreground uppercase">
                     Available Networks
                   </div>
-                  {["OpenBSD-5G", "Atul_Home_Fiber", "Drone_Tech_Lab", "Guest_WiFi_Free"].map((ssid) => (
+                  {SYSTEM_CONFIG.defaultWifiNetworks.map((net) => (
                     <button
-                      key={ssid}
+                      key={net.ssid}
                       type="button"
-                      onClick={() => setConnectedWifi(ssid)}
+                      onClick={() => setConnectedWifi(net.ssid)}
                       className={`w-full p-2 rounded-lg border text-left flex items-center justify-between text-xs transition-all ${
-                        connectedWifi === ssid
+                        connectedWifi === net.ssid
                           ? "bg-amber-500/15 border-amber-500/50 text-amber-300 font-bold"
                           : "bg-background/40 border-border/40 hover:bg-muted text-foreground"
                       }`}
                     >
-                      <span>{ssid}</span>
-                      {connectedWifi === ssid && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      <span>{net.ssid}</span>
+                      {connectedWifi === net.ssid && <Check className="w-3.5 h-3.5 text-amber-400" />}
                     </button>
                   ))}
                 </div>
@@ -246,7 +246,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Select Output Device
               </div>
-              {["Built-in Speakers", "AirPods Pro (Bluetooth)", "Headphones (3.5mm Jack)"].map((dev) => (
+              {SYSTEM_CONFIG.defaultAudioOutputDevices.map((dev) => (
                 <button
                   key={dev}
                   type="button"

@@ -67,23 +67,14 @@ export function SystemTray({
 
   // Wi-Fi State
   const [wifiEnabled, setWifiEnabled] = useState(true);
-  const [connectedWifi, setConnectedWifi] = useState("OpenBSD-5G");
-  const [wifiNetworks, setWifiNetworks] = useState([
-    { ssid: "OpenBSD-5G", signal: 98, secured: true, connected: true },
-    { ssid: "Atul_Home_Fiber", signal: 85, secured: true, connected: false },
-    { ssid: "Drone_Tech_Lab", signal: 60, secured: true, connected: false },
-    { ssid: "Guest_WiFi_Free", signal: 45, secured: false, connected: false },
-  ]);
+  const [connectedWifi, setConnectedWifi] = useState(SYSTEM_CONFIG.defaultWifiNetworks[0]?.ssid || "OpenBSD-5G");
+  const [wifiNetworks, setWifiNetworks] = useState(() => [...SYSTEM_CONFIG.defaultWifiNetworks]);
 
   // Bluetooth State
   const [bluetoothEnabled, setBluetoothEnabled] = useState(true);
-  const [btDevices, setBtDevices] = useState([
-    { id: "1", name: "AirPods Pro", type: "audio", connected: true },
-    { id: "2", name: "Keychron K2 Keyboard", type: "input", connected: true },
-    { id: "3", name: "MX Master 3S Mouse", type: "input", connected: false },
-  ]);
+  const [btDevices, setBtDevices] = useState(() => [...SYSTEM_CONFIG.defaultBluetoothDevices]);
 
-  const [outputDevice, setOutputDevice] = useState("Built-in Speakers");
+  const [outputDevice, setOutputDevice] = useState(SYSTEM_CONFIG.defaultAudioOutputDevices[0] || "Built-in Speakers");
   const trayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -355,11 +346,8 @@ export function SystemTray({
               OUTPUT DEVICE
             </div>
             <div className="space-y-1">
-              {[
-                { id: "Built-in Speakers", name: "Built-in Speakers" },
-                { id: "AirPods Pro (Bluetooth)", name: "AirPods Pro (Bluetooth)" },
-                { id: "Headphones (3.5mm Jack)", name: "Headphones (3.5mm Jack)" },
-              ].map((dev) => {
+              {SYSTEM_CONFIG.defaultAudioOutputDevices.map((devName) => {
+                const dev = { id: devName, name: devName };
                 const isSelected = outputDevice === dev.id;
                 return (
                   <button
