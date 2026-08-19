@@ -3,7 +3,7 @@ import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { buildFastfetch, MAN_PAGES } from "@/lib/command-data";
 import { buildProxyUrl } from "@/lib/browser-config";
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
-
+import { fetchGitHubUser, fetchGitHubRepos } from "@/lib/github-api";
 
 function formatPermissions(node: { type: string; permissions: string }): string {
   const prefix = node.type === "directory" ? "d" : node.type === "symlink" ? "l" : "-";
@@ -111,6 +111,9 @@ export class CommandInterpreter {
       case "tail": return this.cmdHead(args, true);
       case "resume": return this.cmdResume(args);
       case "portfolio": return this.cmdPortfolio(args);
+      case "github":
+      case "gh": return this.cmdGitHub(args);
+      case "ping": return this.cmdPing(args);
       default:
         return `ksh: ${cmd}: not found`;
     }
@@ -277,6 +280,8 @@ export class CommandInterpreter {
     return `Available commands:
   help               Show available commands
   fastfetch          Display system info & specs (neofetch)
+  github [user]      Fetch live GitHub profile & repositories
+  ping <host>        Test network latency & roundtrip
   portfolio          Print portfolio & project summary
   resume             Print resume & technical skills
   ls [-l]            List directory contents
@@ -410,5 +415,44 @@ export class CommandInterpreter {
       results.push(slice.join("\n"));
     }
     return results.join("\n");
+  }
+
+  private async cmdGitHub(args: string[]): Promise<string> {
+    const user = args[0] || "AtulPahal";
+    try {
+      const profile = await fetchGitHubUser(user);
+      const repos = await fetchGitHubRepos(user);
+
+      let output = `GitHub Profile: @${profile.login} (${profile.name || "Atul Pahal"})\n`;
+      output += `Bio: ${profile.bio || "AI/ML Engineer & Full-Stack Developer"}\n`;
+      output += `URL: ${profile.html_url}\n`;
+      output += `Public Repos: ${profile.public_repos} | Followers: ${profile.followers} | Following: ${profile.following}\n\n`;
+      output += `LATEST REPOSITORIES:\n`;
+
+      repos.slice(0, 5).forEach((r) => {
+        output += `  * ${r.name} (${r.language || "TypeScript"}) \u2605 ${r.stargazers_count}\n`;
+        if (r.description) output += `    ${r.description}\n`;
+        output += `    ${r.html_url}\n`;
+      });
+
+      return output;
+    } catch {
+      return `github: unable to fetch profile for @${user}`;
+    }
+  }
+
+  private async cmdPing(args: string[]): Promise<string> {
+    const host = args[0] || "openbsd.org";
+    const delay = Math.floor(16 + Math.random() * 18);
+    return [
+      `PING ${host} (93.184.216.34): 56 data bytes`,
+      `64 bytes from ${host}: icmp_seq=0 ttl=56 time=${delay}.${Math.floor(Math.random() * 9)} ms`,
+      `64 bytes from ${host}: icmp_seq=1 ttl=56 time=${delay + 1}.${Math.floor(Math.random() * 9)} ms`,
+      `64 bytes from ${host}: icmp_seq=2 ttl=56 time=${delay - 1}.${Math.floor(Math.random() * 9)} ms`,
+      ``,
+      `--- ${host} ping statistics ---`,
+      `3 packets transmitted, 3 packets received, 0.0% packet loss`,
+      `round-trip min/avg/max/std-dev = ${delay - 1}.1/${delay}.4/${delay + 1}.8/0.7 ms`,
+    ].join("\n");
   }
 }

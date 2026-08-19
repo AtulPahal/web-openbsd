@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -17,12 +17,14 @@ import {
   CheckCircle2,
   Cpu,
   Layers,
+  Star,
+  GitFork,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { PORTFOLIO_DATA, ALL_TECH_TAGS } from "@/lib/portfolio-data";
 import type { Project, SkillCategory, Education, Certification } from "@/lib/portfolio-data";
 import { GitHubIcon, LinkedInIcon, EmailIcon } from "@/lib/social-icons";
+import { fetchGitHubUser, fetchGitHubRepos, type GitHubUser, type GitHubRepo } from "@/lib/github-api";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   github: GitHubIcon,
@@ -82,18 +84,20 @@ function HeroHeader() {
   );
 }
 
-function AboutTab() {
+function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
   return (
     <div className="p-4 space-y-4 text-xs font-mono">
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground text-[10px]">
-            <span>PROJECTS</span>
-            <Code className="w-3.5 h-3.5 text-amber-400" />
+            <span>PUBLIC REPOS</span>
+            <GitHubIcon className="w-3.5 h-3.5 text-amber-400" />
           </div>
-          <div className="text-xl font-bold text-amber-400 mt-2">4+ SOTA</div>
-          <div className="text-[10px] text-muted-foreground/80 mt-0.5">AI/ML & Web Apps</div>
+          <div className="text-xl font-bold text-amber-400 mt-2">
+            {ghUser ? `${ghUser.public_repos}+ Repos` : "12+ Repos"}
+          </div>
+          <div className="text-[10px] text-muted-foreground/80 mt-0.5">Live GitHub Projects</div>
         </div>
 
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
@@ -203,7 +207,6 @@ function AboutTab() {
 }
 
 function SkillsTab() {
-  // Skill proficiency progress mapping
   const skillLevels: Record<string, number> = {
     "Python (Expert)": 95,
     JavaScript: 90,
@@ -395,6 +398,12 @@ function EducationTab() {
 }
 
 export function Portfolio({ windowId }: { windowId: string }) {
+  const [ghUser, setGhUser] = useState<GitHubUser | null>(null);
+
+  useEffect(() => {
+    fetchGitHubUser("AtulPahal").then(setGhUser).catch(() => {});
+  }, []);
+
   return (
     <div
       className="flex h-full w-full flex-col bg-background font-mono text-sm select-none"
@@ -424,7 +433,7 @@ export function Portfolio({ windowId }: { windowId: string }) {
         </TabsList>
 
         <TabsContent value="about" className="flex-1 overflow-auto">
-          <AboutTab />
+          <AboutTab ghUser={ghUser} />
         </TabsContent>
         <TabsContent value="skills" className="flex-1 overflow-auto">
           <SkillsTab />
