@@ -90,16 +90,16 @@ export function Dock({
               className={clsx(
                 "group relative flex items-center justify-center shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 cursor-pointer",
                 "rounded-xl transition-all duration-150 ease-out origin-center",
-                isActive && "bg-amber-500/25 border border-amber-500/50 shadow-md shadow-amber-500/10",
-                isRunning && !isActive && "bg-amber-500/10 hover:bg-amber-500/20"
+                isActive && "bg-primary/25 border border-primary/50 shadow-md shadow-primary/10",
+                isRunning && !isActive && "bg-primary/10 hover:bg-primary/20"
               )}
             >
               <IconComponent
                 className={clsx(
                   "w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-colors duration-150",
-                  "text-muted-foreground group-hover:text-amber-400",
-                  isActive && "text-amber-400",
-                  isRunning && !isActive && "text-amber-400/90"
+                  "text-muted-foreground group-hover:text-primary",
+                  isActive && "text-primary",
+                  isRunning && !isActive && "text-primary/90"
                 )}
               />
 
@@ -109,7 +109,7 @@ export function Dock({
                   className={clsx(
                     "absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-background",
                     isActive
-                      ? "bg-amber-400 shadow-amber-400/50 shadow"
+                      ? "bg-primary shadow-primary/50 shadow"
                       : "bg-muted-foreground/60"
                   )}
                 />
@@ -117,7 +117,7 @@ export function Dock({
 
               {/* Window count badge */}
               {winCount > 1 && (
-                <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-3 h-3 sm:w-3.5 sm:h-3.5 text-[6px] sm:text-[7px] font-bold text-white bg-amber-500 rounded-full">
+                <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-3 h-3 sm:w-3.5 sm:h-3.5 text-[6px] sm:text-[7px] font-bold text-primary-foreground bg-primary rounded-full">
                   {winCount}
                 </span>
               )}

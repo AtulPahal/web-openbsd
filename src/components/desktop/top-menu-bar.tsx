@@ -56,8 +56,8 @@ export function TopMenuBar({
                 onClick={() => onSelectWorkspace(ws)}
                 className={`h-5 px-1.5 sm:px-2 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono border transition-all duration-150 rounded-none cursor-pointer ${
                   isActive
-                    ? "bg-amber-500/20 border-amber-500/60 text-amber-700 dark:text-amber-300 font-bold shadow-sm"
-                    : "bg-background/40 border-border/40 text-muted-foreground hover:bg-amber-500/10 hover:text-foreground"
+                    ? "bg-primary/20 border-primary/60 text-primary font-bold shadow-sm"
+                    : "bg-background/40 border-border/40 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                 }`}
                 title={`Switch to Workspace ${ws}${count > 0 ? ` (${count} open)` : ""}`}
               >
@@ -65,7 +65,7 @@ export function TopMenuBar({
                 {count > 0 && (
                   <span
                     className={`w-1 h-1 rounded-full ${
-                      isActive ? "bg-amber-400" : "bg-muted-foreground/60"
+                      isActive ? "bg-primary" : "bg-muted-foreground/60"
                     }`}
                   />
                 )}

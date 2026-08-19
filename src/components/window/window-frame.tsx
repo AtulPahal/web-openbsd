@@ -253,7 +253,7 @@ export function WindowFrame({
           : "border rounded-t-lg"
       } ${
         win.isFocused
-          ? "border-amber-500/60 shadow-xl shadow-black/10 dark:shadow-black/50"
+          ? "border-primary/60 shadow-xl shadow-black/10 dark:shadow-black/50"
           : "border-border/80 shadow-md shadow-black/5"
       }`}
       style={
@@ -280,7 +280,7 @@ export function WindowFrame({
       <div
         className={`flex items-center justify-between px-2.5 h-8 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
           win.isFocused
-            ? "bg-card text-foreground font-bold border-amber-500/50 shadow-sm"
+            ? "bg-card text-foreground font-bold border-primary/50 shadow-sm"
             : "bg-muted/70 text-muted-foreground border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
@@ -290,7 +290,7 @@ export function WindowFrame({
         <div className="flex items-center gap-2 truncate pr-2 pointer-events-none">
           <span
             className={`w-2 h-2 rounded-full shrink-0 transition-all ${
-              win.isFocused ? "bg-amber-400 shadow-sm shadow-amber-400/50" : "bg-muted-foreground/30"
+              win.isFocused ? "bg-primary shadow-sm shadow-primary/50" : "bg-muted-foreground/30"
             }`}
           />
           <span className="truncate">{win.title}</span>
@@ -306,7 +306,7 @@ export function WindowFrame({
             }}
             aria-label="Minimize"
             title="Minimize"
-            className="w-6 h-6 rounded flex items-center justify-center text-amber-400/80 hover:text-amber-300 hover:bg-amber-500/20 active:scale-95 transition-all cursor-pointer"
+            className="w-6 h-6 rounded flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/20 active:scale-95 transition-all cursor-pointer"
           >
             <span className="text-sm leading-none">—</span>
           </button>
@@ -318,7 +318,7 @@ export function WindowFrame({
             }}
             aria-label={win.isMaximized ? "Restore" : "Maximize"}
             title={win.isMaximized ? "Restore" : "Maximize"}
-            className="w-6 h-6 rounded flex items-center justify-center text-amber-400/80 hover:text-amber-300 hover:bg-amber-500/20 active:scale-95 transition-all cursor-pointer"
+            className="w-6 h-6 rounded flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/20 active:scale-95 transition-all cursor-pointer"
           >
             <span className="text-xs leading-none">□</span>
           </button>

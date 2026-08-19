@@ -142,7 +142,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 function ToggleSwitch({
   checked,
   onChange,
-  activeColor = "bg-amber-500",
+  activeColor,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -154,8 +154,9 @@ function ToggleSwitch({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
+      style={checked ? { backgroundColor: activeColor || "var(--primary)" } : {}}
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-        checked ? activeColor : "bg-muted/80"
+        checked ? (activeColor ? "" : "bg-primary") : "bg-muted/80"
       }`}
     >
       <span
@@ -283,6 +284,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
       document.documentElement.style.setProperty("--primary", primaryVal);
       document.documentElement.style.setProperty("--accent", primaryVal);
       document.documentElement.style.setProperty("--ring", primaryVal);
+      document.documentElement.style.setProperty("--accent-color", color.hex);
+      document.documentElement.style.setProperty("--accent-glow", `${color.hex}60`);
       document.documentElement.style.setProperty("--sidebar-primary", primaryVal);
       document.documentElement.style.setProperty("--sidebar-ring", primaryVal);
 
@@ -347,13 +350,13 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search Settings..."
-            className="w-full pl-8 pr-2.5 py-1.5 bg-background/60 border border-border/60 rounded-xl text-xs outline-none focus:border-amber-400 transition-all placeholder:text-muted-foreground/60"
+            className="w-full pl-8 pr-2.5 py-1.5 bg-background/60 border border-border/60 rounded-xl text-xs outline-none focus:border-primary transition-all placeholder:text-muted-foreground/60"
           />
         </div>
 
         {/* User Account Card */}
         <div className="flex p-2.5 bg-background/60 border border-border/50 rounded-xl items-center gap-2.5 shrink-0 shadow-sm">
-          <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+          <div className="w-9 h-9 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center text-primary shrink-0">
             <User className="w-4 h-4" />
           </div>
           <div className="truncate flex-1">
@@ -377,7 +380,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 }}
                 className={`p-2.5 rounded-xl flex items-center justify-between text-xs transition-all cursor-pointer w-full text-left ${
                   isActive
-                    ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-sm"
+                    ? "bg-primary/20 border border-primary/60 text-primary font-bold shadow-sm"
                     : "hover:bg-muted/60 text-muted-foreground hover:text-foreground border border-transparent"
                 }`}
               >
@@ -408,7 +411,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           <button
             type="button"
             onClick={() => setMobileView("categories")}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-background/80 border border-border rounded-xl text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-background/80 border border-border rounded-xl text-xs font-bold text-primary hover:text-primary transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Settings</span>
@@ -456,7 +459,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       onClick={() => setIpMode("dhcp")}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "dhcp"
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold shadow-sm"
+                          ? "bg-primary/20 border-primary/50 text-primary font-bold shadow-sm"
                           : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
@@ -467,7 +470,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       onClick={() => setIpMode("static")}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "static"
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold shadow-sm"
+                          ? "bg-primary/20 border-primary/50 text-primary font-bold shadow-sm"
                           : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
@@ -481,7 +484,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       type="text"
                       value={dnsServer}
                       onChange={(e) => setDnsServer(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg outline-none focus:border-amber-400"
+                      className="w-full px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -497,7 +500,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       onClick={() => setConnectedWifi(net.ssid)}
                       className={`w-full p-2 rounded-lg border text-left flex items-center justify-between text-xs transition-all cursor-pointer ${
                         connectedWifi === net.ssid
-                          ? "bg-amber-500/15 border-amber-500/50 text-amber-300 font-bold"
+                          ? "bg-primary/15 border-primary/50 text-primary font-bold"
                           : "bg-background/40 border-border/40 hover:bg-muted text-foreground"
                       }`}
                     >
@@ -507,7 +510,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-muted-foreground">{net.signal}%</span>
-                        {connectedWifi === net.ssid && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                        {connectedWifi === net.ssid && <Check className="w-3.5 h-3.5 text-primary" />}
                       </div>
                     </button>
                   ))}
@@ -532,10 +535,10 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs flex items-center gap-1.5">
-                  {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-amber-400" />}
+                  {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-primary" />}
                   <span>Master Output Volume</span>
                 </span>
-                <span className="font-bold text-amber-400 tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
+                <span className="font-bold text-primary tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
               </div>
               <input
                 type="range"
@@ -543,7 +546,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 max="100"
                 value={isMuted ? 0 : volume}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-2 bg-muted rounded-lg"
+                style={{ accentColor: "var(--primary)" }}
+                className="w-full cursor-pointer h-2 bg-muted rounded-lg"
               />
             </div>
 
@@ -558,7 +562,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 max="100"
                 value={inputVolume}
                 onChange={(e) => setInputVolume(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
+                style={{ accentColor: "var(--primary)" }}
+                className="w-full cursor-pointer h-1.5 bg-muted rounded-lg"
               />
             </div>
 
@@ -567,7 +572,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <div className="font-semibold text-xs">System Sound Effects</div>
                 <div className="text-[10px] text-muted-foreground">Play alerts on window close, error, and notifications</div>
               </div>
-              <ToggleSwitch checked={soundEffects} onChange={setSoundEffects} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={soundEffects} onChange={setSoundEffects} />
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
@@ -581,12 +586,12 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   onClick={() => setOutputDevice(dev)}
                   className={`w-full p-2.5 rounded-lg border text-left flex items-center justify-between text-xs transition-all cursor-pointer ${
                     outputDevice === dev
-                      ? "bg-amber-500/15 border-amber-500/50 text-amber-300 font-bold"
+                      ? "bg-primary/15 border-primary/50 text-primary font-bold"
                       : "bg-background/40 border-border/40 hover:bg-muted text-foreground"
                   }`}
                 >
                   <span>{dev}</span>
-                  {outputDevice === dev && <Check className="w-4 h-4 text-amber-400" />}
+                  {outputDevice === dev && <Check className="w-4 h-4 text-primary" />}
                 </button>
               ))}
             </div>
@@ -604,10 +609,10 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs flex items-center gap-1.5">
-                  <Sun className="w-4 h-4 text-amber-400" />
+                  <Sun className="w-4 h-4 text-primary" />
                   <span>Display Brightness</span>
                 </span>
-                <span className="font-bold text-amber-400 tabular-nums">{brightness}%</span>
+                <span className="font-bold text-primary tabular-nums">{brightness}%</span>
               </div>
               <input
                 type="range"
@@ -615,19 +620,20 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 max="100"
                 value={brightness}
                 onChange={(e) => handleBrightnessChange(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-2 bg-muted rounded-lg"
+                style={{ accentColor: "var(--primary)" }}
+                className="w-full cursor-pointer h-2 bg-muted rounded-lg"
               />
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-semibold text-xs flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-amber-400" />
+                  <Eye className="w-4 h-4 text-primary" />
                   <span>Night Light (Blue Light Filter)</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground">Shift colors to warmer spectrum for eye comfort</div>
               </div>
-              <ToggleSwitch checked={nightLight} onChange={setNightLight} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={nightLight} onChange={setNightLight} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -636,7 +642,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <select
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
-                  className="w-full p-2 bg-background/60 border border-border/60 rounded-lg text-xs outline-none focus:border-amber-400"
+                  className="w-full p-2 bg-background/60 border border-border/60 rounded-lg text-xs outline-none focus:border-primary"
                 >
                   <option value={hwInfo.screenResolution}>{hwInfo.screenResolution} (Native)</option>
                   <option value="1920x1080">1920x1080 (16:9)</option>
@@ -650,7 +656,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <select
                   value={refreshRate}
                   onChange={(e) => setRefreshRate(e.target.value)}
-                  className="w-full p-2 bg-background/60 border border-border/60 rounded-lg text-xs outline-none focus:border-amber-400"
+                  className="w-full p-2 bg-background/60 border border-border/60 rounded-lg text-xs outline-none focus:border-primary"
                 >
                   <option value="60Hz">60 Hz (Standard)</option>
                   <option value="120Hz">120 Hz (Smooth)</option>
@@ -673,7 +679,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs flex items-center gap-1.5">
-                  {darkMode ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+                  {darkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
                   <span>Dark Mode Theme</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground">Toggle between Light and Dark visual palette</div>
@@ -688,14 +694,13 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                     );
                   }
                 }}
-                activeColor="bg-amber-500"
               />
             </div>
 
             {/* Wallpaper Gallery */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                <ImageIcon className="w-3.5 h-3.5 text-primary" />
                 <span>Desktop Wallpaper Gallery</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -707,7 +712,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       type="button"
                       onClick={() => handleWallpaperSelect(wp.url)}
                       className={`group relative flex flex-col items-center rounded-xl overflow-hidden border transition-all cursor-pointer ${
-                        isSelected ? "border-amber-400 ring-2 ring-amber-400/50 shadow-md" : "border-border/60 hover:border-border"
+                        isSelected
+                          ? "border-primary ring-2 ring-primary/50 shadow-md"
+                          : "border-border/60 hover:border-border"
                       }`}
                     >
                       <div
@@ -723,10 +730,10 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* System Accent Color Palette (Functional!) */}
+            {/* System Accent Color Palette (Functional Live!) */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-amber-400" />
+                <Palette className="w-3.5 h-3.5 text-primary" />
                 <span>System Accent Color</span>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -737,12 +744,15 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       key={c.id}
                       type="button"
                       onClick={() => handleAccentSelect(c.id)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                         isSelected
-                          ? `scale-110 ring-2 ${c.ring} ring-offset-2 ring-offset-background shadow-md`
-                          : "hover:scale-105"
+                          ? `scale-110 ring-4 ring-offset-2 ring-offset-background shadow-lg`
+                          : "hover:scale-105 opacity-85 hover:opacity-100"
                       }`}
-                      style={{ backgroundColor: c.hex }}
+                      style={{
+                        backgroundColor: c.hex,
+                        boxShadow: isSelected ? `0 0 12px ${c.hex}80` : undefined,
+                      }}
                       title={c.name}
                     >
                       {isSelected && <Check className="w-4 h-4 text-black font-bold" />}
@@ -768,7 +778,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                     );
                   }
                 }}
-                activeColor="bg-amber-500"
               />
             </div>
           </div>
@@ -798,7 +807,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <div className="font-semibold text-xs">Play Notification Sounds</div>
                 <div className="text-[10px] text-muted-foreground">Audible chime when a new system event arrives</div>
               </div>
-              <ToggleSwitch checked={notificationSound} onChange={setNotificationSound} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={notificationSound} onChange={setNotificationSound} />
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
@@ -821,7 +830,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                         onChange={(v) =>
                           setAppNotifs((prev) => ({ ...prev, [item.key]: v }))
                         }
-                        activeColor="bg-amber-500"
                       />
                     </div>
                   );
@@ -863,13 +871,13 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <FolderLock className="w-4 h-4 text-amber-400 shrink-0" />
+                <FolderLock className="w-4 h-4 text-primary shrink-0" />
                 <div>
                   <div className="font-semibold text-xs">VirtualFS Storage Write Access</div>
                   <div className="text-[10px] text-muted-foreground">Enforce OpenBSD unveil() sandboxed filesystem permissions</div>
                 </div>
               </div>
-              <ToggleSwitch checked={fsAccess} onChange={setFsAccess} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={fsAccess} onChange={setFsAccess} />
             </div>
           </div>
         )}
@@ -910,7 +918,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       type="button"
                       onClick={() => setPfRuleMode(rule.id as typeof pfRuleMode)}
                       className={`p-2.5 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                        isSelected ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold" : "bg-background/40 border-border/40 hover:bg-muted"
+                        isSelected
+                          ? "bg-primary/20 border-primary/50 text-primary font-bold"
+                          : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
                       <span className="text-xs">{rule.label}</span>
@@ -924,7 +934,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold">Automatic Screen Lock Timer</span>
-                <span className="font-bold text-amber-400">{autoLockMinutes} minutes</span>
+                <span className="font-bold text-primary">{autoLockMinutes} minutes</span>
               </div>
               <input
                 type="range"
@@ -933,7 +943,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 step="5"
                 value={autoLockMinutes}
                 onChange={(e) => setAutoLockMinutes(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
+                style={{ accentColor: "var(--primary)" }}
+                className="w-full cursor-pointer h-1.5 bg-muted rounded-lg"
               />
             </div>
           </div>
@@ -976,7 +987,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       type="button"
                       onClick={() => setPowerProfile(pm.id as typeof powerProfile)}
                       className={`p-2.5 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                        isSelected ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold" : "bg-background/40 border-border/40 hover:bg-muted"
+                        isSelected
+                          ? "bg-primary/20 border-primary/50 text-primary font-bold"
+                          : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
                       <span className="text-xs">{pm.label}</span>
@@ -1000,16 +1013,16 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex justify-between items-baseline">
                 <span className="font-bold text-xs">VirtualFS Memory Volume (rootfs)</span>
-                <span className="text-xs font-mono text-amber-400">8.4 MB of 64.0 MB used</span>
+                <span className="text-xs font-mono text-primary">8.4 MB of 64.0 MB used</span>
               </div>
               <div className="h-3 w-full bg-muted/60 rounded-full flex overflow-hidden">
-                <div className="bg-amber-400 h-full w-[25%]" title="Applications & Binaries (2.1 MB)" />
+                <div className="bg-primary h-full w-[25%]" title="Applications & Binaries (2.1 MB)" />
                 <div className="bg-sky-400 h-full w-[35%]" title="Audio & Media (3.0 MB)" />
                 <div className="bg-emerald-400 h-full w-[15%]" title="Documents & Resume (1.3 MB)" />
                 <div className="bg-purple-400 h-full w-[25%]" title="System Cache (2.0 MB)" />
               </div>
               <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground pt-1">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Apps (2.1 MB)</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary" /> Apps (2.1 MB)</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-400" /> Audio/Media (3.0 MB)</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Documents (1.3 MB)</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-400" /> Cache (2.0 MB)</span>
@@ -1027,7 +1040,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   setCacheCleared(true);
                   setTimeout(() => setCacheCleared(false), 2000);
                 }}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 {cacheCleared ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Trash2 className="w-3.5 h-3.5" />}
                 <span>{cacheCleared ? "Cache Cleared!" : "Clean Cache"}</span>
@@ -1053,7 +1066,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   type="button"
                   onClick={() => setShellKeyMode("emacs")}
                   className={`p-2.5 rounded-lg border text-left flex flex-col transition-all cursor-pointer ${
-                    shellKeyMode === "emacs" ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold" : "bg-background/40 border-border/40 hover:bg-muted"
+                    shellKeyMode === "emacs"
+                      ? "bg-primary/20 border-primary/50 text-primary font-bold shadow-sm"
+                      : "bg-background/40 border-border/40 hover:bg-muted"
                   }`}
                 >
                   <span className="text-xs">Emacs / Standard Bash</span>
@@ -1063,7 +1078,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   type="button"
                   onClick={() => setShellKeyMode("vim")}
                   className={`p-2.5 rounded-lg border text-left flex flex-col transition-all cursor-pointer ${
-                    shellKeyMode === "vim" ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold" : "bg-background/40 border-border/40 hover:bg-muted"
+                    shellKeyMode === "vim"
+                      ? "bg-primary/20 border-primary/50 text-primary font-bold shadow-sm"
+                      : "bg-background/40 border-border/40 hover:bg-muted"
                   }`}
                 >
                   <span className="text-xs">Vi / Vim Mode</span>
@@ -1075,7 +1092,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold">Key Repeat Delay</span>
-                <span className="font-bold text-amber-400">{keyRepeatDelay} ms</span>
+                <span className="font-bold text-primary">{keyRepeatDelay} ms</span>
               </div>
               <input
                 type="range"
@@ -1084,7 +1101,8 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 step="25"
                 value={keyRepeatDelay}
                 onChange={(e) => setKeyRepeatDelay(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
+                style={{ accentColor: "var(--primary)" }}
+                className="w-full cursor-pointer h-1.5 bg-muted rounded-lg"
               />
             </div>
           </div>
@@ -1103,7 +1121,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <div className="font-semibold text-xs">24-Hour Time Format (Military Clock)</div>
                 <div className="text-[10px] text-muted-foreground">Display time as 14:30 instead of 02:30 PM</div>
               </div>
-              <ToggleSwitch checked={timeFormat24} onChange={setTimeFormat24} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={timeFormat24} onChange={setTimeFormat24} />
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
@@ -1111,7 +1129,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <div className="font-semibold text-xs">First Day of the Week is Monday</div>
                 <div className="text-[10px] text-muted-foreground">Align calendar week start to Monday</div>
               </div>
-              <ToggleSwitch checked={firstDayMonday} onChange={setFirstDayMonday} activeColor="bg-amber-500" />
+              <ToggleSwitch checked={firstDayMonday} onChange={setFirstDayMonday} />
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-1.5">
@@ -1151,7 +1169,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 type="button"
                 onClick={handleCheckUpdates}
                 disabled={isCheckingUpdate}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isCheckingUpdate ? "animate-spin" : ""}`} />
                 <span>{isCheckingUpdate ? "Checking..." : "Check for Updates"}</span>
@@ -1180,23 +1198,23 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
             {/* Developer About Profile Card */}
             <div className="p-4 bg-card/40 border border-border/60 rounded-xl flex flex-col items-center text-center space-y-3 shadow-sm">
-              <pre className="text-amber-400 text-xs leading-tight font-mono">{PUFFY_ASCII}</pre>
+              <pre className="text-primary text-xs leading-tight font-mono">{PUFFY_ASCII}</pre>
               <div>
                 <h3 className="text-base font-bold text-foreground">{PORTFOLIO_DATA.name}</h3>
-                <p className="text-xs text-amber-400/90 font-medium mt-0.5">{PORTFOLIO_DATA.title}</p>
+                <p className="text-xs text-primary font-medium mt-0.5">{PORTFOLIO_DATA.title}</p>
               </div>
 
               <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
                 <div className="flex items-center justify-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
                   <span>{PORTFOLIO_DATA.location}</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-amber-400" />
+                  <Mail className="w-3.5 h-3.5 text-primary" />
                   <span>{PORTFOLIO_DATA.email}</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-amber-400" />
+                  <Phone className="w-3.5 h-3.5 text-primary" />
                   <span>{PORTFOLIO_DATA.phone}</span>
                 </div>
               </div>
@@ -1211,7 +1229,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       href={s.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-2.5 py-1 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded flex items-center gap-1.5 transition-colors cursor-pointer"
                       title={s.label}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -1224,13 +1242,13 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
             {/* System Hardware Specifications Card */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2 text-xs">
-              <div className="font-bold text-xs text-amber-400 border-b border-border/40 pb-1.5 flex items-center justify-between">
+              <div className="font-bold text-xs text-primary border-b border-border/40 pb-1.5 flex items-center justify-between">
                 <span>System Specifications</span>
                 <span className="text-[10px] text-muted-foreground font-normal">v{SYSTEM_CONFIG.desktopVersion}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-border/40">
                 <span className="text-muted-foreground">OS Name:</span>
-                <span className="font-bold text-amber-400">{SYSTEM_CONFIG.name}</span>
+                <span className="font-bold text-primary">{SYSTEM_CONFIG.name}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-border/40">
                 <span className="text-muted-foreground">OS Version:</span>

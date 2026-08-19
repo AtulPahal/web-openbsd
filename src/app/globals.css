@@ -81,6 +81,8 @@
   --sidebar-accent-foreground: #1c1917;
   --sidebar-border: #e7e5e4;
   --sidebar-ring: #d97706;
+  --accent-color: #d97706;
+  --accent-glow: rgba(217, 119, 6, 0.4);
 }
 
 .dark {
@@ -115,19 +117,8 @@
   --sidebar-accent-foreground: #e0e0e0;
   --sidebar-border: #333333;
   --sidebar-ring: #f0c040;
-}
-
-/* Nerd Fonts Symbols Only — subset for media icons */
-@font-face {
-  font-family: "Symbols Nerd Font";
-  src: url("/fonts/SymbolsNerdFont.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-.nf {
-  font-family: "Symbols Nerd Font", "Geist Mono", var(--font-mono), monospace;
+  --accent-color: #f0c040;
+  --accent-glow: rgba(240, 192, 64, 0.4);
 }
 
 @layer base {
