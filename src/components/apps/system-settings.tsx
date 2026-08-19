@@ -36,6 +36,22 @@ import {
   Image as ImageIcon,
   Key,
   Terminal,
+  Bell,
+  BellOff,
+  Camera,
+  Mic,
+  FolderLock,
+  Languages,
+  Clock,
+  CalendarDays,
+  Database,
+  Trash2,
+  DownloadCloud,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  Music,
+  Video,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
@@ -47,9 +63,14 @@ type SettingsSection =
   | "sound"
   | "display"
   | "appearance"
+  | "notifications"
+  | "privacy"
   | "security"
   | "power"
+  | "storage"
   | "keyboard"
+  | "language"
+  | "updates"
   | "system";
 
 const WALLPAPERS = [
@@ -117,40 +138,71 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   // Real Hardware telemetry
   const [hwInfo, setHwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
 
-  // Settings State
+  // 1. Wi-Fi & Network State
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [connectedWifi, setConnectedWifi] = useState(SYSTEM_CONFIG.defaultWifiNetworks[0]?.ssid || "OpenBSD-5G");
   const [ipMode, setIpMode] = useState<"dhcp" | "static">("dhcp");
   const [dnsServer, setDnsServer] = useState("1.1.1.1, 8.8.8.8");
 
+  // 2. Sound & Audio State
   const [volume, setVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [inputVolume, setInputVolume] = useState(80);
   const [soundEffects, setSoundEffects] = useState(true);
+  const [audioBalance, setAudioBalance] = useState(0);
   const [outputDevice, setOutputDevice] = useState(SYSTEM_CONFIG.defaultAudioOutputDevices[0] || "Built-in Speakers");
 
+  // 3. Display State
   const [brightness, setBrightness] = useState(100);
   const [nightLight, setNightLight] = useState(false);
   const [resolution, setResolution] = useState(hwInfo.screenResolution);
   const [refreshRate, setRefreshRate] = useState("60Hz");
   const [displayScale, setDisplayScale] = useState("100%");
 
+  // 4. Appearance State
   const [darkMode, setDarkMode] = useState(true);
   const [activeWallpaper, setActiveWallpaper] = useState(SYSTEM_CONFIG.wallpaper);
   const [activeAccent, setActiveAccent] = useState("amber");
   const [dockMagnify, setDockMagnify] = useState(true);
-  const [dockPosition, setDockPosition] = useState<"right" | "bottom">("right");
 
+  // 5. Notifications & Focus State
+  const [dndEnabled, setDndEnabled] = useState(false);
+  const [notificationSound, setNotificationSound] = useState(true);
+  const [appNotifs, setAppNotifs] = useState({
+    kitty: true,
+    firefox: true,
+    calendar: true,
+    files: true,
+  });
+
+  // 6. Privacy & Permissions State
+  const [cameraAccess, setCameraAccess] = useState(true);
+  const [micAccess, setMicAccess] = useState(true);
+  const [fsAccess, setFsAccess] = useState(true);
+
+  // 7. Security & PF Firewall State
   const [pfActive, setPfActive] = useState(true);
   const [pfRuleMode, setPfRuleMode] = useState<"standard" | "stealth" | "strict">("standard");
   const [autoLockMinutes, setAutoLockMinutes] = useState(15);
 
+  // 8. Power State
   const [powerProfile, setPowerProfile] = useState<"performance" | "balanced" | "saver">("balanced");
   const [sleepTimeout, setSleepTimeout] = useState(30);
 
+  // 9. Storage State
+  const [cacheCleared, setCacheCleared] = useState(false);
+
+  // 10. Keyboard State
   const [shellKeyMode, setShellKeyMode] = useState<"emacs" | "vim">("emacs");
   const [keyRepeatDelay, setKeyRepeatDelay] = useState(250);
-  const [keyRepeatRate, setKeyRepeatRate] = useState(30);
+
+  // 11. Language & Region State
+  const [timeFormat24, setTimeFormat24] = useState(false);
+  const [firstDayMonday, setFirstDayMonday] = useState(false);
+
+  // 12. Software Update State
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [updateCheckedTime, setUpdateCheckedTime] = useState<string | null>("Just now");
 
   useEffect(() => {
     setHwInfo(getRealHardwareInfo());
@@ -186,14 +238,27 @@ export function SystemSettings({ windowId }: { windowId: string }) {
     }
   };
 
+  const handleCheckUpdates = () => {
+    setIsCheckingUpdate(true);
+    setTimeout(() => {
+      setIsCheckingUpdate(false);
+      setUpdateCheckedTime(new Date().toLocaleTimeString());
+    }, 1200);
+  };
+
   const menuItems: Array<{ id: SettingsSection; label: string; icon: React.ElementType; color: string }> = [
     { id: "wifi", label: "Wi-Fi & Network", icon: Wifi, color: "text-emerald-400" },
     { id: "sound", label: "Sound & Audio", icon: Volume2, color: "text-amber-400" },
     { id: "display", label: "Displays & Graphics", icon: Sun, color: "text-sky-400" },
     { id: "appearance", label: "Appearance & Themes", icon: Palette, color: "text-rose-400" },
-    { id: "security", label: "Security & Firewall", icon: Shield, color: "text-purple-400" },
+    { id: "notifications", label: "Notifications & Focus", icon: Bell, color: "text-amber-500" },
+    { id: "privacy", label: "Privacy & Permissions", icon: FolderLock, color: "text-indigo-400" },
+    { id: "security", label: "Security & PF Firewall", icon: Shield, color: "text-purple-400" },
     { id: "power", label: "Battery & Power", icon: BatteryCharging, color: "text-emerald-400" },
+    { id: "storage", label: "Storage & Cache", icon: Database, color: "text-cyan-400" },
     { id: "keyboard", label: "Keyboard & Shell", icon: Keyboard, color: "text-blue-400" },
+    { id: "language", label: "Language & Region", icon: Languages, color: "text-teal-400" },
+    { id: "updates", label: "Software Update", icon: DownloadCloud, color: "text-violet-400" },
     { id: "system", label: "System & About", icon: Laptop, color: "text-amber-400" },
   ];
 
@@ -209,7 +274,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
       data-window-id={windowId}
     >
       {/* Left Sidebar (macOS Settings Style) */}
-      <div className="w-full sm:w-56 border-b sm:border-b-0 sm:border-r border-border/60 bg-card/40 flex flex-col p-2.5 space-y-2.5 shrink-0 overflow-x-auto sm:overflow-x-visible scrollbar-none">
+      <div className="w-full sm:w-60 border-b sm:border-b-0 sm:border-r border-border/60 bg-card/40 flex flex-col p-2.5 space-y-2.5 shrink-0 overflow-x-auto sm:overflow-x-visible scrollbar-none">
         {/* Search Settings Input */}
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -229,12 +294,12 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
           <div className="truncate">
             <div className="font-bold text-xs text-foreground truncate">{SYSTEM_CONFIG.userFullName}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{SYSTEM_CONFIG.name} Account</div>
+            <div className="text-[10px] text-muted-foreground truncate">{SYSTEM_CONFIG.name} Developer</div>
           </div>
         </div>
 
         {/* Navigation Categories */}
-        <div className="flex flex-row sm:flex-col gap-1 sm:space-y-1 sm:overflow-y-auto scrollbar-thin sm:pr-1 w-full shrink-0 sm:shrink">
+        <div className="flex flex-row sm:flex-col gap-1 sm:space-y-0.5 sm:overflow-y-auto scrollbar-thin sm:pr-1 w-full shrink-0 sm:shrink">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -246,14 +311,14 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 className={`p-2 rounded-lg flex items-center justify-between text-xs transition-all cursor-pointer shrink-0 sm:w-full ${
                   isActive
                     ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-sm"
-                    : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                    : "hover:bg-muted/60 text-muted-foreground hover:text-foreground border border-transparent"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Icon className={`w-4 h-4 ${item.color}`} />
+                  <Icon className={`w-3.5 h-3.5 ${item.color}`} />
                   <span className="truncate">{item.label}</span>
                 </div>
-                <ChevronRight className="hidden sm:block w-3.5 h-3.5 opacity-40 shrink-0" />
+                <ChevronRight className="hidden sm:block w-3 h-3 opacity-40 shrink-0" />
               </button>
             );
           })}
@@ -261,7 +326,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
       </div>
 
       {/* Right Content Panel */}
-      <div className="flex-1 p-4 overflow-y-auto bg-card/20 space-y-4 scrollbar-thin">
+      <div className="flex-1 p-4 sm:p-5 overflow-y-auto bg-card/20 space-y-4 scrollbar-thin">
         {/* 1. SECTION: Wi-Fi & Network */}
         {activeSection === "wifi" && (
           <div className="space-y-4">
@@ -275,7 +340,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
             {wifiEnabled ? (
               <div className="space-y-3">
-                {/* Active Connection Tile */}
                 <div className="p-3 bg-card/60 border border-emerald-500/40 rounded-xl flex items-center justify-between shadow-sm">
                   <div>
                     <div className="font-bold text-emerald-400 flex items-center gap-1.5 text-xs">
@@ -291,7 +355,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   </span>
                 </div>
 
-                {/* IP Configuration (DHCP vs Static) */}
                 <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     TCP/IP Address Configuration
@@ -300,7 +363,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                     <button
                       type="button"
                       onClick={() => setIpMode("dhcp")}
-                      className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
+                      className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "dhcp"
                           ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
                           : "bg-background/40 border-border/40 hover:bg-muted"
@@ -311,7 +374,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                     <button
                       type="button"
                       onClick={() => setIpMode("static")}
-                      className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all ${
+                      className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "static"
                           ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
                           : "bg-background/40 border-border/40 hover:bg-muted"
@@ -332,7 +395,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   </div>
                 </div>
 
-                {/* Available Networks List */}
                 <div className="p-3 bg-card/40 border border-border/60 rounded-xl space-y-2">
                   <div className="text-[10px] font-bold text-muted-foreground uppercase">
                     Available Networks
@@ -376,7 +438,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Adjust master volume, input microphone, and output devices.</p>
             </div>
 
-            {/* Master Volume */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs flex items-center gap-1.5">
@@ -395,7 +456,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               />
             </div>
 
-            {/* Input Volume */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-xs">Microphone Input Level</span>
@@ -411,7 +471,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               />
             </div>
 
-            {/* Sound Effects Toggle */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-semibold text-xs">System Sound Effects</div>
@@ -420,7 +479,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <ToggleSwitch checked={soundEffects} onChange={setSoundEffects} activeColor="bg-amber-500" />
             </div>
 
-            {/* Output Device Selector */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Select Audio Output Device
@@ -452,7 +510,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Adjust display brightness, refresh rate, and blue light filter.</p>
             </div>
 
-            {/* Brightness */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs flex items-center gap-1.5">
@@ -471,7 +528,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               />
             </div>
 
-            {/* Night Light Filter */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-semibold text-xs flex items-center gap-1.5">
@@ -483,7 +539,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <ToggleSwitch checked={nightLight} onChange={setNightLight} activeColor="bg-amber-500" />
             </div>
 
-            {/* Resolution & Refresh Rate Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-3 bg-card/40 border border-border/60 rounded-xl space-y-1.5">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase">Resolution</span>
@@ -523,7 +578,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Customize dark/light mode, wallpapers, and accent colors.</p>
             </div>
 
-            {/* Dark / Light Mode */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs flex items-center gap-1.5">
@@ -546,7 +600,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               />
             </div>
 
-            {/* Live Wallpaper Gallery */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
@@ -577,7 +630,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Accent Color Palette */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-amber-400" />
@@ -604,7 +656,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Dock Magnification */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs">Dock Proximity Magnification</div>
@@ -626,7 +677,107 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
         )}
 
-        {/* 5. SECTION: Security & Firewall */}
+        {/* 5. SECTION: Notifications & Focus */}
+        {activeSection === "notifications" && (
+          <div className="space-y-4">
+            <div className="border-b border-border/60 pb-2">
+              <h2 className="text-sm font-bold text-foreground">Notifications & Focus Mode</h2>
+              <p className="text-[10px] text-muted-foreground">Manage Do Not Disturb schedules and app notification banners.</p>
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div>
+                <div className="font-bold text-xs flex items-center gap-1.5 text-purple-400">
+                  <BellOff className="w-4 h-4" />
+                  <span>Do Not Disturb (DND Mode)</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Silence all floating banners and sound chimes</div>
+              </div>
+              <ToggleSwitch checked={dndEnabled} onChange={setDndEnabled} activeColor="bg-purple-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-xs">Play Notification Sounds</div>
+                <div className="text-[10px] text-muted-foreground">Audible chime when a new system event arrives</div>
+              </div>
+              <ToggleSwitch checked={notificationSound} onChange={setNotificationSound} activeColor="bg-amber-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">
+                App-by-App Notification Permissions
+              </div>
+              <div className="space-y-2">
+                {[
+                  { key: "kitty", label: "kitty Terminal (Command completions)" },
+                  { key: "firefox", label: "Firefox Browser (Download alerts)" },
+                  { key: "calendar", label: "Calendar (Event reminders & agenda)" },
+                  { key: "files", label: "Files (VirtualFS disk alerts)" },
+                ].map((item) => {
+                  const isChecked = appNotifs[item.key as keyof typeof appNotifs];
+                  return (
+                    <div key={item.key} className="flex items-center justify-between p-2 bg-background/50 rounded-lg">
+                      <span className="text-xs">{item.label}</span>
+                      <ToggleSwitch
+                        checked={isChecked}
+                        onChange={(v) =>
+                          setAppNotifs((prev) => ({ ...prev, [item.key]: v }))
+                        }
+                        activeColor="bg-amber-500"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. SECTION: Privacy & App Permissions */}
+        {activeSection === "privacy" && (
+          <div className="space-y-4">
+            <div className="border-b border-border/60 pb-2">
+              <h2 className="text-sm font-bold text-foreground">Privacy & Application Permissions</h2>
+              <p className="text-[10px] text-muted-foreground">Manage sandbox access rights for desktop applications.</p>
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Camera className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-xs">Camera Access</div>
+                  <div className="text-[10px] text-muted-foreground">Allow web vision apps to access camera stream</div>
+                </div>
+              </div>
+              <ToggleSwitch checked={cameraAccess} onChange={setCameraAccess} activeColor="bg-emerald-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Mic className="w-4 h-4 text-sky-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-xs">Microphone Access</div>
+                  <div className="text-[10px] text-muted-foreground">Allow voice recording and speech synthesis</div>
+                </div>
+              </div>
+              <ToggleSwitch checked={micAccess} onChange={setMicAccess} activeColor="bg-sky-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FolderLock className="w-4 h-4 text-amber-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-xs">VirtualFS Storage Write Access</div>
+                  <div className="text-[10px] text-muted-foreground">Enforce OpenBSD unveil() sandboxed filesystem permissions</div>
+                </div>
+              </div>
+              <ToggleSwitch checked={fsAccess} onChange={setFsAccess} activeColor="bg-amber-500" />
+            </div>
+          </div>
+        )}
+
+        {/* 7. SECTION: Security & PF Firewall */}
         {activeSection === "security" && (
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
@@ -634,7 +785,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">OpenBSD Packet Filter (PF), pledge sandbox, and login authentication.</p>
             </div>
 
-            {/* PF Status */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs flex items-center gap-1.5 text-emerald-400">
@@ -646,7 +796,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <ToggleSwitch checked={pfActive} onChange={setPfActive} activeColor="bg-emerald-500" />
             </div>
 
-            {/* Firewall Rules Mode */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 PF Firewall Rule Preset
@@ -675,7 +824,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Auto Lock Screen */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold">Automatic Screen Lock Timer</span>
@@ -694,7 +842,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
         )}
 
-        {/* 6. SECTION: Battery & Power */}
+        {/* 8. SECTION: Battery & Power */}
         {activeSection === "power" && (
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
@@ -702,7 +850,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Manage power profiles and sleep management.</p>
             </div>
 
-            {/* Battery Status */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -715,7 +862,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Power Mode Grid */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Energy Mode Profile
@@ -746,7 +892,56 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
         )}
 
-        {/* 7. SECTION: Keyboard & Input */}
+        {/* 9. SECTION: Storage & VirtualFS Cleaner */}
+        {activeSection === "storage" && (
+          <div className="space-y-4">
+            <div className="border-b border-border/60 pb-2">
+              <h2 className="text-sm font-bold text-foreground">Storage & VirtualFS Cleaner</h2>
+              <p className="text-[10px] text-muted-foreground">Inspect memory filesystem usage and clean cache.</p>
+            </div>
+
+            {/* Storage Usage Bar */}
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
+              <div className="flex justify-between items-baseline">
+                <span className="font-bold text-xs">VirtualFS Memory Volume (rootfs)</span>
+                <span className="text-xs font-mono text-amber-400">8.4 MB of 64.0 MB used</span>
+              </div>
+              <div className="h-3 w-full bg-muted/60 rounded-full flex overflow-hidden">
+                <div className="bg-amber-400 h-full w-[25%]" title="Applications & Binaries (2.1 MB)" />
+                <div className="bg-sky-400 h-full w-[35%]" title="Audio & Media (3.0 MB)" />
+                <div className="bg-emerald-400 h-full w-[15%]" title="Documents & Resume (1.3 MB)" />
+                <div className="bg-purple-400 h-full w-[25%]" title="System Cache (2.0 MB)" />
+              </div>
+              <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground pt-1">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Apps (2.1 MB)</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-400" /> Audio/Media (3.0 MB)</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Documents (1.3 MB)</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-400" /> Cache (2.0 MB)</span>
+              </div>
+            </div>
+
+            {/* Cleaner Button */}
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-xs">Clear Temporary Cache</div>
+                <div className="text-[10px] text-muted-foreground">Purge cached iframe logs, temporary proxy entries, and scratch buffers</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setCacheCleared(true);
+                  setTimeout(() => setCacheCleared(false), 2000);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                {cacheCleared ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Trash2 className="w-3.5 h-3.5" />}
+                <span>{cacheCleared ? "Cache Cleared!" : "Clean Cache"}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 10. SECTION: Keyboard & Input */}
         {activeSection === "keyboard" && (
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
@@ -754,7 +949,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Configure shell keybindings and key repeat rates.</p>
             </div>
 
-            {/* Shell Mode (Emacs vs Vim) */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Shell Command Line Keybinding Mode
@@ -783,7 +977,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Key Repeat Delay */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold">Key Repeat Delay</span>
@@ -802,7 +995,87 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           </div>
         )}
 
-        {/* 8. SECTION: System & About */}
+        {/* 11. SECTION: Language & Region */}
+        {activeSection === "language" && (
+          <div className="space-y-4">
+            <div className="border-b border-border/60 pb-2">
+              <h2 className="text-sm font-bold text-foreground">Language & Region</h2>
+              <p className="text-[10px] text-muted-foreground">Configure clock formatting and regional preferences.</p>
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-xs">24-Hour Time Format (Military Clock)</div>
+                <div className="text-[10px] text-muted-foreground">Display time as 14:30 instead of 02:30 PM</div>
+              </div>
+              <ToggleSwitch checked={timeFormat24} onChange={setTimeFormat24} activeColor="bg-amber-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-xs">First Day of the Week is Monday</div>
+                <div className="text-[10px] text-muted-foreground">Align calendar week start to Monday</div>
+              </div>
+              <ToggleSwitch checked={firstDayMonday} onChange={setFirstDayMonday} activeColor="bg-amber-500" />
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-1.5">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">System Locale & Language</span>
+              <div className="p-2.5 bg-background/50 border border-border/50 rounded-lg flex items-center justify-between text-xs">
+                <span>English (United States) — en_US.UTF-8</span>
+                <span className="text-[10px] text-emerald-400 font-bold">Active</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 12. SECTION: Software Update */}
+        {activeSection === "updates" && (
+          <div className="space-y-4">
+            <div className="border-b border-border/60 pb-2">
+              <h2 className="text-sm font-bold text-foreground">Software Update</h2>
+              <p className="text-[10px] text-muted-foreground">Keep your OpenBSD Portfolio OS secure and up to date.</p>
+            </div>
+
+            <div className="p-4 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs text-foreground">
+                    OpenBSD {SYSTEM_CONFIG.desktopVersion} is Up to Date
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                    Last checked: {updateCheckedTime || "Never"} • Branch: main
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCheckUpdates}
+                disabled={isCheckingUpdate}
+                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isCheckingUpdate ? "animate-spin" : ""}`} />
+                <span>{isCheckingUpdate ? "Checking..." : "Check for Updates"}</span>
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2 text-xs">
+              <div className="font-bold text-xs text-foreground">Latest Release Highlights:</div>
+              <ul className="space-y-1 text-[11px] text-muted-foreground list-disc pl-4">
+                <li>Interactive in-browser AI/ML Model Studio with ONNX web execution.</li>
+                <li>Ubuntu Touch mobile launcher, fullscreen app stages, and multi-app switcher.</li>
+                <li>kitty Terminal with custom mascot vector icon and real hardware telemetry.</li>
+                <li>Real-time Web API hardware prober and live GitHub API profile client.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* 13. SECTION: System & About */}
         {activeSection === "system" && (
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
