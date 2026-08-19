@@ -18,6 +18,7 @@ import {
   Globe,
   Sliders,
   ChevronRight,
+  ChevronLeft,
   Mail,
   Phone,
   MapPin,
@@ -80,12 +81,47 @@ const WALLPAPERS = [
   { id: "nordic-dusk", name: "Nordic Minimalist", url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1920&auto=format&fit=crop", thumb: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=300&auto=format&fit=crop" },
 ];
 
-const ACCENT_COLORS = [
-  { id: "amber", name: "OpenBSD Amber", hex: "#f59e0b", ring: "ring-amber-500" },
-  { id: "emerald", name: "Terminal Green", hex: "#10b981", ring: "ring-emerald-500" },
-  { id: "sky", name: "BSD Sky", hex: "#0284c7", ring: "ring-sky-500" },
-  { id: "purple", name: "Cyber Purple", hex: "#a855f7", ring: "ring-purple-500" },
-  { id: "rose", name: "Neon Rose", hex: "#f43f5e", ring: "ring-rose-500" },
+export const ACCENT_COLORS = [
+  {
+    id: "amber",
+    name: "OpenBSD Amber",
+    hex: "#f59e0b",
+    primary: "#f0c040",
+    primaryLight: "#d97706",
+    ring: "ring-amber-500",
+  },
+  {
+    id: "emerald",
+    name: "Terminal Green",
+    hex: "#10b981",
+    primary: "#10b981",
+    primaryLight: "#059669",
+    ring: "ring-emerald-500",
+  },
+  {
+    id: "sky",
+    name: "BSD Sky",
+    hex: "#0284c7",
+    primary: "#38bdf8",
+    primaryLight: "#0284c7",
+    ring: "ring-sky-500",
+  },
+  {
+    id: "purple",
+    name: "Cyber Purple",
+    hex: "#a855f7",
+    primary: "#c084fc",
+    primaryLight: "#9333ea",
+    ring: "ring-purple-500",
+  },
+  {
+    id: "rose",
+    name: "Neon Rose",
+    hex: "#f43f5e",
+    primary: "#fb7185",
+    primaryLight: "#e11d48",
+    ring: "ring-rose-500",
+  },
 ];
 
 const PUFFY_ASCII = `
@@ -133,6 +169,7 @@ function ToggleSwitch({
 
 export function SystemSettings({ windowId }: { windowId: string }) {
   const [activeSection, setActiveSection] = useState<SettingsSection>("wifi");
+  const [mobileView, setMobileView] = useState<"categories" | "detail">("categories");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Real Hardware telemetry
@@ -149,7 +186,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   const [isMuted, setIsMuted] = useState(false);
   const [inputVolume, setInputVolume] = useState(80);
   const [soundEffects, setSoundEffects] = useState(true);
-  const [audioBalance, setAudioBalance] = useState(0);
   const [outputDevice, setOutputDevice] = useState(SYSTEM_CONFIG.defaultAudioOutputDevices[0] || "Built-in Speakers");
 
   // 3. Display State
@@ -238,6 +274,26 @@ export function SystemSettings({ windowId }: { windowId: string }) {
     }
   };
 
+  const handleAccentSelect = (accentId: string) => {
+    setActiveAccent(accentId);
+    const color = ACCENT_COLORS.find((c) => c.id === accentId);
+    if (color && typeof document !== "undefined") {
+      const isDark = document.documentElement.classList.contains("dark");
+      const primaryVal = isDark ? color.primary : color.primaryLight;
+      document.documentElement.style.setProperty("--primary", primaryVal);
+      document.documentElement.style.setProperty("--accent", primaryVal);
+      document.documentElement.style.setProperty("--ring", primaryVal);
+      document.documentElement.style.setProperty("--sidebar-primary", primaryVal);
+      document.documentElement.style.setProperty("--sidebar-ring", primaryVal);
+
+      window.dispatchEvent(
+        new CustomEvent("accent-change", {
+          detail: { accentId: color.id, primary: primaryVal, hex: color.hex },
+        })
+      );
+    }
+  };
+
   const handleCheckUpdates = () => {
     setIsCheckingUpdate(true);
     setTimeout(() => {
@@ -246,60 +302,68 @@ export function SystemSettings({ windowId }: { windowId: string }) {
     }, 1200);
   };
 
-  const menuItems: Array<{ id: SettingsSection; label: string; icon: React.ElementType; color: string }> = [
-    { id: "wifi", label: "Wi-Fi & Network", icon: Wifi, color: "text-emerald-400" },
-    { id: "sound", label: "Sound & Audio", icon: Volume2, color: "text-amber-400" },
-    { id: "display", label: "Displays & Graphics", icon: Sun, color: "text-sky-400" },
-    { id: "appearance", label: "Appearance & Themes", icon: Palette, color: "text-rose-400" },
-    { id: "notifications", label: "Notifications & Focus", icon: Bell, color: "text-amber-500" },
-    { id: "privacy", label: "Privacy & Permissions", icon: FolderLock, color: "text-indigo-400" },
-    { id: "security", label: "Security & PF Firewall", icon: Shield, color: "text-purple-400" },
-    { id: "power", label: "Battery & Power", icon: BatteryCharging, color: "text-emerald-400" },
-    { id: "storage", label: "Storage & Cache", icon: Database, color: "text-cyan-400" },
-    { id: "keyboard", label: "Keyboard & Shell", icon: Keyboard, color: "text-blue-400" },
-    { id: "language", label: "Language & Region", icon: Languages, color: "text-teal-400" },
-    { id: "updates", label: "Software Update", icon: DownloadCloud, color: "text-violet-400" },
-    { id: "system", label: "System & About", icon: Laptop, color: "text-amber-400" },
+  const menuItems: Array<{ id: SettingsSection; label: string; icon: React.ElementType; color: string; desc: string }> = [
+    { id: "wifi", label: "Wi-Fi & Network", icon: Wifi, color: "text-emerald-400", desc: "Network status, IP, DNS" },
+    { id: "sound", label: "Sound & Audio", icon: Volume2, color: "text-amber-400", desc: "Volume, input mic, speakers" },
+    { id: "display", label: "Displays & Graphics", icon: Sun, color: "text-sky-400", desc: "Brightness, resolution, refresh rate" },
+    { id: "appearance", label: "Appearance & Themes", icon: Palette, color: "text-rose-400", desc: "Dark mode, wallpapers, accent color" },
+    { id: "notifications", label: "Notifications & Focus", icon: Bell, color: "text-amber-500", desc: "Do Not Disturb, app banners" },
+    { id: "privacy", label: "Privacy & Permissions", icon: FolderLock, color: "text-indigo-400", desc: "Camera, mic, filesystem access" },
+    { id: "security", label: "Security & PF Firewall", icon: Shield, color: "text-purple-400", desc: "Packet filter, sandbox, auto-lock" },
+    { id: "power", label: "Battery & Power", icon: BatteryCharging, color: "text-emerald-400", desc: "Battery health, energy modes" },
+    { id: "storage", label: "Storage & Cache", icon: Database, color: "text-cyan-400", desc: "VirtualFS disk volume & cleaner" },
+    { id: "keyboard", label: "Keyboard & Shell", icon: Keyboard, color: "text-blue-400", desc: "Vim/Emacs mode, key repeat" },
+    { id: "language", label: "Language & Region", icon: Languages, color: "text-teal-400", desc: "24-hour clock, locale, calendar" },
+    { id: "updates", label: "Software Update", icon: DownloadCloud, color: "text-violet-400", desc: "OpenBSD release & patch updates" },
+    { id: "system", label: "System & About", icon: Laptop, color: "text-amber-400", desc: "Developer profile, hardware specs" },
   ];
 
   const filteredMenuItems = useMemo(() => {
     if (!searchQuery.trim()) return menuItems;
     const q = searchQuery.toLowerCase();
-    return menuItems.filter((m) => m.label.toLowerCase().includes(q));
+    return menuItems.filter(
+      (m) => m.label.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)
+    );
   }, [searchQuery, menuItems]);
+
+  const activeCategoryMeta = menuItems.find((m) => m.id === activeSection) || menuItems[0];
 
   return (
     <div
       className="flex flex-col sm:flex-row h-full w-full bg-background font-mono text-foreground text-xs select-none overflow-hidden"
       data-window-id={windowId}
     >
-      {/* Left Sidebar (macOS Settings Style) */}
-      <div className="w-full sm:w-60 border-b sm:border-b-0 sm:border-r border-border/60 bg-card/40 flex flex-col p-2.5 space-y-2.5 shrink-0 overflow-x-auto sm:overflow-x-visible scrollbar-none">
+      {/* --- DESKTOP SIDEBAR (hidden on mobile when in detail view) --- */}
+      <div
+        className={`w-full sm:w-64 border-b sm:border-b-0 sm:border-r border-border/60 bg-card/40 flex-col p-2.5 sm:p-3 space-y-2.5 shrink-0 overflow-y-auto scrollbar-thin ${
+          mobileView === "detail" ? "hidden sm:flex" : "flex"
+        }`}
+      >
         {/* Search Settings Input */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search Settings..."
-            className="w-full pl-8 pr-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs outline-none focus:border-amber-400 transition-all placeholder:text-muted-foreground/60"
+            className="w-full pl-8 pr-2.5 py-1.5 bg-background/60 border border-border/60 rounded-xl text-xs outline-none focus:border-amber-400 transition-all placeholder:text-muted-foreground/60"
           />
         </div>
 
         {/* User Account Card */}
-        <div className="hidden sm:flex p-2.5 bg-background/60 border border-border/50 rounded-xl items-center gap-2.5 shrink-0">
+        <div className="flex p-2.5 bg-background/60 border border-border/50 rounded-xl items-center gap-2.5 shrink-0 shadow-sm">
           <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
             <User className="w-4 h-4" />
           </div>
-          <div className="truncate">
+          <div className="truncate flex-1">
             <div className="font-bold text-xs text-foreground truncate">{SYSTEM_CONFIG.userFullName}</div>
             <div className="text-[10px] text-muted-foreground truncate">{SYSTEM_CONFIG.name} Developer</div>
           </div>
         </div>
 
         {/* Navigation Categories */}
-        <div className="flex flex-row sm:flex-col gap-1 sm:space-y-0.5 sm:overflow-y-auto scrollbar-thin sm:pr-1 w-full shrink-0 sm:shrink">
+        <div className="flex flex-col space-y-1 overflow-y-auto scrollbar-thin pr-1 flex-1">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -307,26 +371,53 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveSection(item.id)}
-                className={`p-2 rounded-lg flex items-center justify-between text-xs transition-all cursor-pointer shrink-0 sm:w-full ${
+                onClick={() => {
+                  setActiveSection(item.id);
+                  setMobileView("detail");
+                }}
+                className={`p-2.5 rounded-xl flex items-center justify-between text-xs transition-all cursor-pointer w-full text-left ${
                   isActive
                     ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-sm"
                     : "hover:bg-muted/60 text-muted-foreground hover:text-foreground border border-transparent"
                 }`}
               >
-                <div className="flex items-center gap-2 truncate">
-                  <Icon className={`w-3.5 h-3.5 ${item.color}`} />
-                  <span className="truncate">{item.label}</span>
+                <div className="flex items-center gap-2.5 truncate">
+                  <div className={`p-1 rounded-lg bg-background/40 ${item.color}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="truncate">
+                    <div className="font-semibold text-xs text-foreground truncate">{item.label}</div>
+                    <div className="text-[9px] text-muted-foreground/70 truncate sm:hidden">{item.desc}</div>
+                  </div>
                 </div>
-                <ChevronRight className="hidden sm:block w-3 h-3 opacity-40 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0" />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Right Content Panel */}
-      <div className="flex-1 p-4 sm:p-5 overflow-y-auto bg-card/20 space-y-4 scrollbar-thin">
+      {/* --- RIGHT / MOBILE DETAIL CONTENT PANEL --- */}
+      <div
+        className={`flex-1 p-4 sm:p-5 overflow-y-auto bg-card/20 space-y-4 scrollbar-thin ${
+          mobileView === "categories" ? "hidden sm:block" : "block"
+        }`}
+      >
+        {/* Mobile Detail Navigation Header (Back button) */}
+        <div className="flex sm:hidden items-center justify-between pb-3 border-b border-border/60">
+          <button
+            type="button"
+            onClick={() => setMobileView("categories")}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-background/80 border border-border rounded-xl text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Settings</span>
+          </button>
+          <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
+            <span>{activeCategoryMeta.label}</span>
+          </div>
+        </div>
+
         {/* 1. SECTION: Wi-Fi & Network */}
         {activeSection === "wifi" && (
           <div className="space-y-4">
@@ -365,7 +456,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       onClick={() => setIpMode("dhcp")}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "dhcp"
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold shadow-sm"
                           : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
@@ -376,7 +467,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                       onClick={() => setIpMode("static")}
                       className={`p-2 rounded-lg border text-xs font-semibold text-center transition-all cursor-pointer ${
                         ipMode === "static"
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold shadow-sm"
                           : "bg-background/40 border-border/40 hover:bg-muted"
                       }`}
                     >
@@ -578,6 +669,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Customize dark/light mode, wallpapers, and accent colors.</p>
             </div>
 
+            {/* Dark / Light Mode */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs flex items-center gap-1.5">
@@ -600,6 +692,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               />
             </div>
 
+            {/* Wallpaper Gallery */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
@@ -630,32 +723,36 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
+            {/* System Accent Color Palette (Functional!) */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
               <div className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-amber-400" />
                 <span>System Accent Color</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {ACCENT_COLORS.map((c) => {
                   const isSelected = activeAccent === c.id;
                   return (
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => setActiveAccent(c.id)}
-                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform cursor-pointer ${
-                        isSelected ? `scale-110 ring-2 ${c.ring} ring-offset-2 ring-offset-background` : "hover:scale-105"
+                      onClick={() => handleAccentSelect(c.id)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                        isSelected
+                          ? `scale-110 ring-2 ${c.ring} ring-offset-2 ring-offset-background shadow-md`
+                          : "hover:scale-105"
                       }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
                     >
-                      {isSelected && <Check className="w-3.5 h-3.5 text-black" />}
+                      {isSelected && <Check className="w-4 h-4 text-black font-bold" />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
+            {/* Dock Magnification */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-bold text-xs">Dock Proximity Magnification</div>
@@ -800,7 +897,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 PF Firewall Rule Preset
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   { id: "standard", label: "Standard", desc: "Block inbound, permit stateful out" },
                   { id: "stealth", label: "Stealth", desc: "Drop all unsolicited probes silently" },
@@ -866,7 +963,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Energy Mode Profile
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   { id: "performance", label: "High Performance", desc: "Maximize CPU clock frequencies" },
                   { id: "balanced", label: "Balanced (Default)", desc: "Optimal performance and battery balance" },
@@ -900,7 +997,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <p className="text-[10px] text-muted-foreground">Inspect memory filesystem usage and clean cache.</p>
             </div>
 
-            {/* Storage Usage Bar */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-3">
               <div className="flex justify-between items-baseline">
                 <span className="font-bold text-xs">VirtualFS Memory Volume (rootfs)</span>
@@ -920,7 +1016,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               </div>
             </div>
 
-            {/* Cleaner Button */}
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
               <div>
                 <div className="font-semibold text-xs">Clear Temporary Cache</div>
@@ -953,7 +1048,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <div className="text-[10px] font-bold text-muted-foreground uppercase">
                 Shell Command Line Keybinding Mode
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setShellKeyMode("emacs")}
@@ -1067,7 +1162,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
               <div className="font-bold text-xs text-foreground">Latest Release Highlights:</div>
               <ul className="space-y-1 text-[11px] text-muted-foreground list-disc pl-4">
                 <li>Interactive in-browser AI/ML Model Studio with ONNX web execution.</li>
-                <li>Ubuntu Touch mobile launcher, fullscreen app stages, and multi-app switcher.</li>
+                <li>Right-side auto-scaled dock and responsive mobile layout.</li>
                 <li>kitty Terminal with custom mascot vector icon and real hardware telemetry.</li>
                 <li>Real-time Web API hardware prober and live GitHub API profile client.</li>
               </ul>
