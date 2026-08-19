@@ -4,7 +4,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   terminal: {
     id: "terminal",
     name: "kitty",
-    icon: "Terminal",
+    icon: "Kitty",
     defaultSize: { width: 680, height: 420 },
     minSize: { width: 400, height: 250 },
   },

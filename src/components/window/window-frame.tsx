@@ -51,7 +51,7 @@ export function WindowFrame({
     originH: number;
   } | null>(null);
 
-  // --- Title bar drag (Mouse + Touch) ---
+  // --- Title bar drag (Mouse + Touch with RAF smooth throttling) ---
   const handleTitleStart = useCallback(
     (clientX: number, clientY: number) => {
       if (win.isMaximized) return;
@@ -64,13 +64,19 @@ export function WindowFrame({
         originY: win.position.y,
       };
 
+      let rafId: number | null = null;
+
       const handleMove = (evX: number, evY: number) => {
         if (!dragRef.current) return;
-        const dx = evX - dragRef.current.startX;
-        const dy = evY - dragRef.current.startY;
-        onMove({
-          x: dragRef.current.originX + dx,
-          y: Math.max(0, dragRef.current.originY + dy),
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          if (!dragRef.current) return;
+          const dx = evX - dragRef.current.startX;
+          const dy = evY - dragRef.current.startY;
+          onMove({
+            x: dragRef.current.originX + dx,
+            y: Math.max(0, dragRef.current.originY + dy),
+          });
         });
       };
 
@@ -82,6 +88,7 @@ export function WindowFrame({
       };
 
       const handleEnd = () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
         dragRef.current = null;
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleEnd);
@@ -90,9 +97,9 @@ export function WindowFrame({
         document.removeEventListener("touchcancel", handleEnd);
       };
 
-      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mousemove", handleMouseMove, { passive: true });
       document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, { passive: true });
       document.addEventListener("touchend", handleEnd);
       document.addEventListener("touchcancel", handleEnd);
     },
@@ -120,7 +127,7 @@ export function WindowFrame({
     onMaximize();
   }, [onMaximize]);
 
-  // --- Resize handles (Mouse + Touch) ---
+  // --- Resize handles (Mouse + Touch with RAF smooth throttling) ---
   const handleResizeStart = useCallback(
     (direction: ResizeDirection, clientX: number, clientY: number) => {
       if (win.isMaximized) return;
@@ -136,40 +143,46 @@ export function WindowFrame({
         originH: win.size.height,
       };
 
+      let resizeRafId: number | null = null;
+
       const handleResizeMove = (evX: number, evY: number) => {
         if (!resizeRef.current) return;
-        const r = resizeRef.current;
-        const dx = evX - r.startX;
-        const dy = evY - r.startY;
+        if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
+        resizeRafId = requestAnimationFrame(() => {
+          if (!resizeRef.current) return;
+          const r = resizeRef.current;
+          const dx = evX - r.startX;
+          const dy = evY - r.startY;
 
-        let newX = r.originX;
-        let newY = r.originY;
-        let newW = r.originW;
-        let newH = r.originH;
+          let newX = r.originX;
+          let newY = r.originY;
+          let newW = r.originW;
+          let newH = r.originH;
 
-        if (r.direction.includes("e")) newW = r.originW + dx;
-        if (r.direction.includes("w")) {
-          newW = r.originW - dx;
-          newX = r.originX + dx;
-        }
-        if (r.direction.includes("s")) newH = r.originH + dy;
-        if (r.direction.includes("n")) {
-          newH = r.originH - dy;
-          newY = r.originY + dy;
-        }
+          if (r.direction.includes("e")) newW = r.originW + dx;
+          if (r.direction.includes("w")) {
+            newW = r.originW - dx;
+            newX = r.originX + dx;
+          }
+          if (r.direction.includes("s")) newH = r.originH + dy;
+          if (r.direction.includes("n")) {
+            newH = r.originH - dy;
+            newY = r.originY + dy;
+          }
 
-        const clampedW = Math.max(newW, win.minSize.width);
-        const clampedH = Math.max(newH, win.minSize.height);
+          const clampedW = Math.max(newW, win.minSize.width);
+          const clampedH = Math.max(newH, win.minSize.height);
 
-        if (r.direction.includes("w") && clampedW !== newW) {
-          newX = r.originX + r.originW - clampedW;
-        }
-        if (r.direction.includes("n") && clampedH !== newH) {
-          newY = r.originY + r.originH - clampedH;
-        }
+          if (r.direction.includes("w") && clampedW !== newW) {
+            newX = r.originX + r.originW - clampedW;
+          }
+          if (r.direction.includes("n") && clampedH !== newH) {
+            newY = r.originY + r.originH - clampedH;
+          }
 
-        onResize({ width: clampedW, height: clampedH });
-        onMove({ x: newX, y: Math.max(0, newY) });
+          onResize({ width: clampedW, height: clampedH });
+          onMove({ x: newX, y: Math.max(0, newY) });
+        });
       };
 
       const handleMouseMove = (ev: MouseEvent) => handleResizeMove(ev.clientX, ev.clientY);
@@ -180,6 +193,7 @@ export function WindowFrame({
       };
 
       const handleEnd = () => {
+        if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
         resizeRef.current = null;
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleEnd);
@@ -188,9 +202,9 @@ export function WindowFrame({
         document.removeEventListener("touchcancel", handleEnd);
       };
 
-      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mousemove", handleMouseMove, { passive: true });
       document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, { passive: true });
       document.addEventListener("touchend", handleEnd);
       document.addEventListener("touchcancel", handleEnd);
     },

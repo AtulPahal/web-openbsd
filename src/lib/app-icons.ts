@@ -12,10 +12,12 @@ import {
   Terminal,
   User,
 } from "lucide-react";
+import { KittyIcon } from "@/lib/social-icons";
 
-/** Lucide icons used by the applications registered in the desktop. */
+/** Lucide and custom vector icons used by the applications registered in the desktop. */
 export const APP_ICON_MAP: Record<string, ElementType> = {
-  Terminal,
+  Terminal: KittyIcon,
+  Kitty: KittyIcon,
   Folder,
   FileText,
   Activity,

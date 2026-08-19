@@ -396,29 +396,14 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
   const [cpuHistory, setCpuHistory] = useState<number[]>([25, 28, 30, 24, 29, 32, 28, 35, 27, 30]);
   const [memHistory, setMemHistory] = useState<number[]>([40, 41, 41, 42, 41, 41, 42, 41, 41, 41]);
   const [netHistory, setNetHistory] = useState<number[]>([10, 15, 20, 18, 25, 30, 22, 28, 35, 40]);
-
-  const intervalRefs = useRef<ReturnType<typeof setInterval>[]>([]);
-
-  const clearIntervals = useCallback(() => {
-    intervalRefs.current.forEach(clearInterval);
-    intervalRefs.current = [];
-  }, []);
-
   const handleKillProcess = (pid: number) => {
     setProcesses((prev) => prev.filter((p) => p.pid !== pid));
   };
 
   useEffect(() => {
-    clearIntervals();
-
-    // Uptime: every second
-    const uptimeId = setInterval(() => {
+    const timerId = setInterval(() => {
       setUptime((u) => u + 1);
-    }, 1000);
-    intervalRefs.current.push(uptimeId);
 
-    // Process + CPU update: every 2 seconds
-    const procId = setInterval(() => {
       setProcesses((prev) =>
         prev.map((p) => ({
           ...p,
@@ -428,27 +413,22 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
       );
 
       setCpuUsage((prev) => {
-        const next = Math.min(45, Math.max(15, +(prev + (Math.random() - 0.5) * 8).toFixed(1)));
-        setCpuHistory((h) => [...h.slice(-20), next]);
+        const next = Math.min(45, Math.max(15, +(prev + (Math.random() - 0.5) * 6).toFixed(1)));
+        setCpuHistory((h) => [...h.slice(-19), next]);
         return next;
       });
 
-      setMemHistory((h) => [...h.slice(-20), 41 + (Math.random() - 0.5) * 2]);
-    }, 2000);
-    intervalRefs.current.push(procId);
+      setMemHistory((h) => [...h.slice(-19), +(41 + (Math.random() - 0.5) * 1.5).toFixed(1)]);
 
-    // Network: every second
-    const netId = setInterval(() => {
-      const deltaTx = Math.floor(Math.random() * 4096);
-      const deltaRx = Math.floor(Math.random() * 16384);
+      const deltaTx = Math.floor(Math.random() * 3000);
+      const deltaRx = Math.floor(Math.random() * 12000);
       setTxBytes((b) => b + deltaTx);
       setRxBytes((b) => b + deltaRx);
-      setNetHistory((h) => [...h.slice(-20), (deltaRx + deltaTx) / 200]);
-    }, 1000);
-    intervalRefs.current.push(netId);
+      setNetHistory((h) => [...h.slice(-19), +((deltaRx + deltaTx) / 200).toFixed(1)]);
+    }, 1500);
 
-    return clearIntervals;
-  }, [clearIntervals]);
+    return () => clearInterval(timerId);
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-background font-mono text-foreground text-xs select-none" data-window-id={windowId}>
