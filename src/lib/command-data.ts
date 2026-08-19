@@ -1,4 +1,5 @@
 import { SYSTEM_CONFIG } from "./system-config";
+import { getRealHardwareInfo } from "./hardware-info";
 
 export const PUFFY_ASCII = `
                  _____
@@ -17,7 +18,7 @@ export const PUFFY_ASCII = `
                   Puffy`;
 
 export const INITIAL_MOTD = `${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (GENERIC.MP)
-Welcome to ${SYSTEM_CONFIG.name}: Proactively secure web environment.
+Welcome to ${SYSTEM_CONFIG.name}: Proactively secure web portfolio environment.
 Type 'help' for available commands or 'fastfetch' for system info.
 `;
 
@@ -29,18 +30,25 @@ export function buildFastfetch(cwd: string, elapsedSeconds = 0): string {
   const uptime = hours > 0
     ? `${hours}h ${minutes}m ${seconds}s`
     : `${minutes}m ${seconds}s`;
+
+  const hw = getRealHardwareInfo();
+
   return `${PUFFY_ASCII}
 
  \x1b[38;5;220m${SYSTEM_CONFIG.username}\x1b[0m@\x1b[38;5;81m${SYSTEM_CONFIG.hostname.split('.')[0]}\x1b[0m
- \x1b[38;5;240m${'─'.repeat(uptime.length + 1)}\x1b[0m
- \x1b[1;38;5;220mOS:\x1b[0m          ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (GENERIC.MP) ${SYSTEM_CONFIG.architecture}
- \x1b[1;38;5;220mHost:\x1b[0m        Web Desktop
+ \x1b[38;5;240m${'─'.repeat(28)}\x1b[0m
+ \x1b[1;38;5;220mOS:\x1b[0m          ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (${SYSTEM_CONFIG.architecture})
+ \x1b[1;38;5;220mHost:\x1b[0m        ${SYSTEM_CONFIG.userFullName} Portfolio OS
  \x1b[1;38;5;220mKernel:\x1b[0m      ${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} GENERIC.MP#1
  \x1b[1;38;5;220mUptime:\x1b[0m      ${uptime}
  \x1b[1;38;5;220mShell:\x1b[0m       ${SYSTEM_CONFIG.shell.split('/').pop()} ${SYSTEM_CONFIG.desktopVersion}
- \x1b[1;38;5;220mTerminal:\x1b[0m     ${SYSTEM_CONFIG.terminal}
- \x1b[1;38;5;220mLocal IP:\x1b[0m     ${SYSTEM_CONFIG.localIp}
- \x1b[1;38;5;220mCWD:\x1b[0m          ${cwd}`;
+ \x1b[1;38;5;220mTerminal:\x1b[0m    kitty (${SYSTEM_CONFIG.terminal})
+ \x1b[1;38;5;220mCPU:\x1b[0m         ${hw.cpuCores} Cores (${hw.platform})
+ \x1b[1;38;5;220mMemory:\x1b[0m      ${hw.memoryGb} GB RAM
+ \x1b[1;38;5;220mDisplay:\x1b[0m     ${hw.screenResolution} @ ${hw.pixelRatio}x
+ \x1b[1;38;5;220mNetwork:\x1b[0m     ${hw.networkType} (${hw.downlinkMbps} Mbps)
+ \x1b[1;38;5;220mGitHub:\x1b[0m      ${SYSTEM_CONFIG.website}
+ \x1b[1;38;5;220mCWD:\x1b[0m         ${cwd}`;
 }
 
 export const MAN_PAGES: Record<string, string> = {
@@ -55,10 +63,7 @@ SYNOPSIS
 DESCRIPTION
      For each operand that names a file, ls displays its name. For each
      operand that names a directory, ls displays the names of files
-     contained in that directory.
-
-     -l      List in long format.
-     -a      Include hidden files (entries starting with '.').`,
+     contained in that directory.`,
 
   cd: `CD(1)                     General Commands Manual                    CD(1)
 
@@ -105,6 +110,54 @@ SYNOPSIS
 DESCRIPTION
      The echo utility writes any specified operands, separated by
      single blank characters, to the standard output.`,
+
+  github: `GITHUB(1)                 General Commands Manual                 GITHUB(1)
+
+NAME
+     github - inspect live GitHub profile and repositories
+
+SYNOPSIS
+     github [username]
+
+DESCRIPTION
+     Fetches live user profile data, public repository count, follower
+     metrics, and latest public repositories from GitHub API.`,
+
+  ping: `PING(8)                   System Manager's Manual                 PING(8)
+
+NAME
+     ping - send ICMP ECHO_REQUEST packets to network hosts
+
+SYNOPSIS
+     ping host
+
+DESCRIPTION
+     The ping utility uses the ICMP protocol's mandatory ECHO_REQUEST
+     datagram to elicit an ICMP ECHO_RESPONSE from a host or gateway.`,
+
+  sysctl: `SYSCTL(8)                 System Manager's Manual                 SYSCTL(8)
+
+NAME
+     sysctl - get or set kernel state
+
+SYNOPSIS
+     sysctl [name ...]
+
+DESCRIPTION
+     The sysctl utility retrieves kernel state and allows processes
+     with appropriate privilege to set kernel state.`,
+
+  pkg_add: `PKG_ADD(1)                General Commands Manual                PKG_ADD(1)
+
+NAME
+     pkg_add - install and update packages
+
+SYNOPSIS
+     pkg_add [-v] pkgname ...
+
+DESCRIPTION
+     The pkg_add command is used to install packages or upgrade to
+     newer versions.`,
 
   reboot: `REBOOT(8)                 System Manager's Manual                 REBOOT(8)
 
@@ -207,6 +260,7 @@ SYNOPSIS
 
 DESCRIPTION
      Display a list of all available built-in commands.`,
+
   banner: `BANNER(1)                 General Commands Manual                 BANNER(1)
 
 NAME

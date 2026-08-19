@@ -4,6 +4,7 @@ import { buildFastfetch, MAN_PAGES } from "@/lib/command-data";
 import { buildProxyUrl } from "@/lib/browser-config";
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 import { fetchGitHubUser, fetchGitHubRepos } from "@/lib/github-api";
+import { getRealHardwareInfo } from "@/lib/hardware-info";
 
 function formatPermissions(node: { type: string; permissions: string }): string {
   const prefix = node.type === "directory" ? "d" : node.type === "symlink" ? "l" : "-";
@@ -114,6 +115,9 @@ export class CommandInterpreter {
       case "github":
       case "gh": return this.cmdGitHub(args);
       case "ping": return this.cmdPing(args);
+      case "sysctl": return this.cmdSysctl(args);
+      case "pkg_add": return this.cmdPkgAdd(args);
+      case "pkg_info": return this.cmdPkgInfo();
       default:
         return `ksh: ${cmd}: not found`;
     }
@@ -282,6 +286,9 @@ export class CommandInterpreter {
   fastfetch          Display system info & specs (neofetch)
   github [user]      Fetch live GitHub profile & repositories
   ping <host>        Test network latency & roundtrip
+  sysctl [-a]        Get kernel and hardware state
+  pkg_info           List installed software packages
+  pkg_add <pkg>      Install a software package
   portfolio          Print portfolio & project summary
   resume             Print resume & technical skills
   ls [-l]            List directory contents
@@ -454,5 +461,50 @@ export class CommandInterpreter {
       `3 packets transmitted, 3 packets received, 0.0% packet loss`,
       `round-trip min/avg/max/std-dev = ${delay - 1}.1/${delay}.4/${delay + 1}.8/0.7 ms`,
     ].join("\n");
+  }
+
+  private cmdSysctl(args: string[]): string {
+    const hw = getRealHardwareInfo();
+    const map: Record<string, string> = {
+      "hw.machine": SYSTEM_CONFIG.architecture,
+      "hw.model": `${SYSTEM_CONFIG.name} Virtual Machine`,
+      "hw.ncpu": String(hw.cpuCores),
+      "hw.byteorder": "1234",
+      "hw.physmem": String(hw.memoryGb * 1024 * 1024 * 1024),
+      "hw.usermem": String(Math.round(hw.memoryGb * 0.8 * 1024 * 1024 * 1024)),
+      "kern.ostype": SYSTEM_CONFIG.name,
+      "kern.osrelease": SYSTEM_CONFIG.osVersion,
+      "kern.version": `${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} (GENERIC.MP) #1: Sat Apr 6 12:00:00 MDT 2024`,
+      "kern.hostname": SYSTEM_CONFIG.hostname,
+    };
+
+    if (args.length === 0 || args[0] === "-a") {
+      return Object.entries(map).map(([k, v]) => `${k}=${v}`).join("\n");
+    }
+
+    const key = args[0];
+    if (map[key]) return `${key}=${map[key]}`;
+    return `sysctl: third level name ${key} in ${key} is invalid`;
+  }
+
+  private cmdPkgInfo(): string {
+    return [
+      "python-3.11.8       interpreted, interactive, object-oriented language",
+      "pytorch-2.2.1       deep learning framework for Python",
+      "onnxruntime-1.17.1  cross-platform inference engine",
+      "bun-1.2.0           fast all-in-one JavaScript runtime",
+      "nextjs-16.2.12      React production framework",
+      "kitty-0.34.1        fast, feature-rich, GPU based terminal emulator",
+      "firefox-125.0       Mozilla Firefox web browser",
+      "neovim-0.9.5        extensible Vim-fork focused on extensibility",
+    ].join("\n");
+  }
+
+  private cmdPkgAdd(args: string[]): string {
+    if (args.length === 0) return "usage: pkg_add [-v] pkgname ...";
+    const pkgs = args.filter((a) => !a.startsWith("-"));
+    return pkgs
+      .map((p) => `quirks-7.5 signed on 2024-04-06T12:00:00Z\n${p}: ok`)
+      .join("\n");
   }
 }
