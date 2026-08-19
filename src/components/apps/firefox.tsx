@@ -33,6 +33,14 @@ interface Tab {
   history: string[];
   historyIndex: number;
 }
+function getDomainFromUrl(url: string): string {
+  if (url === "about:home" || url === "about:newtab" || !url) return "Firefox Home";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url.slice(0, 30);
+  }
+}
 
 const DEFAULT_BOOKMARKS = [
   { title: "Atul Pahal (GitHub)", url: "https://github.com/AtulPahal", icon: GitHubIcon, isSvg: true },
@@ -81,11 +89,7 @@ export function Firefox({ windowId }: { windowId: string }) {
         if (t.id === tabId) {
           const newHistory = t.history.slice(0, t.historyIndex + 1);
           newHistory.push(finalUrl);
-          const domain = finalUrl.startsWith("http")
-            ? new URL(finalUrl).hostname.replace(/^www\./, "")
-            : finalUrl === "about:home"
-            ? "Firefox Home"
-            : finalUrl;
+          const domain = getDomainFromUrl(finalUrl);
 
           return {
             ...t,
@@ -155,7 +159,7 @@ export function Firefox({ windowId }: { windowId: string }) {
             ? {
                 ...t,
                 url: prevUrl,
-                title: prevUrl === "about:home" ? "Firefox Home" : new URL(prevUrl).hostname,
+                title: getDomainFromUrl(prevUrl),
                 historyIndex: newIndex,
               }
             : t
@@ -175,7 +179,7 @@ export function Firefox({ windowId }: { windowId: string }) {
             ? {
                 ...t,
                 url: nextUrl,
-                title: nextUrl === "about:home" ? "Firefox Home" : new URL(nextUrl).hostname,
+                title: getDomainFromUrl(nextUrl),
                 historyIndex: newIndex,
               }
             : t

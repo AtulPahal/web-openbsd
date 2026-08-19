@@ -175,7 +175,7 @@ export const AI_MODELS: Record<string, ModelDefinition> = {
       const drama = (inputs.dramaWeight ?? 60) / 100;
       const tech = (inputs.aiTechWeight ?? 95) / 100;
 
-      const vectorMagnitude = Math.sqrt(action * action + drama * drama + tech * tech);
+      const vectorMagnitude = Math.max(0.001, Math.sqrt(action * action + drama * drama + tech * tech));
       const similarity = +( (action * 0.8 + drama * 0.5 + tech * 0.95) / (vectorMagnitude * 1.35) ).toFixed(3);
 
       const highProb = Math.min(0.96, Math.max(0.05, similarity > 0.75 ? similarity : similarity * 0.6));
