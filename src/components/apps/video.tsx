@@ -1,11 +1,21 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MEDIA_CONFIG } from "@/lib/media-config";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Clapperboard,
+  Film,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import { VirtualFS } from "@/features/virtual-fs";
 
 function formatTime(seconds: number) {
-  if (isNaN(seconds)) return "0:00";
+  if (isNaN(seconds) || seconds <= 0) return "0:00";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
@@ -20,7 +30,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
-  
+
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [isYoutube, setIsYoutube] = useState(false);
   const [ytId, setYtId] = useState("");
@@ -56,12 +66,13 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   // Handle auto-play when URL changes
   useEffect(() => {
     if (videoUrl && videoRef.current) {
-      videoRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(e => {
-        console.warn("Autoplay prevented:", e);
-        setIsPlaying(false);
-      });
+      videoRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((e) => {
+          console.warn("Autoplay prevented:", e);
+          setIsPlaying(false);
+        });
     }
   }, [videoUrl]);
 
@@ -71,17 +82,19 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
         videoRef.current.play();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const nextMute = !isMuted;
+      videoRef.current.muted = nextMute;
+      setIsMuted(nextMute);
     }
   };
 
@@ -113,7 +126,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
     }
     controlsTimeoutRef.current = setTimeout(() => {
       if (isPlaying) setShowControls(false);
-    }, 2000);
+    }, 2500);
   };
 
   useEffect(() => {
@@ -137,7 +150,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       const url = URL.createObjectURL(file);
@@ -154,26 +167,49 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
     }
   };
 
-  // If no video URL is loaded, show a blank screen like real mpv
+  // If no video URL is loaded, show a clean modern mpv player placeholder
   if (!videoUrl) {
     return (
       <div
-        className="w-full h-full bg-background text-foreground font-mono flex flex-col items-center justify-center select-none transition-colors" data-window-id={windowId}
+        className="w-full h-full bg-background text-foreground font-mono flex flex-col items-center justify-center select-none p-6 transition-colors"
+        data-window-id={windowId}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <p className="text-4xl font-bold text-amber-400 tracking-widest">mpv</p>
-        <p className="text-xs text-muted-foreground mt-2">
-          {isDragging ? "Drop to play!" : "Drop files or URLs to play"}
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/10">
+          <Clapperboard className="w-8 h-8" />
+        </div>
+        <p className="text-3xl font-bold text-amber-400 tracking-wider">mpv</p>
+        <p className="text-xs text-muted-foreground mt-2 text-center max-w-xs">
+          {isDragging
+            ? "Drop video file to start playback!"
+            : "Drop video files (.mp4, .webm) or open videos from File Manager to play"}
         </p>
+
+        {/* Demo Video Load Button */}
+        <button
+          type="button"
+          onClick={() => {
+            setVideoUrl("/bad_apple.mp4");
+            setIsYoutube(false);
+            setTitle("mpv - bad_apple.mp4");
+          }}
+          className="mt-5 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+        >
+          <Film className="w-4 h-4" />
+          <span>Play Sample Video (bad_apple.mp4)</span>
+        </button>
       </div>
     );
   }
 
   return (
-    <div 
-      className={`relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none group ${isDragging ? 'border-2 border-dashed border-amber-500/50 opacity-80' : ''}`} data-window-id={windowId}
+    <div
+      className={`relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none group ${
+        isDragging ? "border-2 border-dashed border-amber-500/50 opacity-80" : ""
+      }`}
+      data-window-id={windowId}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         if (isPlaying) setShowControls(false);
@@ -202,51 +238,71 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         />
       )}
 
-      {/* On-Screen Controller (OSC) mimicking mpv */}
+      {/* On-Screen Controller (OSC) with Vector Lucide Icons */}
       {!isYoutube && (
         <div
-        className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md bg-background/90 border border-border rounded-none p-2 transition-opacity duration-300 flex items-center gap-3 ${showControls ? 'opacity-100' : 'opacity-0'}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={togglePlay}
-          aria-label={isPlaying ? "Pause" : "Play"}
-          className="px-2 py-1 text-sm border border-border text-foreground hover:text-amber-400 disabled:opacity-40"
+          className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md bg-card/90 backdrop-blur-md border border-border/80 rounded-xl p-2.5 transition-opacity duration-300 flex items-center gap-3 shadow-2xl ${
+            showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <span className="nf text-lg" aria-hidden="true">{isPlaying ? MEDIA_CONFIG.glyphs.pause : MEDIA_CONFIG.glyphs.play}</span>
-        </button>
+          {/* Play/Pause Button */}
+          <button
+            type="button"
+            onClick={togglePlay}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            title={isPlaying ? "Pause" : "Play"}
+            className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-lg transition-all cursor-pointer shadow-sm shrink-0"
+          >
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-amber-300" />}
+          </button>
 
-        <span className="font-mono text-sm text-muted-foreground shrink-0">
-          {formatTime(progress)}
-        </span>
+          {/* Current Elapsed Time */}
+          <span className="font-mono text-xs text-foreground/80 shrink-0 tabular-nums">
+            {formatTime(progress)}
+          </span>
 
-        <input
-          type="range"
-          min={0}
-          max={duration || 100}
-          value={progress}
-          onChange={handleSeek}
-          className="flex-1 h-1 accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-2 [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:rounded-none cursor-pointer"
-        />
+          {/* Seek Progress Bar */}
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={progress}
+            onChange={handleSeek}
+            className="flex-1 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
+          />
 
-        <span className="font-mono text-sm text-muted-foreground shrink-0">
-          {formatTime(duration)}
-        </span>
+          {/* Total Duration */}
+          <span className="font-mono text-xs text-muted-foreground shrink-0 tabular-nums">
+            {formatTime(duration)}
+          </span>
 
-        <button
-          onClick={toggleMute}
-          aria-label={isMuted ? "Unmute" : "Mute"}
-          className="px-2 py-1 text-sm border border-border text-foreground hover:text-amber-400 disabled:opacity-40"
-        >
-          <span className="nf text-base" aria-hidden="true">{isMuted ? MEDIA_CONFIG.glyphs.mute : MEDIA_CONFIG.glyphs.volume}</span>
-        </button>
+          {/* Mute/Unmute Button */}
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+            title={isMuted ? "Unmute" : "Mute"}
+            className="p-1.5 text-foreground/80 hover:text-amber-400 hover:bg-muted/60 rounded transition-colors cursor-pointer shrink-0"
+          >
+            {isMuted ? (
+              <VolumeX className="w-4 h-4 text-red-400" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-amber-400" />
+            )}
+          </button>
         </div>
       )}
 
       {/* Top Title Bar Overlay */}
-      <div className={`absolute top-0 left-0 right-0 p-2 bg-background/90 border-b border-border rounded-none transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
-        <h1 className="text-foreground text-xs font-mono font-semibold truncate px-1">
-          {title}
+      <div
+        className={`absolute top-0 left-0 right-0 p-2.5 bg-card/85 backdrop-blur-md border-b border-border/80 transition-opacity duration-300 flex items-center justify-between shadow-md ${
+          showControls ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <h1 className="text-foreground text-xs font-mono font-semibold truncate px-1 flex items-center gap-2">
+          <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
+          <span>{title}</span>
         </h1>
       </div>
     </div>

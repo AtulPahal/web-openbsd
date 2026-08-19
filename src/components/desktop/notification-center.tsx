@@ -118,7 +118,7 @@ export function NotificationCenter({
   return (
     <div
       ref={panelRef}
-      className="fixed top-8 right-2 z-50 w-[calc(100vw-16px)] sm:w-84 max-h-[85vh] bg-card/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl flex flex-col overflow-hidden font-mono text-xs select-none animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-150"
+      className="fixed top-8 right-2 z-[60] w-[calc(100vw-16px)] sm:w-84 max-h-[85vh] bg-card/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl flex flex-col overflow-hidden font-mono text-xs select-none animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-150"
     >
       {/* Top Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 bg-background/50 border-b border-border/50">

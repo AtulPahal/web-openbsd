@@ -214,7 +214,7 @@ export function SystemTray({
 
       {/* Wi-Fi Popover */}
       {activePopover === "wifi" && (
-        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-[60] w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Wifi className="w-4 h-4 text-emerald-400" />
@@ -266,7 +266,7 @@ export function SystemTray({
 
       {/* Bluetooth Popover */}
       {activePopover === "bluetooth" && (
-        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-[60] w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Bluetooth className="w-4 h-4 text-sky-400" />
@@ -319,7 +319,7 @@ export function SystemTray({
 
       {/* Audio Popover */}
       {activePopover === "audio" && (
-        <div className="absolute top-8 right-0 z-50 w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="absolute top-8 right-0 z-[60] w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <Volume2 className="w-4 h-4 text-amber-400" />
