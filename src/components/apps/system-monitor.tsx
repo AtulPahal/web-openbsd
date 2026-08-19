@@ -24,7 +24,7 @@ import {
   INITIAL_UPTIME,
   NETWORK_CONFIG,
 } from "@/lib/system-monitor-config";
-
+import { getRealHardwareInfo, type SystemHardwareInfo } from "@/lib/hardware-info";
 function jitter(base: number, range: number): number {
   const delta = (Math.random() - 0.5) * 2 * range;
   return Math.max(0, +(base + delta).toFixed(1));
@@ -227,16 +227,17 @@ function ResourcesTab({
   memHistory,
   cpuUsage,
   uptime,
+  hwInfo,
 }: {
   cpuHistory: number[];
   memHistory: number[];
   cpuUsage: number;
   uptime: number;
+  hwInfo: SystemHardwareInfo;
 }) {
-  const memUsed = 847;
-  const memTotal = 2048;
-  const memPct = Math.round((memUsed / memTotal) * 100);
-
+  const memTotal = hwInfo.memoryGb * 1024;
+  const memUsed = Math.round(memTotal * 0.42);
+  const memPct = 42;
   return (
     <div className="flex flex-col gap-3 p-3 font-mono text-xs">
       {/* CPU Live Chart Card */}
@@ -244,7 +245,7 @@ function ResourcesTab({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-amber-400">
             <Cpu className="w-4 h-4 text-amber-400" />
-            <span>CPU History (Virtual CPU @ 3.00GHz)</span>
+            <span>CPU ({hwInfo.cpuCores} Cores @ {hwInfo.platform})</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-foreground tabular-nums">{cpuUsage.toFixed(1)}%</span>
@@ -260,7 +261,7 @@ function ResourcesTab({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-sky-400">
             <HardDrive className="w-4 h-4 text-sky-400" />
-            <span>Memory History (RAM & Swap)</span>
+            <span>Memory ({hwInfo.memoryGb} GB RAM & Swap)</span>
           </div>
           <div className="text-xs text-muted-foreground tabular-nums">
             {memUsed} MB / {memTotal} MB ({memPct}%)
@@ -387,6 +388,7 @@ function NetworkTab({
 }
 
 export function SystemMonitor({ windowId }: { windowId: string }) {
+  const [hwInfo, setHwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
   const [processes, setProcesses] = useState<ProcessInfo[]>(INITIAL_PROCESSES);
   const [cpuUsage, setCpuUsage] = useState(INITIAL_CPU_USAGE);
   const [uptime, setUptime] = useState(INITIAL_UPTIME);
@@ -396,10 +398,13 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
   const [cpuHistory, setCpuHistory] = useState<number[]>([25, 28, 30, 24, 29, 32, 28, 35, 27, 30]);
   const [memHistory, setMemHistory] = useState<number[]>([40, 41, 41, 42, 41, 41, 42, 41, 41, 41]);
   const [netHistory, setNetHistory] = useState<number[]>([10, 15, 20, 18, 25, 30, 22, 28, 35, 40]);
+
   const handleKillProcess = (pid: number) => {
     setProcesses((prev) => prev.filter((p) => p.pid !== pid));
   };
-
+  useEffect(() => {
+    setHwInfo(getRealHardwareInfo());
+  }, []);
   useEffect(() => {
     const timerId = setInterval(() => {
       setUptime((u) => u + 1);
@@ -479,7 +484,13 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
           <ProcessesTab processes={processes} onKillProcess={handleKillProcess} />
         </TabsContent>
         <TabsContent value="resources" className="flex-1 overflow-auto">
-          <ResourcesTab cpuHistory={cpuHistory} memHistory={memHistory} cpuUsage={cpuUsage} uptime={uptime} />
+          <ResourcesTab
+            cpuHistory={cpuHistory}
+            memHistory={memHistory}
+            cpuUsage={cpuUsage}
+            uptime={uptime}
+            hwInfo={hwInfo}
+          />
         </TabsContent>
         <TabsContent value="network" className="flex-1 overflow-auto">
           <NetworkTab txBytes={txBytes} rxBytes={rxBytes} netHistory={netHistory} />

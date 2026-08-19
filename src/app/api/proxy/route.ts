@@ -23,11 +23,11 @@ export async function GET(request: Request) {
     let body = await res.text();
 
     const headers = new Headers(res.headers);
-    // Strip security headers that prevent iframe embedding
     headers.delete("x-frame-options");
     headers.delete("content-security-policy");
     headers.delete("content-security-policy-report-only");
     headers.delete("x-content-security-policy");
+    headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 
     // Inject base tag so relative assets/links resolve to the live website origin
     const baseTag = `<base href="${parsedUrl.origin}/">`;

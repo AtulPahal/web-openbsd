@@ -13,76 +13,21 @@ import {
   CheckCircle2,
   Layers,
 } from "lucide-react";
-
-interface EventItem {
-  id: string;
-  dateStr: string; // "YYYY-MM-DD"
-  title: string;
-  time: string;
-  category: "Work" | "Personal" | "Project" | "Milestone";
-}
-
-const INITIAL_EVENTS: EventItem[] = [
-  {
-    id: "evt-1",
-    dateStr: "2026-08-14",
-    title: "OpenBSD Web Desktop Release",
-    time: "10:00 AM",
-    category: "Milestone",
-  },
-  {
-    id: "evt-2",
-    dateStr: "2026-08-14",
-    title: "AI/ML Real-time Inference Review",
-    time: "02:30 PM",
-    category: "Work",
-  },
-  {
-    id: "evt-3",
-    dateStr: "2026-08-18",
-    title: "Precision Agriculture Model Evaluation",
-    time: "11:00 AM",
-    category: "Project",
-  },
-  {
-    id: "evt-4",
-    dateStr: "2026-08-22",
-    title: "ONNX Runtime Web Benchmark Run",
-    time: "04:00 PM",
-    category: "Work",
-  },
-  {
-    id: "evt-5",
-    dateStr: "2026-09-01",
-    title: "Quarterly AI Research Review",
-    time: "09:00 AM",
-    category: "Milestone",
-  },
-  {
-    id: "evt-6",
-    dateStr: "2026-09-15",
-    title: "YOLOv5 Vision Pipeline Optimization",
-    time: "03:00 PM",
-    category: "Project",
-  },
-];
-
-const CATEGORY_COLORS: Record<EventItem["category"], { bg: string; text: string; border: string; dot: string }> = {
-  Milestone: { bg: "bg-emerald-500/15", text: "text-emerald-400", border: "border-emerald-500/30", dot: "bg-emerald-400" },
-  Work: { bg: "bg-amber-500/15", text: "text-amber-300", border: "border-amber-500/30", dot: "bg-amber-400" },
-  Project: { bg: "bg-sky-500/15", text: "text-sky-400", border: "border-sky-500/30", dot: "bg-sky-400" },
-  Personal: { bg: "bg-purple-500/15", text: "text-purple-300", border: "border-purple-500/30", dot: "bg-purple-400" },
-};
+import {
+  type CalendarEvent,
+  INITIAL_CALENDAR_EVENTS,
+  CALENDAR_CATEGORY_COLORS,
+} from "@/lib/calendar-data";
 
 export function CalendarApp({ windowId }: { windowId: string }) {
   const [currentDate, setCurrentDate] = useState(() => new Date(2026, 7, 14)); // Aug 14, 2026
   const [selectedDate, setSelectedDate] = useState(() => new Date(2026, 7, 14));
-  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
+  const [events, setEvents] = useState<CalendarEvent[]>(INITIAL_CALENDAR_EVENTS);
 
   // New Event Form State
   const [newTitle, setNewTitle] = useState("");
   const [newTime, setNewTime] = useState("12:00 PM");
-  const [newCategory, setNewCategory] = useState<EventItem["category"]>("Work");
+  const [newCategory, setNewCategory] = useState<CalendarEvent["category"]>("Work");
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -176,7 +121,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
-    const newEvt: EventItem = {
+    const newEvt: CalendarEvent = {
       id: `evt-${Date.now()}`,
       dateStr: selectedDateStr,
       title: newTitle.trim(),
@@ -310,7 +255,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                   {item.isCurrentMonth && dayEvts.length > 0 && (
                     <div className="space-y-0.5 mt-1 w-full">
                       {dayEvts.slice(0, 2).map((evt) => {
-                        const style = CATEGORY_COLORS[evt.category] || CATEGORY_COLORS.Work;
+                        const style = CALENDAR_CATEGORY_COLORS[evt.category] || CALENDAR_CATEGORY_COLORS.Work;
                         return (
                           <div
                             key={evt.id}
@@ -367,7 +312,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
               </div>
             ) : (
               selectedEvents.map((evt) => {
-                const style = CATEGORY_COLORS[evt.category] || CATEGORY_COLORS.Work;
+                const style = CALENDAR_CATEGORY_COLORS[evt.category] || CALENDAR_CATEGORY_COLORS.Work;
                 return (
                   <div
                     key={evt.id}
@@ -432,7 +377,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
               />
               <select
                 value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value as EventItem["category"])}
+                onChange={(e) => setNewCategory(e.target.value as CalendarEvent["category"])}
                 className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground outline-none focus:border-amber-400"
               >
                 <option value="Work">Work</option>
