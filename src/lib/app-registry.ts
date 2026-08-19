@@ -78,4 +78,11 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     defaultSize: { width: 740, height: 500 },
     minSize: { width: 480, height: 350 },
   },
+  "ai-studio": {
+    id: "ai-studio",
+    name: "AI Studio",
+    icon: "Brain",
+    defaultSize: { width: 780, height: 560 },
+    minSize: { width: 440, height: 340 },
+  },
 };

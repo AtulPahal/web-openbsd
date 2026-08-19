@@ -57,8 +57,8 @@ export type AppId =
   | "portfolio"
   | "resume"
   | "calendar"
-  | "settings";
-/** Application metadata for the launcher / taskbar */
+  | "settings"
+  | "ai-studio";
 export interface AppDefinition {
   id: AppId;
   name: string;
