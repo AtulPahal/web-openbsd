@@ -109,10 +109,6 @@ export function Desktop() {
 
   const handleOpenApp = (appId: AppId, appState?: AppState) => {
     openWindow(appId, appState, activeWorkspace);
-    const app = APP_REGISTRY[appId];
-    if (app) {
-      addNotification(app.name, `Opened ${app.name}`, appId);
-    }
   };
 
   const handleVolumeChange = (newLevel: number, muted = isMuted) => {
