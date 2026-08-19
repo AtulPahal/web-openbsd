@@ -35,7 +35,7 @@ export function TopMenuBar({
   };
 
   return (
-    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-1.5 sm:px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-hidden">
+    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-1.5 sm:px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-visible">
       {/* Left: OpenBSD App Launcher + Workspaces */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* OpenBSD Option */}
