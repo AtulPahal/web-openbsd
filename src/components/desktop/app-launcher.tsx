@@ -22,8 +22,8 @@ interface AppLauncherProps {
 export function AppLauncher({ onOpenApp }: AppLauncherProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="h-5 px-2 gap-1.5 border border-amber-500/50 bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/30 hover:text-amber-800 dark:hover:text-amber-300 font-mono font-bold text-[11px] shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-200 outline-none focus:ring-1 focus:ring-amber-400 rounded-none">
-        <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-400/20" />
+      <DropdownMenuTrigger className="h-5 px-2 gap-1.5 border border-primary/50 bg-primary/15 text-primary hover:bg-primary/30 font-mono font-bold text-[11px] shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-200 outline-none focus:ring-1 focus:ring-primary rounded-none">
+        <Shield className="w-3.5 h-3.5 text-primary fill-primary/20" />
         <span>{SYSTEM_CONFIG.name}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -31,7 +31,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
         className="w-56 bg-card border-border text-foreground font-mono rounded-none p-1 shadow-xl"
       >
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-amber-400 font-bold px-2 py-1.5 flex items-center justify-between">
+          <DropdownMenuLabel className="text-xs text-primary font-bold px-2 py-1.5 flex items-center justify-between">
             <span>APPLICATIONS</span>
             <span className="text-[10px] text-muted-foreground font-normal">v{SYSTEM_CONFIG.desktopVersion}</span>
           </DropdownMenuLabel>
@@ -42,9 +42,9 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
               <DropdownMenuItem
                 key={app.id}
                 onClick={() => onOpenApp(app.id)}
-                className="cursor-pointer gap-2.5 px-2 py-1.5 text-xs focus:bg-amber-500/20 focus:text-amber-300 rounded-none transition-colors"
+                className="cursor-pointer gap-2.5 px-2 py-1.5 text-xs focus:bg-primary/20 focus:text-primary rounded-none transition-colors"
               >
-                <IconComponent className="w-4 h-4 text-amber-400" />
+                <IconComponent className="w-4 h-4 text-primary" />
                 <span className="font-medium">{app.name}</span>
               </DropdownMenuItem>
             );

@@ -342,7 +342,7 @@ export function Desktop() {
 
       {/* Desktop Context Menu */}
       <ContextMenuContent className="w-52 bg-card border-border font-mono text-xs rounded-none p-1 shadow-2xl">
-        <div className="px-2 py-1 text-[10px] text-amber-400 font-bold tracking-wider">
+        <div className="px-2 py-1 text-[10px] text-primary font-bold tracking-wider">
           {SYSTEM_CONFIG.name.toUpperCase()} DESKTOP
         </div>
         <ContextMenuSeparator className="bg-border/60" />
@@ -352,9 +352,9 @@ export function Desktop() {
             <ContextMenuItem
               key={app.id}
               onClick={() => handleOpenApp(app.id)}
-              className="gap-2.5 px-2 py-1.5 cursor-pointer focus:bg-amber-500/20 focus:text-amber-300 rounded-none"
+              className="gap-2.5 px-2 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-none"
             >
-              <IconComp className="w-4 h-4 text-amber-400" />
+              <IconComp className="w-4 h-4 text-primary" />
               <span>Open {app.name}</span>
             </ContextMenuItem>
           );

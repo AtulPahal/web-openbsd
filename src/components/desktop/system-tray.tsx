@@ -10,10 +10,6 @@ import {
   Volume2,
   VolumeX,
   Check,
-  Sun,
-  Moon,
-  Shield,
-  Monitor,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 
@@ -30,7 +26,7 @@ type ActivePopover = "wifi" | "bluetooth" | "audio" | null;
 function ToggleSwitch({
   checked,
   onChange,
-  activeColor = "bg-emerald-500",
+  activeColor,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -41,8 +37,9 @@ function ToggleSwitch({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
+      style={checked ? { backgroundColor: activeColor || "var(--primary)" } : {}}
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-        checked ? activeColor : "bg-muted/80"
+        checked ? (activeColor ? "" : "bg-primary") : "bg-muted/80"
       }`}
     >
       <span
@@ -136,8 +133,8 @@ export function SystemTray({
       <button
         type="button"
         onClick={() => togglePopover("wifi")}
-        className={`p-1 rounded hover:bg-amber-500/10 transition-colors cursor-pointer ${
-          activePopover === "wifi" ? "bg-amber-500/20 text-amber-300" : "text-foreground/80 hover:text-amber-400"
+        className={`p-1 rounded hover:bg-primary/10 transition-colors cursor-pointer ${
+          activePopover === "wifi" ? "bg-primary/20 text-primary" : "text-foreground/80 hover:text-primary"
         }`}
         title={`Wi-Fi: ${wifiEnabled ? connectedWifi : "Off"}`}
       >
@@ -148,8 +145,8 @@ export function SystemTray({
       <button
         type="button"
         onClick={() => togglePopover("bluetooth")}
-        className={`p-1 rounded hover:bg-amber-500/10 transition-colors cursor-pointer ${
-          activePopover === "bluetooth" ? "bg-amber-500/20 text-amber-300" : "text-foreground/80 hover:text-amber-400"
+        className={`p-1 rounded hover:bg-primary/10 transition-colors cursor-pointer ${
+          activePopover === "bluetooth" ? "bg-primary/20 text-primary" : "text-foreground/80 hover:text-primary"
         }`}
         title={`Bluetooth: ${bluetoothEnabled ? "On" : "Off"}`}
       >
@@ -164,15 +161,15 @@ export function SystemTray({
       <button
         type="button"
         onClick={() => togglePopover("audio")}
-        className={`p-1 rounded hover:bg-amber-500/10 transition-colors cursor-pointer ${
-          activePopover === "audio" ? "bg-amber-500/20 text-amber-300" : "text-foreground/80 hover:text-amber-400"
+        className={`p-1 rounded hover:bg-primary/10 transition-colors cursor-pointer ${
+          activePopover === "audio" ? "bg-primary/20 text-primary" : "text-foreground/80 hover:text-primary"
         }`}
         title={`Volume: ${isMuted ? "Muted" : `${volume}%`}`}
       >
         {isMuted || volume === 0 ? (
           <VolumeX className="w-3.5 h-3.5 text-red-400" />
         ) : (
-          <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+          <Volume2 className="w-3.5 h-3.5 text-primary" />
         )}
       </button>
 
@@ -184,20 +181,20 @@ export function SystemTray({
         type="button"
         data-time-trigger
         onClick={onToggleNotificationCenter}
-        className="flex items-center gap-1.5 bg-background/50 hover:bg-amber-500/10 px-1.5 sm:px-2 py-0.5 border border-border/50 hover:border-amber-500/50 text-foreground font-semibold min-w-0 sm:min-w-[130px] justify-center transition-all duration-200 cursor-pointer rounded-none group relative"
+        className="flex items-center gap-1.5 bg-background/50 hover:bg-primary/10 px-1.5 sm:px-2 py-0.5 border border-border/50 hover:border-primary/50 text-foreground font-semibold min-w-0 sm:min-w-[130px] justify-center transition-all duration-200 cursor-pointer rounded-none group relative"
         title="Click for Notification Center"
       >
-        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+        <Clock className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
         {time ? (
           <>
             <span>{date}</span>
-            <span className="text-amber-600 dark:text-amber-400">{time}</span>
+            <span className="text-primary font-bold">{time}</span>
           </>
         ) : (
           <span className="text-muted-foreground">--:--:--</span>
         )}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse border-2 border-background" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse border-2 border-background" />
         )}
       </button>
 
@@ -237,10 +234,10 @@ export function SystemTray({
                     key={net.ssid}
                     type="button"
                     onClick={() => handleConnectWifi(net.ssid)}
-                    className={`w-full p-2 text-left rounded flex items-center justify-between text-xs transition-colors ${
+                    className={`w-full p-2 text-left rounded flex items-center justify-between text-xs transition-colors cursor-pointer ${
                       net.connected
-                        ? "bg-amber-500/15 text-amber-300 font-bold"
-                        : "hover:bg-muted/60 text-foreground"
+                        ? "bg-primary/15 text-primary font-bold border border-primary/40"
+                        : "hover:bg-muted/60 text-foreground border border-transparent"
                     }`}
                   >
                     <span>{net.ssid}</span>
@@ -290,7 +287,7 @@ export function SystemTray({
                     <button
                       type="button"
                       onClick={() => handleToggleBtDevice(dev.id)}
-                      className={`px-2 py-0.5 text-[10px] rounded border transition-colors ${
+                      className={`px-2 py-0.5 text-[10px] rounded border transition-colors cursor-pointer ${
                         dev.connected
                           ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
                           : "bg-muted text-muted-foreground border-border"
@@ -313,13 +310,13 @@ export function SystemTray({
         <div className="absolute top-8 right-0 z-[60] w-64 max-w-[calc(100vw-16px)] p-3 bg-card/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl space-y-3 animate-in fade-in-0 zoom-in-95 duration-150">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <div className="flex items-center gap-2 font-bold text-foreground">
-              <Volume2 className="w-4 h-4 text-amber-400" />
+              <Volume2 className="w-4 h-4 text-primary" />
               <span>Sound & Audio</span>
             </div>
             <button
               type="button"
               onClick={() => onVolumeChange?.(volume, !isMuted)}
-              className={`px-2 py-0.5 text-[10px] rounded border font-semibold ${
+              className={`px-2 py-0.5 text-[10px] rounded border font-semibold cursor-pointer ${
                 isMuted ? "bg-red-500/20 text-red-300 border-red-500/40" : "bg-muted text-foreground border-border"
               }`}
             >
@@ -330,7 +327,7 @@ export function SystemTray({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Master Volume</span>
-              <span className="font-bold text-amber-400 tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
+              <span className="font-bold text-primary tabular-nums">{isMuted ? "Muted" : `${volume}%`}</span>
             </div>
             <input
               type="range"
@@ -338,7 +335,8 @@ export function SystemTray({
               max="100"
               value={isMuted ? 0 : volume}
               onChange={(e) => onVolumeChange?.(Number(e.target.value), false)}
-              className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
+              style={{ accentColor: "var(--primary)" }}
+              className="w-full cursor-pointer h-1.5 bg-muted rounded-lg"
             />
 
             {/* Audio Output Device Selection List */}
@@ -356,12 +354,12 @@ export function SystemTray({
                     onClick={() => setOutputDevice(dev.id)}
                     className={`w-full p-2 text-left rounded flex items-center justify-between text-xs transition-colors cursor-pointer ${
                       isSelected
-                        ? "bg-amber-500/15 text-amber-300 font-bold border border-amber-500/40"
+                        ? "bg-primary/15 text-primary font-bold border border-primary/40"
                         : "hover:bg-muted/60 text-foreground border border-transparent"
                     }`}
                   >
                     <span className="truncate">{dev.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
                   </button>
                 );
               })}
