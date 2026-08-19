@@ -82,11 +82,11 @@ function PlaceItem({
       onClick={() => onClick(path)}
       className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors ${
         isSelected
-          ? "bg-amber-400/15 text-amber-400 font-medium"
+          ? "bg-primary/15 text-primary font-medium"
           : "text-foreground/80 hover:bg-accent/20 hover:text-foreground"
       }`}
     >
-      <Icon className={`size-4 ${isSelected ? "text-amber-400" : "text-muted-foreground"}`} />
+      <Icon className={`size-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
       <span>{name}</span>
     </button>
   );
@@ -108,7 +108,7 @@ interface SortIndicatorProps {
 function SortIndicator({ column, currentKey, direction }: SortIndicatorProps) {
   if (currentKey !== column) return null;
   return (
-    <span className="ml-0.5 text-amber-400">
+    <span className="ml-0.5 text-primary">
       {direction === "asc" ? "▲" : "▼"}
     </span>
   );
@@ -275,7 +275,7 @@ export function FileManager({ windowId }: { windowId: string }) {
               <button
                 type="button"
                 onClick={() => navigateTo(seg.path)}
-                className="rounded px-1.5 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/40 hover:text-amber-400"
+                className="rounded px-1.5 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/40 hover:text-primary"
               >
                 {seg.name === "/" ? "root" : seg.name}
               </button>
@@ -379,7 +379,7 @@ export function FileManager({ windowId }: { windowId: string }) {
                     type="button"
                     className={`flex w-full items-center border-b border-border/20 px-2 py-1.5 text-left text-xs transition-colors cursor-pointer ${
                       isSelected
-                        ? "bg-amber-400/15 text-foreground"
+                        ? "bg-primary/15 text-foreground"
                         : "hover:bg-accent/20"
                     }`}
                     onClick={() => {
@@ -395,13 +395,13 @@ export function FileManager({ windowId }: { windowId: string }) {
                       <Icon
                         className={`size-3.5 shrink-0 ${
                           isDir
-                            ? "text-amber-400/80"
+                            ? "text-primary/80"
                             : "text-muted-foreground"
                         }`}
                       />
                       <span
                         className={`truncate ${
-                          isDir ? "text-amber-400/90 font-semibold" : "text-foreground/80"
+                          isDir ? "text-primary font-semibold" : "text-foreground/80"
                         }`}
                       >
                         {node.name}

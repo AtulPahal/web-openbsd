@@ -263,7 +263,7 @@ export function TextEditor({ windowId, path }: { windowId: string; path?: string
             className="flex items-center justify-center gap-1 py-1 border-r border-b sm:border-b-0 border-border last:border-r-0"
           >
             <span
-              className="font-bold text-amber-400"
+              className="font-bold text-primary"
             >
               {key}
             </span>

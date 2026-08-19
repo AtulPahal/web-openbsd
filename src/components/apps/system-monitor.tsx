@@ -149,16 +149,16 @@ function ProcessesTab({
         <table className="w-full text-xs font-mono">
           <thead>
             <tr className="border-b border-border/60 bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider select-none">
-              <th onClick={() => handleSort("pid")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("pid")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-primary">
                 PID {sortKey === "pid" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("name")} className="px-2 sm:px-3 py-1.5 text-left cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("name")} className="px-2 sm:px-3 py-1.5 text-left cursor-pointer hover:text-primary">
                 PROCESS {sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("cpu")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("cpu")} className="px-2 sm:px-3 py-1.5 text-right cursor-pointer hover:text-primary">
                 CPU % {sortKey === "cpu" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => handleSort("memory")} className="hidden sm:table-cell px-3 py-1.5 text-right cursor-pointer hover:text-amber-400">
+              <th onClick={() => handleSort("memory")} className="hidden sm:table-cell px-3 py-1.5 text-right cursor-pointer hover:text-primary">
                 MEM % {sortKey === "memory" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
               <th className="hidden md:table-cell px-3 py-1.5 text-left">STATE</th>
@@ -168,20 +168,20 @@ function ProcessesTab({
           </thead>
           <tbody>
             {sorted.map((p) => (
-              <tr key={p.pid} className="border-b border-border/40 hover:bg-amber-500/10 transition-colors group">
+              <tr key={p.pid} className="border-b border-border/40 hover:bg-primary/10 transition-colors group">
                 <td className="px-2 sm:px-3 py-1.5 text-right tabular-nums text-muted-foreground">{p.pid}</td>
                 <td className="px-2 sm:px-3 py-1.5 font-bold text-foreground flex items-center gap-1.5 truncate max-w-[140px] sm:max-w-none">
-                  <Zap className="w-3 h-3 text-amber-400 opacity-60 shrink-0" />
+                  <Zap className="w-3 h-3 text-primary opacity-60 shrink-0" />
                   <span className="truncate">{p.name}</span>
                 </td>
                 <td className="px-2 sm:px-3 py-1.5 text-right tabular-nums">
                   <div className="flex items-center justify-end gap-1.5 sm:gap-2">
-                    <span className={p.cpu > 2 ? "text-amber-400 font-semibold" : "text-foreground/80"}>
+                    <span className={p.cpu > 2 ? "text-primary font-semibold" : "text-foreground/80"}>
                       {p.cpu.toFixed(1)}%
                     </span>
                     <div className="w-8 sm:w-12 h-1.5 bg-muted/40 rounded-full overflow-hidden shrink-0">
                       <div
-                        className={`h-full ${p.cpu > 2 ? "bg-amber-400" : "bg-emerald-400"}`}
+                        className={`h-full ${p.cpu > 2 ? "bg-primary" : "bg-emerald-400"}`}
                         style={{ width: `${Math.min(100, p.cpu * 20)}%` }}
                       />
                     </div>
@@ -195,10 +195,10 @@ function ProcessesTab({
                     className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                       p.state === "running"
                         ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                        : "bg-primary/15 text-primary border border-primary/30"
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${p.state === "running" ? "bg-emerald-400" : "bg-amber-400"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${p.state === "running" ? "bg-emerald-400" : "bg-primary"}`} />
                     {p.state}
                   </span>
                 </td>
@@ -243,8 +243,8 @@ function ResourcesTab({
       {/* CPU Live Chart Card */}
       <div className="p-3 bg-card/40 border border-border/60 rounded-lg space-y-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-amber-400">
-            <Cpu className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2 font-bold text-primary">
+            <Cpu className="w-4 h-4 text-primary" />
             <span>CPU ({hwInfo.cpuCores} Cores @ {hwInfo.platform})</span>
           </div>
           <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ function ResourcesTab({
       <div className="grid grid-cols-2 gap-3">
         <div className="p-2.5 bg-background/40 border border-border/40 rounded-lg flex items-center justify-between">
           <span className="text-muted-foreground">Load Average:</span>
-          <span className="font-bold text-amber-400 tabular-nums">0.12, 0.08, 0.06</span>
+          <span className="font-bold text-primary tabular-nums">0.12, 0.08, 0.06</span>
         </div>
         <div className="p-2.5 bg-background/40 border border-border/40 rounded-lg flex items-center justify-between">
           <span className="text-muted-foreground">System Uptime:</span>
@@ -325,7 +325,7 @@ function NetworkTab({
         <div className="p-3 bg-card/30 border border-border/60 rounded-lg space-y-2">
           <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
             <div className="flex items-center gap-2 font-bold text-foreground">
-              <Server className="w-3.5 h-3.5 text-amber-400" />
+              <Server className="w-3.5 h-3.5 text-primary" />
               <span>{NETWORK_CONFIG.interface}</span>
             </div>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -441,10 +441,10 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
       <div className="grid grid-cols-3 gap-2 p-2 border-b border-border/60 bg-card/40">
         <div className="p-2 bg-background/60 border border-border/50 rounded flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-amber-400" />
+            <Cpu className="w-3.5 h-3.5 text-primary" />
             <span className="text-[11px] font-bold">CPU</span>
           </div>
-          <span className="font-bold text-amber-400 tabular-nums">{cpuUsage.toFixed(1)}%</span>
+          <span className="font-bold text-primary tabular-nums">{cpuUsage.toFixed(1)}%</span>
         </div>
 
         <div className="p-2 bg-background/60 border border-border/50 rounded flex items-center justify-between">
@@ -467,7 +467,7 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
       <Tabs defaultValue="processes" className="flex flex-1 flex-col overflow-hidden">
         <TabsList className="shrink-0 rounded-none border-b border-border/60 bg-muted/40">
           <TabsTrigger value="processes" className="gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
+            <Activity className="w-3.5 h-3.5 text-primary" />
             <span>Processes</span>
           </TabsTrigger>
           <TabsTrigger value="resources" className="gap-1.5">

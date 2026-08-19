@@ -74,13 +74,13 @@ export function AIStudio({ windowId }: { windowId: string }) {
       {/* 1. App Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-card/60 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400">
+          <div className="p-1.5 rounded-lg bg-primary/15 border border-primary/30 text-primary">
             <Brain className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-foreground tracking-wide">AI/ML Studio</span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary/20 text-primary border border-primary/30">
                 Web ONNX Engine
               </span>
             </div>
@@ -114,7 +114,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
               onClick={() => handleModelChange(m.id)}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
                 isSelected
-                  ? "bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-sm"
+                  ? "bg-primary/25 border border-primary/60 text-primary shadow-sm"
                   : "bg-card/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground border border-border/40"
               }`}
             >
@@ -138,7 +138,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               <span className="flex items-center gap-1">
-                <Sliders className="w-3 h-3 text-amber-400" />
+                <Sliders className="w-3 h-3 text-primary" />
                 Input Feature Parameters ({activeModel.features.length})
               </span>
             </div>
@@ -152,7 +152,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs text-foreground">{f.name}</span>
-                    <span className="font-mono text-xs font-bold text-amber-400 tabular-nums">
+                    <span className="font-mono text-xs font-bold text-primary tabular-nums">
                       {currentValue} {f.unit}
                     </span>
                   </div>
@@ -164,7 +164,8 @@ export function AIStudio({ windowId }: { windowId: string }) {
                     step={f.step}
                     value={currentValue}
                     onChange={(e) => handleInputChange(f.id, Number(e.target.value))}
-                    className="w-full accent-amber-400 cursor-pointer h-1.5 bg-muted rounded-lg"
+                    style={{ accentColor: "var(--primary)" }}
+                    className="w-full cursor-pointer h-1.5 bg-muted rounded-lg"
                   />
 
                   <div className="flex justify-between text-[9px] text-muted-foreground">
@@ -256,7 +257,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
               {Object.entries(prediction.metrics).map(([k, v]) => (
                 <div key={k} className="p-2 bg-background/50 border border-border/40 rounded-lg">
                   <div className="text-[9px] text-muted-foreground truncate">{k}</div>
-                  <div className="text-xs font-bold text-amber-400 font-mono mt-0.5">{String(v)}</div>
+                  <div className="text-xs font-bold text-primary font-mono mt-0.5">{String(v)}</div>
                 </div>
               ))}
             </div>

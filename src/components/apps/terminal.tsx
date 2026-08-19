@@ -41,12 +41,10 @@ export function Terminal({ windowId }: { windowId: string }) {
     scrollToBottom();
   }, [lines, scrollToBottom]);
 
-  // Focus input when clicking anywhere inside the terminal area
   const handleTerminalClick = () => {
     inputRef.current?.focus();
   };
 
-  /** Append output lines, capping total to MAX_LINES */
   const appendLines = useCallback((newLines: TerminalLine[]) => {
     setLines((prev) => {
       const combined = [...prev, ...newLines];
@@ -82,11 +80,8 @@ export function Terminal({ windowId }: { windowId: string }) {
       }
 
       const currentPrompt = interpreter.getPrompt();
-
-      // Add to command history
       setCommandHistory((prev) => [...prev, trimmed]);
 
-      // Execute command
       const result = interpreter.execute(trimmed);
 
       if (typeof result === "string") {
@@ -186,7 +181,7 @@ export function Terminal({ windowId }: { windowId: string }) {
               key={line.id}
               className={`whitespace-pre-wrap leading-relaxed text-xs ${
                 line.type === "input"
-                  ? "text-amber-400 font-semibold"
+                  ? "text-primary font-semibold"
                   : line.type === "pending"
                   ? "text-muted-foreground italic animate-pulse"
                   : "text-foreground/85"
@@ -198,7 +193,7 @@ export function Terminal({ windowId }: { windowId: string }) {
 
           {/* Current Active Input Line */}
           <div className="flex items-center gap-2 pt-1">
-            <span className="text-amber-400 font-semibold shrink-0 text-xs sm:text-sm">
+            <span className="text-primary font-semibold shrink-0 text-xs sm:text-sm">
               {prompt}
             </span>
             <input
@@ -207,7 +202,8 @@ export function Terminal({ windowId }: { windowId: string }) {
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent outline-none border-none text-foreground caret-amber-400 font-mono text-base sm:text-sm p-0 m-0 focus:ring-0"
+              style={{ caretColor: "var(--primary)" }}
+              className="flex-1 bg-transparent outline-none border-none text-foreground font-mono text-base sm:text-sm p-0 m-0 focus:ring-0"
               autoFocus
               spellCheck={false}
               autoComplete="off"

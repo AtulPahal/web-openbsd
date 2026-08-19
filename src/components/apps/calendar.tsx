@@ -163,7 +163,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
       {/* App Header Bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 bg-card/60">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400">
+          <div className="p-1.5 rounded-lg bg-primary/15 border border-primary/30 text-primary">
             <CalendarIcon className="w-4 h-4" />
           </div>
           <span className="font-bold text-sm text-foreground tracking-wide">
@@ -175,7 +175,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1.5 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded-md border border-border/50 transition-colors"
+            className="p-1.5 hover:bg-primary/20 text-muted-foreground hover:text-primary rounded-md border border-border/50 transition-colors"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -183,14 +183,14 @@ export function CalendarApp({ windowId }: { windowId: string }) {
           <button
             type="button"
             onClick={handleResetToday}
-            className="px-3 py-1 text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-md transition-colors shadow-sm"
+            className="px-3 py-1 text-xs font-semibold bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 rounded-md transition-colors shadow-sm"
           >
             Today
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1.5 hover:bg-amber-500/20 text-muted-foreground hover:text-amber-300 rounded-md border border-border/50 transition-colors"
+            className="p-1.5 hover:bg-primary/20 text-muted-foreground hover:text-primary rounded-md border border-border/50 transition-colors"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -229,19 +229,19 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                     !item.isCurrentMonth
                       ? "opacity-20 cursor-default bg-background/20"
                       : active
-                      ? "bg-amber-500/20 border-2 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10"
+                      ? "bg-primary/20 border-2 border-primary text-primary shadow-md shadow-primary/10"
                       : today
-                      ? "bg-card border-2 border-amber-400/80 text-foreground"
-                      : "bg-card/40 hover:bg-amber-500/10 border border-border/40 text-foreground"
+                      ? "bg-card border-2 border-primary text-foreground"
+                      : "bg-card/40 hover:bg-primary/10 border border-border/40 text-foreground"
                   }`}
                 >
                     <div className="flex items-center justify-between">
                       <span
                       className={`text-xs font-bold ${
                         today
-                          ? "w-5 h-5 rounded-full bg-amber-400 text-black flex items-center justify-center text-[11px]"
+                          ? "w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[11px]"
                           : active
-                          ? "text-amber-400"
+                          ? "text-primary"
                           : item.isCurrentMonth
                           ? "text-foreground"
                           : "text-muted-foreground"
@@ -286,7 +286,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                 SELECTED DATE
               </div>
-              <div className="text-sm font-bold text-amber-400 mt-0.5">
+              <div className="text-sm font-bold text-primary mt-0.5">
                 {selectedDate.toLocaleDateString("en-US", {
                   weekday: "short",
                   month: "short",
@@ -295,7 +295,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                 })}
               </div>
             </div>
-            <span className="px-2 py-1 rounded-md text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <span className="px-2 py-1 rounded-md text-xs font-bold bg-primary/15 text-primary border border-primary/30">
               {selectedEvents.length} {selectedEvents.length === 1 ? "event" : "events"}
             </span>
           </div>
@@ -316,10 +316,10 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                 return (
                   <div
                     key={evt.id}
-                    className="group relative p-3 bg-card/60 hover:bg-card border border-border/60 hover:border-amber-500/50 rounded-xl flex flex-col gap-1.5 transition-all shadow-sm"
+                    className="group relative p-3 bg-card/60 hover:bg-card border border-border/60 hover:border-primary/50 rounded-xl flex flex-col gap-1.5 transition-all shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-bold text-xs text-foreground group-hover:text-amber-400 transition-colors">
+                      <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
                         {evt.title}
                       </h4>
                       <button
@@ -334,7 +334,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-3 h-3 text-amber-400" />
+                        <Clock className="w-3 h-3 text-primary" />
                         {evt.time}
                       </span>
                       <span
@@ -354,7 +354,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
             onSubmit={handleAddEvent}
             className="p-3 bg-card/60 border border-border/60 rounded-xl space-y-2.5 shrink-0 shadow-sm"
           >
-            <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+            <div className="text-[10px] font-bold text-primary uppercase tracking-wider flex items-center justify-between">
               <span>ADD EVENT</span>
               <Tag className="w-3 h-3 opacity-60" />
             </div>
@@ -364,7 +364,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Event title (e.g. AI Model Benchmark)..."
-              className="w-full px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
+              className="w-full px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary"
             />
 
             <div className="flex gap-2">
@@ -373,12 +373,12 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
                 placeholder="Time (12:00 PM)"
-                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-amber-400"
+                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary"
               />
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as CalendarEvent["category"])}
-                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground outline-none focus:border-amber-400"
+                className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-lg text-xs text-foreground outline-none focus:border-primary"
               >
                 <option value="Work">Work</option>
                 <option value="Personal">Personal</option>
@@ -389,7 +389,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
             <button
               type="submit"
-              className="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              className="w-full py-1.5 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Event</span>

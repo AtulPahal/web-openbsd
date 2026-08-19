@@ -89,8 +89,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
               placeholder={`Enter password (${SYSTEM_CONFIG.loginPassword})...`}
               className={`w-full bg-white/10 border ${
                 error ? "border-red-500/80" : "border-white/20"
-              } text-white text-base rounded-lg px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500/50 transition-all placeholder:text-white/40`}
-              autoFocus
+              } text-white text-base rounded-lg px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-white/40`}
               suppressHydrationWarning
             />
             <button

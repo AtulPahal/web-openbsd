@@ -227,9 +227,9 @@ export function Firefox({ windowId }: { windowId: string }) {
               }`}
             >
               {tab.url.includes("github.com") ? (
-                <GitHubIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <GitHubIcon className="w-3.5 h-3.5 text-primary shrink-0" />
               ) : (
-                <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
               )}
               <span className="truncate flex-1">{tab.title}</span>
 
@@ -322,7 +322,7 @@ export function Firefox({ windowId }: { windowId: string }) {
               type="button"
               onClick={() => setIsBookmarked(!isBookmarked)}
               className={`p-1 hover:text-[#fbfbfe] transition-colors ${
-                isBookmarked ? "text-amber-400 fill-amber-400" : ""
+                isBookmarked ? "text-primary fill-primary" : ""
               }`}
               title="Bookmark this page"
             >
@@ -365,7 +365,7 @@ export function Firefox({ windowId }: { windowId: string }) {
                 onClick={() => navigateTo(bm.url)}
                 className="flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-[#383740] text-[#cfcfd8] hover:text-white transition-colors shrink-0 cursor-pointer"
               >
-                <Icon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span className="truncate">{bm.title}</span>
               </button>
             );
@@ -385,7 +385,7 @@ export function Firefox({ windowId }: { windowId: string }) {
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-[#fbfbfe] flex items-center gap-2">
                 <span>Firefox</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
                   OpenBSD Edition
                 </span>
               </h1>
@@ -421,7 +421,7 @@ export function Firefox({ windowId }: { windowId: string }) {
                     subtitle: "GitHub Profile",
                     url: "https://github.com/AtulPahal",
                     icon: GitHubIcon,
-                    color: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+                    color: "bg-primary/15 text-primary border-primary/30",
                   },
                   {
                     title: "OpenBSD",
@@ -451,7 +451,7 @@ export function Firefox({ windowId }: { windowId: string }) {
                       key={site.title}
                       type="button"
                       onClick={() => navigateTo(site.url)}
-                      className="p-3.5 bg-[#2b2a33]/70 hover:bg-[#383740] border border-[#42414d]/60 hover:border-amber-500/50 rounded-xl flex flex-col items-center text-center gap-2 transition-all group cursor-pointer shadow-sm"
+                      className="p-3.5 bg-[#2b2a33]/70 hover:bg-[#383740] border border-[#42414d]/60 hover:border-primary/50 rounded-xl flex flex-col items-center text-center gap-2 transition-all group cursor-pointer shadow-sm"
                     >
                       <div
                         className={`w-10 h-10 rounded-xl flex items-center justify-center border ${site.color} group-hover:scale-110 transition-transform`}
@@ -459,7 +459,7 @@ export function Firefox({ windowId }: { windowId: string }) {
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="truncate w-full">
-                        <div className="font-semibold text-xs text-[#fbfbfe] truncate group-hover:text-amber-300">
+                        <div className="font-semibold text-xs text-[#fbfbfe] truncate group-hover:text-primary">
                           {site.title}
                         </div>
                         <div className="text-[10px] text-[#8f8f9d] truncate">{site.subtitle}</div>
@@ -482,14 +482,14 @@ export function Firefox({ windowId }: { windowId: string }) {
         ) : isDirectFrameBlocked ? (
           /* --- External Frame Protection View --- */
           <div className="h-full w-full bg-[#1c1b22] p-6 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-500/10">
+            <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary shadow-xl shadow-primary/10">
               <Shield className="w-7 h-7" />
             </div>
 
             <div className="space-y-1 max-w-md">
               <h3 className="text-base font-bold text-[#fbfbfe]">Secure External Page</h3>
               <p className="text-xs text-[#8f8f9d] leading-relaxed">
-                <span className="text-amber-400 font-semibold">{activeTab.url}</span> is an external secure web resource.
+                <span className="text-primary font-semibold">{activeTab.url}</span> is an external secure web resource.
               </p>
             </div>
 
@@ -497,7 +497,7 @@ export function Firefox({ windowId }: { windowId: string }) {
               href={activeTab.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl transition-all shadow-lg flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-primary hover:opacity-90 text-black font-bold text-xs rounded-xl transition-all shadow-lg flex items-center gap-2 cursor-pointer"
             >
               <span>Open in Firefox Tab ↗</span>
               <ExternalLink className="w-4 h-4" />

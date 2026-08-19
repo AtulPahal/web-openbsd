@@ -37,8 +37,8 @@ function HeroHeader() {
     <div className="p-3 sm:p-4 bg-gradient-to-r from-card via-card/80 to-card border-b border-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
       <div className="flex items-center gap-3">
         {/* Avatar Ring */}
-        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-500/10 border-2 border-amber-500/50 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
-          <User className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
+        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-primary/10 border-2 border-primary/50 flex items-center justify-center shrink-0 shadow-lg shadow-primary/10">
+          <User className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
         </div>
 
         <div>
@@ -51,11 +51,11 @@ function HeroHeader() {
               Available for AI/ML Roles
             </span>
           </div>
-          <p className="text-xs text-amber-400/90 font-medium mt-0.5">
+          <p className="text-xs text-primary font-medium mt-0.5">
             {PORTFOLIO_DATA.title}
           </p>
           <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-1">
-            <MapPin className="w-3 h-3 text-amber-400" />
+            <MapPin className="w-3 h-3 text-primary" />
             <span>{PORTFOLIO_DATA.location}</span>
           </div>
         </div>
@@ -67,7 +67,7 @@ function HeroHeader() {
           href="/resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 rounded font-semibold transition-all shadow-sm"
+          className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-primary/20 hover:bg-primary/30 border border-primary/50 text-primary rounded font-semibold transition-all shadow-sm"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Resume (PDF)</span>
@@ -76,7 +76,7 @@ function HeroHeader() {
           href={`mailto:${PORTFOLIO_DATA.email}`}
           className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-card hover:bg-muted border border-border/80 text-foreground rounded transition-colors"
         >
-          <Mail className="w-3.5 h-3.5 text-amber-400" />
+          <Mail className="w-3.5 h-3.5 text-primary" />
           <span>Contact</span>
         </a>
       </div>
@@ -92,9 +92,9 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground text-[10px]">
             <span>PUBLIC REPOS</span>
-            <GitHubIcon className="w-3.5 h-3.5 text-amber-400" />
+            <GitHubIcon className="w-3.5 h-3.5 text-primary" />
           </div>
-          <div className="text-xl font-bold text-amber-400 mt-2">
+          <div className="text-xl font-bold text-primary mt-2">
             {ghUser ? `${ghUser.public_repos}+ Repos` : "12+ Repos"}
           </div>
           <div className="text-[10px] text-muted-foreground/80 mt-0.5">Live GitHub Projects</div>
@@ -121,16 +121,16 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground text-[10px]">
             <span>CERTS</span>
-            <Award className="w-3.5 h-3.5 text-amber-400" />
+            <Award className="w-3.5 h-3.5 text-primary" />
           </div>
-          <div className="text-xl font-bold text-amber-400 mt-2">2 Specialized</div>
+          <div className="text-xl font-bold text-primary mt-2">2 Specialized</div>
           <div className="text-[10px] text-muted-foreground/80 mt-0.5">IIT Hyderabad & HARTRON</div>
         </div>
       </div>
 
       {/* Bio Card */}
       <div className="p-3.5 bg-card/30 border border-border/60 rounded-lg space-y-2">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase flex items-center gap-1.5">
           <User className="w-3.5 h-3.5" />
           <span>Professional Summary</span>
         </h3>
@@ -141,15 +141,15 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
 
       {/* Interactive Contact & Social Cards Grid */}
       <div className="space-y-2">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase">
           Connect & Contact
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <a
             href={`mailto:${PORTFOLIO_DATA.email}`}
-            className="p-3 bg-card/40 hover:bg-amber-500/10 border border-border/60 hover:border-amber-500/50 rounded-lg flex items-center gap-3 transition-all group"
+            className="p-3 bg-card/40 hover:bg-primary/10 border border-border/60 hover:border-primary/50 rounded-lg flex items-center gap-3 transition-all group"
           >
-            <div className="w-8 h-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Mail className="w-4 h-4" />
             </div>
             <div className="truncate">
@@ -160,9 +160,9 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
 
           <a
             href={`tel:${PORTFOLIO_DATA.phone}`}
-            className="p-3 bg-card/40 hover:bg-amber-500/10 border border-border/60 hover:border-amber-500/50 rounded-lg flex items-center gap-3 transition-all group"
+            className="p-3 bg-card/40 hover:bg-primary/10 border border-border/60 hover:border-primary/50 rounded-lg flex items-center gap-3 transition-all group"
           >
-            <div className="w-8 h-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Phone className="w-4 h-4" />
             </div>
             <div className="truncate">
@@ -172,7 +172,7 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
           </a>
 
           <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-400">
+            <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
               <MapPin className="w-4 h-4" />
             </div>
             <div className="truncate">
@@ -192,9 +192,9 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 p-2.5 bg-card/40 hover:bg-amber-500/10 border border-border/60 hover:border-amber-500/50 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-foreground hover:text-amber-300 transition-all"
+                className="flex-1 p-2.5 bg-card/40 hover:bg-primary/10 border border-border/60 hover:border-primary/50 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-foreground hover:text-primary transition-all cursor-pointer"
               >
-                <Icon className="w-4 h-4 text-amber-400" />
+                <Icon className="w-4 h-4 text-primary" />
                 <span>{s.label}</span>
                 <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
               </a>
@@ -230,7 +230,7 @@ function SkillsTab() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {PORTFOLIO_DATA.skillCategories.map((cat: SkillCategory) => (
           <div key={cat.label} className="p-3 bg-card/40 border border-border/60 rounded-lg space-y-2.5">
-            <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center justify-between">
+            <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase flex items-center justify-between">
               <span>{cat.label}</span>
               <Layers className="w-3.5 h-3.5 opacity-60" />
             </h3>
@@ -245,7 +245,7 @@ function SkillsTab() {
                     </div>
                     <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-amber-400 transition-all duration-500 rounded-full"
+                        className="h-full bg-primary transition-all duration-500 rounded-full"
                         style={{ width: `${level}%` }}
                       />
                     </div>
@@ -259,14 +259,14 @@ function SkillsTab() {
 
       {/* All Tech Tag Cloud */}
       <div className="p-3 bg-card/30 border border-border/60 rounded-lg space-y-2">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase">
           Technology & Tooling Cloud ({ALL_TECH_TAGS.length})
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {ALL_TECH_TAGS.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 text-[10px] bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded font-semibold hover:bg-amber-500/20 transition-colors cursor-default"
+              className="px-2 py-0.5 text-[10px] bg-primary/10 border border-primary/30 text-primary rounded font-semibold hover:bg-primary/20 transition-colors cursor-default"
             >
               {tag}
             </span>
@@ -279,10 +279,10 @@ function SkillsTab() {
 
 function ProjectCard({ project }: { project: Project }) {
   return (
-    <div className="p-3.5 bg-card/40 hover:bg-card/70 border border-border/60 hover:border-amber-500/50 rounded-lg space-y-2.5 transition-all shadow-sm group">
+    <div className="p-3.5 bg-card/40 hover:bg-card/70 border border-border/60 hover:border-primary/50 rounded-lg space-y-2.5 transition-all shadow-sm group">
       <div className="flex items-start justify-between gap-2 border-b border-border/40 pb-2">
         <div>
-          <h4 className="font-bold text-sm text-foreground group-hover:text-amber-400 transition-colors">
+          <h4 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
             {project.title}
           </h4>
           <span className="text-[10px] text-muted-foreground/80">Completed {project.date}</span>
@@ -295,7 +295,7 @@ function ProjectCard({ project }: { project: Project }) {
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold bg-primary/15 hover:bg-primary/30 text-primary border border-primary/40 rounded transition-colors"
               >
                 <GitHubIcon className="w-3 h-3" />
                 <span>{l.label}</span>
@@ -338,17 +338,17 @@ function EducationTab() {
     <div className="p-4 space-y-4 font-mono text-xs">
       {/* Education Timeline */}
       <div className="p-3.5 bg-card/40 border border-border/60 rounded-lg space-y-3">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
-          <GraduationCap className="w-4 h-4 text-amber-400" />
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase flex items-center gap-1.5">
+          <GraduationCap className="w-4 h-4 text-primary" />
           <span>Education History</span>
         </h3>
-        <div className="space-y-3 border-l-2 border-amber-500/40 ml-2 pl-4">
+        <div className="space-y-3 border-l-2 border-primary/40 ml-2 pl-4">
           {PORTFOLIO_DATA.education.map((edu: Education, i: number) => (
             <div key={i} className="relative space-y-0.5">
-              <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-background" />
+              <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background" />
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-bold text-foreground text-xs">{edu.degree}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">
                   {edu.period}
                 </span>
               </div>
@@ -361,8 +361,8 @@ function EducationTab() {
 
       {/* Certifications Card */}
       <div className="p-3.5 bg-card/40 border border-border/60 rounded-lg space-y-3">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
-          <Award className="w-4 h-4 text-amber-400" />
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase flex items-center gap-1.5">
+          <Award className="w-4 h-4 text-primary" />
           <span>Professional Certifications</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -371,7 +371,7 @@ function EducationTab() {
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <div>
                 <div className="font-bold text-foreground text-xs leading-snug">{c.name}</div>
-                <div className="text-[10px] text-amber-400/80 font-semibold mt-0.5">{c.issuer}</div>
+                <div className="text-[10px] text-primary/80 font-semibold mt-0.5">{c.issuer}</div>
               </div>
             </div>
           ))}
@@ -380,14 +380,14 @@ function EducationTab() {
 
       {/* Technical Interests */}
       <div className="p-3.5 bg-card/40 border border-border/60 rounded-lg space-y-2.5">
-        <h3 className="text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
-          <Coffee className="w-4 h-4 text-amber-400" />
+        <h3 className="text-[10px] font-bold tracking-wider text-primary uppercase flex items-center gap-1.5">
+          <Coffee className="w-4 h-4 text-primary" />
           <span>Technical Interests & Passions</span>
         </h3>
         <div className="space-y-2">
           {PORTFOLIO_DATA.interests.map((interest, i) => (
             <div key={i} className="p-2 bg-background/40 border border-border/40 rounded flex items-start gap-2 text-xs text-foreground/90">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+              <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               <span>{interest}</span>
             </div>
           ))}
@@ -415,7 +415,7 @@ export function Portfolio({ windowId }: { windowId: string }) {
       <Tabs defaultValue="about" className="flex flex-1 flex-col overflow-hidden">
         <TabsList className="flex w-full shrink-0 rounded-none border-b border-border/60 bg-muted/40 overflow-x-auto justify-start sm:justify-center scrollbar-none">
           <TabsTrigger value="about" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
-            <User className="w-3.5 h-3.5 text-amber-400" />
+            <User className="w-3.5 h-3.5 text-primary" />
             <span>About</span>
           </TabsTrigger>
           <TabsTrigger value="skills" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
@@ -427,7 +427,7 @@ export function Portfolio({ windowId }: { windowId: string }) {
             <span>Projects</span>
           </TabsTrigger>
           <TabsTrigger value="education" className="gap-1.5 shrink-0 px-3.5 py-2 text-xs">
-            <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+            <GraduationCap className="w-3.5 h-3.5 text-primary" />
             <span>Education</span>
           </TabsTrigger>
         </TabsList>

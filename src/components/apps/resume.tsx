@@ -12,29 +12,29 @@ function ResumeText() {
     <div className="flex h-full w-full flex-col bg-background font-mono text-xs p-4 sm:p-6 overflow-y-auto">
       {/* Header */}
       <div className="mb-6 space-y-1">
-        <h1 className="text-xl sm:text-2xl font-bold text-amber-400">{name}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-primary">{name}</h1>
         <p className="text-xs sm:text-sm text-foreground/70">{title}</p>
       </div>
 
       {/* Contact */}
       <div className="mb-5 space-y-1.5 text-xs">
         <div className="flex items-center gap-2 text-foreground/90">
-          <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
           <span>{location}</span>
         </div>
         <div className="flex items-center gap-2 text-foreground/90">
-          <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
           <span>{email}</span>
         </div>
         <div className="flex items-center gap-2 text-foreground/90">
-          <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
           <span>{phone}</span>
         </div>
       </div>
 
       {/* Technical Skills */}
       <div className="mb-5">
-        <h2 className="text-xs font-bold tracking-wider text-amber-400 uppercase mb-2">
+        <h2 className="text-xs font-bold tracking-wider text-primary uppercase mb-2">
           Technical Skills
         </h2>
         {PORTFOLIO_DATA.skillCategories.map((cat: SkillCategory) => (
@@ -47,7 +47,7 @@ function ResumeText() {
 
       {/* Projects */}
       <div className="mb-5">
-        <h2 className="text-xs font-bold tracking-wider text-amber-400 uppercase mb-2">
+        <h2 className="text-xs font-bold tracking-wider text-primary uppercase mb-2">
           Projects
         </h2>
         {PORTFOLIO_DATA.projects.map((p: Project) => (
@@ -66,7 +66,7 @@ function ResumeText() {
 
       {/* Education */}
       <div className="mb-5">
-        <h2 className="text-xs font-bold tracking-wider text-amber-400 uppercase mb-2">
+        <h2 className="text-xs font-bold tracking-wider text-primary uppercase mb-2">
           Education
         </h2>
         {PORTFOLIO_DATA.education.map((edu, i) => (
@@ -84,7 +84,7 @@ function ResumeText() {
 
       {/* Certifications */}
       <div>
-        <h2 className="text-xs font-bold tracking-wider text-amber-400 uppercase mb-2">
+        <h2 className="text-xs font-bold tracking-wider text-primary uppercase mb-2">
           Certifications
         </h2>
         {PORTFOLIO_DATA.certifications.map((c, i) => (
@@ -115,7 +115,7 @@ export function Resume({ windowId }: { windowId: string }) {
       {/* Top bar */}
       <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-border bg-muted text-foreground overflow-x-auto scrollbar-none">
         <div className="flex items-center gap-2 truncate">
-          <FileText className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
           <span className="text-xs font-medium truncate">resume.pdf</span>
           <span className="text-xs text-muted-foreground hidden sm:inline">
             &mdash; {PORTFOLIO_DATA.name}
@@ -130,7 +130,7 @@ export function Resume({ windowId }: { windowId: string }) {
               onClick={() => setView("pdf")}
               className={`px-2 py-0.5 text-[10px] transition-colors cursor-pointer ${
                 view === "pdf"
-                  ? "bg-amber-500/20 text-amber-300 font-bold"
+                  ? "bg-primary/20 text-primary font-bold"
                   : "text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -141,7 +141,7 @@ export function Resume({ windowId }: { windowId: string }) {
               onClick={() => setView("text")}
               className={`px-2 py-0.5 text-[10px] transition-colors cursor-pointer ${
                 view === "text"
-                  ? "bg-amber-500/20 text-amber-300 font-bold"
+                  ? "bg-primary/20 text-primary font-bold"
                   : "text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -154,7 +154,7 @@ export function Resume({ windowId }: { windowId: string }) {
             <a
               href={resumeUrl}
               download="atulpahal-resume.pdf"
-              className="flex items-center gap-1 px-2 py-0.5 text-[10px] border border-border text-foreground/70 hover:border-amber-500/40 hover:text-amber-300 transition-colors"
+              className="flex items-center gap-1 px-2 py-0.5 text-[10px] border border-border text-foreground/70 hover:border-primary/40 hover:text-primary transition-colors"
               title="Download resume (PDF)"
             >
               <Download className="h-3 w-3" />
@@ -164,7 +164,7 @@ export function Resume({ windowId }: { windowId: string }) {
               href={resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 px-2 py-0.5 text-[10px] border border-border text-foreground/70 hover:border-amber-500/40 hover:text-amber-300 transition-colors"
+              className="flex items-center gap-1 px-2 py-0.5 text-[10px] border border-border text-foreground/70 hover:border-primary/40 hover:text-primary transition-colors"
               title="Open in new tab"
             >
               <ExternalLink className="h-3 w-3" />

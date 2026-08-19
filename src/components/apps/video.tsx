@@ -177,10 +177,10 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/10">
+        <div className="w-16 h-16 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center justify-center text-primary mb-4 shadow-lg shadow-primary/10">
           <Clapperboard className="w-8 h-8" />
         </div>
-        <p className="text-3xl font-bold text-amber-400 tracking-wider">mpv</p>
+        <p className="text-3xl font-bold text-primary tracking-wider">mpv</p>
         <p className="text-xs text-muted-foreground mt-2 text-center max-w-xs">
           {isDragging
             ? "Drop video file to start playback!"
@@ -195,7 +195,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
             setIsYoutube(false);
             setTitle("mpv - bad_apple.mp4");
           }}
-          className="mt-5 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+          className="mt-5 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-sm"
         >
           <Film className="w-4 h-4" />
           <span>Play Sample Video (bad_apple.mp4)</span>
@@ -207,7 +207,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   return (
     <div
       className={`relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none group ${
-        isDragging ? "border-2 border-dashed border-amber-500/50 opacity-80" : ""
+        isDragging ? "border-2 border-dashed border-primary/50 opacity-80" : ""
       }`}
       data-window-id={windowId}
       onMouseMove={handleMouseMove}
@@ -252,9 +252,9 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
             onClick={togglePlay}
             aria-label={isPlaying ? "Pause" : "Play"}
             title={isPlaying ? "Pause" : "Play"}
-            className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded-lg transition-all cursor-pointer shadow-sm shrink-0"
+            className="p-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 rounded-lg transition-all cursor-pointer shadow-sm shrink-0"
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-amber-300" />}
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-primary" />}
           </button>
 
           {/* Current Elapsed Time */}
@@ -269,7 +269,8 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
             max={duration || 100}
             value={progress}
             onChange={handleSeek}
-            className="flex-1 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
+            style={{ accentColor: "var(--primary)" }}
+            className="flex-1 h-1.5 cursor-pointer bg-muted rounded"
           />
 
           {/* Total Duration */}
@@ -283,12 +284,12 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
             onClick={toggleMute}
             aria-label={isMuted ? "Unmute" : "Mute"}
             title={isMuted ? "Unmute" : "Mute"}
-            className="p-1.5 text-foreground/80 hover:text-amber-400 hover:bg-muted/60 rounded transition-colors cursor-pointer shrink-0"
+            className="p-1.5 text-foreground/80 hover:text-primary hover:bg-muted/60 rounded transition-colors cursor-pointer shrink-0"
           >
             {isMuted ? (
               <VolumeX className="w-4 h-4 text-red-400" />
             ) : (
-              <Volume2 className="w-4 h-4 text-amber-400" />
+              <Volume2 className="w-4 h-4 text-primary" />
             )}
           </button>
         </div>
@@ -301,7 +302,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         }`}
       >
         <h1 className="text-foreground text-xs font-mono font-semibold truncate px-1 flex items-center gap-2">
-          <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
+          <Clapperboard className="w-3.5 h-3.5 text-primary" />
           <span>{title}</span>
         </h1>
       </div>

@@ -33,15 +33,15 @@ export function Panel({ windows, onFocusWindow, onOpenApp }: PanelProps) {
               onClick={() => onFocusWindow(win.id)}
               className={`group h-7 px-3 flex items-center gap-2 text-xs font-mono border transition-all duration-200 truncate max-w-[180px] ${
                 isActive
-                  ? "bg-amber-500/20 border-amber-500/60 text-amber-300 font-semibold hover:bg-amber-500/30"
+                  ? "bg-primary/20 border-primary/60 text-primary font-semibold hover:bg-primary/30"
                   : win.isMinimized
-                  ? "bg-background/40 border-border/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-amber-500/10"
-                  : "bg-secondary/40 border-border/80 text-foreground hover:bg-amber-500/15 hover:text-amber-300"
+                  ? "bg-background/40 border-border/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-primary/10"
+                  : "bg-secondary/40 border-border/80 text-foreground hover:bg-primary/15 hover:text-primary"
               }`}
             >
               <IconComponent
                 className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
-                  isActive ? "text-amber-400" : "text-muted-foreground group-hover:text-amber-400"
+                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"
                 }`}
               />
               <span className="truncate">{win.title}</span>

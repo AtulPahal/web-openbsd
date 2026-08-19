@@ -204,8 +204,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
       {/* Header / Now Playing Banner */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border text-xs bg-card/40">
-        <Music className="w-4 h-4 text-amber-400 shrink-0" />
-        <span className="text-amber-400 font-bold">Now Playing:</span>
+        <Music className="w-4 h-4 text-primary shrink-0" />
+        <span className="text-primary font-bold">Now Playing:</span>
         <span className="text-foreground truncate font-semibold">
           {title || "No track loaded"}
         </span>
@@ -234,11 +234,11 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
                   <tr
                     key={node.path}
                     onClick={() => loadTrack(node)}
-                    className={`cursor-pointer border-b border-border/30 last:border-0 hover:bg-amber-500/10 transition-colors ${
-                      isCurrent ? "bg-amber-500/15" : ""
+                    className={`cursor-pointer border-b border-border/30 last:border-0 hover:bg-primary/10 transition-colors ${
+                      isCurrent ? "bg-primary/15" : ""
                     }`}
                   >
-                    <td className={`py-2 px-1 font-semibold ${isCurrent ? "text-amber-400" : "text-foreground"}`}>
+                    <td className={`py-2 px-1 font-semibold ${isCurrent ? "text-primary" : "text-foreground"}`}>
                       {node.name}
                     </td>
                     <td className="py-2 px-1 text-muted-foreground">
@@ -248,7 +248,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
                       <span
                         className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                           isPlayingThis
-                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            ? "bg-primary/20 text-primary border border-primary/30"
                             : isCurrent
                             ? "bg-muted text-muted-foreground"
                             : "text-muted-foreground/60"
@@ -274,7 +274,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
           max={duration || 1}
           value={progress}
           onChange={handleSeek}
-          className="flex-1 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
+          style={{ accentColor: "var(--primary)" }}
+          className="flex-1 h-1.5 bg-muted rounded cursor-pointer"
         />
         <span className="w-10 text-left tabular-nums">-{remaining}</span>
       </div>
@@ -288,7 +289,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             onClick={prevTrack}
             disabled={playlist.length === 0}
             aria-label="Previous track"
-            className="p-2 bg-card hover:bg-amber-500/20 border border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40 rounded transition-colors"
+            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors"
             title="Previous Track"
           >
             <SkipBack className="w-4 h-4" />
@@ -300,8 +301,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             aria-label={isPlaying ? "Pause" : "Play"}
             className={`p-2 border rounded transition-all ${
               isPlaying
-                ? "bg-amber-500/25 border-amber-500/60 text-amber-300 shadow-sm"
-                : "bg-card hover:bg-amber-500/20 border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40"
+                ? "bg-primary/25 border-primary/60 text-primary shadow-sm"
+                : "bg-card hover:bg-primary/20 border-border/80 text-foreground hover:text-primary disabled:opacity-40"
             }`}
             title={isPlaying ? "Pause" : "Play"}
           >
@@ -312,7 +313,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             onClick={nextTrack}
             disabled={playlist.length === 0}
             aria-label="Next track"
-            className="p-2 bg-card hover:bg-amber-500/20 border border-border/80 text-foreground hover:text-amber-300 disabled:opacity-40 rounded transition-colors"
+            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors"
             title="Next Track"
           >
             <SkipForward className="w-4 h-4" />
@@ -329,14 +330,14 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             className={`p-1.5 border rounded transition-colors ${
               isMuted || volume === 0
                 ? "bg-red-500/20 text-red-300 border-red-500/40"
-                : "bg-card hover:bg-amber-500/20 border-border/80 text-foreground hover:text-amber-300"
+                : "bg-card hover:bg-primary/20 border-border/80 text-foreground hover:text-primary"
             }`}
             title={isMuted ? "Unmute" : "Mute"}
           >
             {isMuted || volume === 0 ? (
               <VolumeX className="w-4 h-4" />
             ) : (
-              <Volume2 className="w-4 h-4 text-amber-400" />
+              <Volume2 className="w-4 h-4 text-primary" />
             )}
           </button>
           <input
@@ -346,7 +347,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             step={0.01}
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-28 h-1.5 accent-amber-400 bg-muted rounded cursor-pointer"
+            style={{ accentColor: "var(--primary)" }}
+            className="w-28 h-1.5 bg-muted rounded cursor-pointer"
           />
         </div>
       </div>
