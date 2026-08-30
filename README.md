@@ -1,4 +1,4 @@
-# openBSD-Portfolio — Atul Pahal
+# openBSD-Portfolio — Atul Pahal 
 
 An interactive, browser-native OpenBSD & macOS-inspired web desktop environment showcasing the AI/ML and full-stack engineering portfolio of **Atul Pahal**. Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and Bun.
 
