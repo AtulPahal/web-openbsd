@@ -10,6 +10,10 @@ export async function GET(request: Request) {
 
   try {
     const parsedUrl = new URL(targetUrl);
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return new NextResponse("Invalid URL protocol. Only HTTP and HTTPS are supported.", { status: 400 });
+    }
+
     const res = await fetch(targetUrl, {
       headers: {
         "User-Agent":
@@ -18,6 +22,7 @@ export async function GET(request: Request) {
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
       },
+      signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(8000) : undefined,
     });
 
     let body = await res.text();
