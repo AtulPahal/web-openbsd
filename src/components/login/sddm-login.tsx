@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { User, ArrowRight, Power, RotateCcw, Unlock, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { User, ArrowRight, Power, RotateCcw, Unlock, Sparkles, Shield, Fingerprint } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 interface SDDMLoginProps {
@@ -13,6 +13,11 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
   const [date, setDate] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+
+  // 3D Parallax Tilt State
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [shine, setShine] = useState({ x: 50, y: 50 });
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -38,12 +43,35 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
     return () => clearInterval(interval);
   }, []);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = -((y - centerY) / centerY) * 12;
+    const rotateY = ((x - centerX) / centerX) * 12;
+
+    setTilt({ x: rotateX, y: rotateY });
+    setShine({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setShine({ x: 50, y: 50 });
+  };
+
   const handleUnlock = () => {
     if (isUnlocking) return;
     setIsUnlocking(true);
     setTimeout(() => {
       onLogin();
-    }, 400);
+    }, 450);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -65,81 +93,105 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
 
   return (
     <div
-      className={`min-h-[100dvh] h-full w-full bg-cover bg-center flex flex-col justify-between p-4 sm:p-8 select-none overflow-y-auto transition-all duration-500 ease-out ${
-        isUnlocking ? "scale-105 opacity-0 blur-sm pointer-events-none" : "scale-100 opacity-100 blur-0"
+      className={`relative min-h-[100dvh] h-full w-full bg-cover bg-center flex flex-col justify-between p-4 sm:p-8 select-none overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isUnlocking
+          ? "scale-110 opacity-0 blur-md pointer-events-none"
+          : "scale-100 opacity-100 blur-0"
       }`}
       style={{ backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')` }}
       suppressHydrationWarning
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      {/* Top section: Clock */}
-      <div className="flex flex-col items-center mt-6 sm:mt-12 md:mt-16 drop-shadow-lg" suppressHydrationWarning>
+      {/* Ambient Floating 3D Glowing Orbs */}
+      <div className="absolute top-1/4 left-1/5 w-80 h-80 rounded-full bg-primary/20 blur-[100px] pointer-events-none animate-pulse duration-1000" />
+      <div className="absolute bottom-1/4 right-1/5 w-96 h-96 rounded-full bg-sky-500/15 blur-[120px] pointer-events-none" />
+
+      {/* Top section: Clock with Specular Glow */}
+      <div className="relative z-10 flex flex-col items-center mt-6 sm:mt-12 md:mt-16 drop-shadow-2xl" suppressHydrationWarning>
         <h1
-          className="text-5xl sm:text-7xl md:text-8xl font-bold text-white tracking-wider font-sans drop-shadow-md"
+          className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-wider font-sans drop-shadow-2xl"
           suppressHydrationWarning
         >
           {mounted ? time : "--:--"}
         </h1>
         <p
-          className="text-sm sm:text-lg md:text-xl text-white/90 mt-1 sm:mt-2 font-medium text-center drop-shadow"
+          className="text-sm sm:text-lg md:text-xl text-white/90 mt-1 sm:mt-2 font-semibold text-center drop-shadow-md tracking-wide"
           suppressHydrationWarning
         >
           {mounted ? date : ""}
         </p>
       </div>
 
-      {/* Center section: Modern Glassmorphic Unlock Card */}
-      <div className="flex flex-col items-center my-6 sm:my-10" suppressHydrationWarning>
+      {/* Center section: 3D Parallax Tilt Unlock Card */}
+      <div className="relative z-10 flex flex-col items-center my-6 sm:my-10 perspective-[1000px]" suppressHydrationWarning>
         <div
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
           onClick={handleUnlock}
-          className="group bg-black/40 hover:bg-black/50 backdrop-blur-2xl border border-white/20 hover:border-primary/60 p-6 sm:p-8 rounded-3xl shadow-2xl flex flex-col items-center w-full max-w-[340px] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+          style={{
+            transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1, 1, 1)`,
+            transition: "transform 0.15s ease-out, box-shadow 0.3s ease",
+            boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px var(--accent-glow, rgba(245, 158, 11, 0.2))`,
+          }}
+          className="group relative bg-black/45 hover:bg-black/55 backdrop-blur-3xl border border-white/20 hover:border-primary/80 p-7 sm:p-9 rounded-3xl flex flex-col items-center w-full max-w-[350px] cursor-pointer overflow-hidden"
           suppressHydrationWarning
         >
-          {/* Avatar Ring */}
+          {/* Specular Radial Shine Overlay */}
           <div
-            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 border-2 border-white/30 group-hover:border-primary flex items-center justify-center mb-4 overflow-hidden shadow-xl transition-colors"
+            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"
+            style={{
+              background: `radial-gradient(circle 220px at ${shine.x}% ${shine.y}%, rgba(255, 255, 255, 0.15), transparent 80%)`,
+            }}
+          />
+
+          {/* Avatar Ring with 3D Depth */}
+          <div
+            className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 border-2 border-white/30 group-hover:border-primary flex items-center justify-center mb-4 overflow-hidden shadow-2xl transition-all duration-300 group-hover:scale-105"
             suppressHydrationWarning
           >
             <User className="w-10 h-10 sm:w-12 sm:h-12 text-white/90 group-hover:text-primary transition-colors" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/30 to-transparent pointer-events-none" />
           </div>
 
-          <h2 className="text-xl text-white font-bold mb-1 tracking-wide" suppressHydrationWarning>
+          <h2 className="text-xl text-white font-extrabold mb-1 tracking-wide" suppressHydrationWarning>
             {SYSTEM_CONFIG.userFullName}
           </h2>
-          <p className="text-xs text-white/70 font-mono mb-5" suppressHydrationWarning>
-            {SYSTEM_CONFIG.name} {SYSTEM_CONFIG.osVersion}
-          </p>
+          <div className="flex items-center gap-1.5 text-xs text-white/70 font-mono mb-6" suppressHydrationWarning>
+            <Shield className="w-3.5 h-3.5 text-primary" />
+            <span>{SYSTEM_CONFIG.name} {SYSTEM_CONFIG.osVersion} Pro</span>
+          </div>
 
-          {/* Instant Unlock Button (No password required) */}
+          {/* Instant Unlock Button with Pulse */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleUnlock();
             }}
-            className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer text-sm"
+            className="w-full py-3.5 px-5 bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl flex items-center justify-center gap-2.5 shadow-xl transition-all active:scale-95 cursor-pointer text-xs sm:text-sm tracking-wide group-hover:shadow-primary/30"
             suppressHydrationWarning
           >
-            <Unlock className="w-4 h-4" />
-            <span>Click or Press Enter to Unlock</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <Unlock className="w-4 h-4 animate-bounce" />
+            <span>Press Enter to Unlock</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
           </button>
         </div>
       </div>
 
       {/* Bottom section: Power Controls & System Info */}
       <div
-        className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between items-center sm:items-end px-2 sm:px-4 pb-2 sm:pb-4"
+        className="relative z-10 flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between items-center sm:items-end px-2 sm:px-4 pb-2 sm:pb-4"
         suppressHydrationWarning
       >
-        <div className="text-white/70 text-xs sm:text-sm font-mono text-center sm:text-left drop-shadow">
+        <div className="text-white/75 text-xs sm:text-sm font-mono text-center sm:text-left drop-shadow-md">
           {SYSTEM_CONFIG.name} {SYSTEM_CONFIG.desktopVersion} ({SYSTEM_CONFIG.architecture})
         </div>
         <div className="flex gap-2 sm:gap-4" suppressHydrationWarning>
           <button
             type="button"
-            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-1.5 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-sm"
+            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
             onClick={() => window.location.reload()}
             suppressHydrationWarning
           >
@@ -148,7 +200,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           </button>
           <button
             type="button"
-            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-1.5 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-sm"
+            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
             onClick={() => window.close()}
             suppressHydrationWarning
           >
