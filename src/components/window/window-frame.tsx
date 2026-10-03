@@ -263,15 +263,17 @@ export function WindowFrame({
 
   return (
     <div
-      className={`absolute flex flex-col overflow-hidden animate-in zoom-in-95 fade-in-0 duration-200 ${
-        isDragging || isResizing ? "select-none pointer-events-auto" : "transition-[border-color,box-shadow,opacity] duration-150"
+      className={`absolute flex flex-col overflow-hidden ${
+        isDragging || isResizing
+          ? "select-none pointer-events-auto"
+          : "transition-[box-shadow,border-color] duration-150"
       } ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
-          : "border rounded-2xl shadow-2xl backdrop-blur-xl"
+          : "border rounded-2xl shadow-2xl backdrop-blur-2xl"
       } ${
         win.isFocused
-          ? "border-primary/60 shadow-2xl shadow-black/30 dark:shadow-black/70 ring-1 ring-primary/40"
+          ? "border-primary/60 shadow-2xl shadow-black/40 dark:shadow-black/80 ring-1 ring-primary/40"
           : "border-border/80 shadow-lg shadow-black/10"
       }`}
       style={
@@ -294,54 +296,22 @@ export function WindowFrame({
       onMouseDown={onFocus}
       onTouchStart={onFocus}
     >
-      {/* Title bar */}
+      {/* macOS Style Title Bar */}
       <div
-        className={`flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
+        className={`group/titlebar flex items-center justify-between px-3 h-8.5 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
           win.isMaximized ? "rounded-none" : "rounded-t-2xl"
         } ${
           win.isFocused
-            ? "bg-card/90 backdrop-blur-md text-foreground font-bold border-primary/50 shadow-sm"
-            : "bg-muted/80 text-muted-foreground border-border/60"
+            ? "bg-card/95 backdrop-blur-xl text-foreground font-semibold border-primary/40 shadow-sm"
+            : "bg-muted/85 text-muted-foreground border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
         onDoubleClick={handleTitleDoubleClick}
       >
-        <div className="flex items-center gap-2 truncate pr-2 pointer-events-none">
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 transition-all ${
-              win.isFocused ? "bg-primary shadow-sm shadow-primary/50" : "bg-muted-foreground/30"
-            }`}
-          />
-          <span className="truncate">{win.title}</span>
-        </div>
-
-        {/* Window Traffic Light Action Buttons */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMinimize();
-            }}
-            aria-label="Minimize"
-            title="Minimize"
-            className="w-6 h-6 rounded flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/20 active:scale-95 transition-all cursor-pointer"
-          >
-            <span className="text-sm leading-none">—</span>
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMaximize();
-            }}
-            aria-label={win.isMaximized ? "Restore" : "Maximize"}
-            title={win.isMaximized ? "Restore" : "Maximize"}
-            className="w-6 h-6 rounded flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/20 active:scale-95 transition-all cursor-pointer"
-          >
-            <span className="text-xs leading-none">□</span>
-          </button>
+        {/* Left: macOS Traffic Light Buttons */}
+        <div className="flex items-center gap-2 shrink-0 group/lights">
+          {/* Close: Red */}
           <button
             type="button"
             onClick={(e) => {
@@ -350,15 +320,55 @@ export function WindowFrame({
             }}
             aria-label="Close"
             title="Close"
-            className="w-6 h-6 rounded flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-500/20 active:scale-95 transition-all cursor-pointer"
+            className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[8px] leading-none select-none"
           >
-            <span className="text-xs font-bold leading-none">✕</span>
+            ✕
+          </button>
+
+          {/* Minimize: Yellow/Amber */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMinimize();
+            }}
+            aria-label="Minimize"
+            title="Minimize"
+            className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[8px] leading-none select-none"
+          >
+            —
+          </button>
+
+          {/* Maximize: Green */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMaximize();
+            }}
+            aria-label={win.isMaximized ? "Restore" : "Maximize"}
+            title={win.isMaximized ? "Restore" : "Maximize"}
+            className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[7px] leading-none select-none"
+          >
+            +
           </button>
         </div>
+
+        {/* Center: Window Title */}
+        <div className="flex-1 text-center truncate px-2 font-medium text-foreground/90 tracking-wide pointer-events-none text-[11px]">
+          {win.title}
+        </div>
+
+        {/* Right: Balance Spacer */}
+        <div className="w-12 shrink-0" />
       </div>
 
-      {/* Window content */}
-      <div className={`flex-1 overflow-hidden bg-card text-card-foreground ${win.isMaximized ? "rounded-none" : "rounded-b-2xl"}`}>
+      {/* Window Content */}
+      <div
+        className={`flex-1 overflow-hidden bg-card text-card-foreground ${
+          win.isMaximized ? "rounded-none" : "rounded-b-2xl"
+        }`}
+      >
         {children}
       </div>
 
