@@ -1,18 +1,23 @@
 "use client";
 
-import { Columns, Grid, Square, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Compass, Home, Focus, Eye } from "lucide-react";
 import { AppLauncher } from "./app-launcher";
 import { SystemTray } from "./system-tray";
 import type { AppId, WindowState } from "@/types";
-import type { DriftLayoutMode } from "@/hooks/use-window-manager";
+import type { CameraState } from "@/hooks/use-window-manager";
 
 interface TopMenuBarProps {
   onOpenApp: (appId: AppId) => void;
-  activeWorkspace: number;
-  onSelectWorkspace: (ws: number) => void;
+  activeWorkspace?: number;
+  onSelectWorkspace?: (ws: number) => void;
   windows?: WindowState[];
-  layoutMode?: DriftLayoutMode;
-  onToggleLayoutMode?: () => void;
+  camera?: CameraState;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onResetZoom?: () => void;
+  onZoomToFit?: () => void;
+  onCenterWindow?: () => void;
+  onGoHome?: () => void;
   onToggleNotificationCenter: () => void;
   unreadCount?: number;
   volume: number;
@@ -22,82 +27,101 @@ interface TopMenuBarProps {
 
 export function TopMenuBar({
   onOpenApp,
-  activeWorkspace,
-  onSelectWorkspace,
   windows = [],
-  layoutMode = "floating",
-  onToggleLayoutMode,
+  camera = { x: 0, y: 0, zoom: 1.0 },
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
+  onZoomToFit,
+  onCenterWindow,
+  onGoHome,
   onToggleNotificationCenter,
   unreadCount = 0,
   volume,
   isMuted,
   onVolumeChange,
 }: TopMenuBarProps) {
-  const workspaces = [1, 2, 3, 4];
-
-  // Count active windows per workspace
-  const getWorkspaceWindowCount = (ws: number) => {
-    return windows.filter((w) => (w.workspace ?? 1) === ws).length;
-  };
+  const visibleWindowsCount = windows.filter((w) => !w.isMinimized).length;
 
   return (
-    <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-1.5 sm:px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-visible">
-      {/* Left: OpenBSD App Launcher + Workspaces + driftwm Layout Mode */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+    <div className="h-7 bg-background/95 backdrop-blur-xl border-b border-border/60 flex items-center justify-between px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-visible">
+      {/* Left: OpenBSD App Launcher + driftwm Camera Navigator */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         {/* OpenBSD Option */}
         <AppLauncher onOpenApp={onOpenApp} />
 
         <div className="text-border/80 text-xs px-0.5 hidden xs:inline">|</div>
 
-        {/* 4 Workspaces Switcher */}
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          {workspaces.map((ws) => {
-            const isActive = activeWorkspace === ws;
-            const count = getWorkspaceWindowCount(ws);
+        {/* driftwm Camera Controls Strip */}
+        <div className="flex items-center gap-1">
+          {/* Home Button (Mod+A) */}
+          <button
+            type="button"
+            onClick={onGoHome}
+            className="h-5 px-1.5 sm:px-2 flex items-center gap-1 text-[10px] sm:text-[11px] font-mono border border-border/50 hover:border-primary/50 bg-card/50 hover:bg-primary/10 text-foreground hover:text-primary rounded-md transition-all cursor-pointer active:scale-95 shadow-sm"
+            title="driftwm Home (Mod+A) — Jump to origin (0, 0)"
+          >
+            <Home className="w-3 h-3 text-primary" />
+            <span className="hidden sm:inline">Home</span>
+          </button>
 
-            return (
-              <button
-                key={ws}
-                type="button"
-                onClick={() => onSelectWorkspace(ws)}
-                className={`h-5 px-1.5 sm:px-2 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono border transition-all duration-150 rounded-md cursor-pointer ${
-                  isActive
-                    ? "bg-primary/20 border-primary/60 text-primary font-bold shadow-sm"
-                    : "bg-background/40 border-border/40 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
-                }`}
-                title={`Switch to Workspace ${ws}${count > 0 ? ` (${count} open)` : ""}`}
-              >
-                <span>{ws}</span>
-                {count > 0 && (
-                  <span
-                    className={`w-1 h-1 rounded-full ${
-                      isActive ? "bg-primary" : "bg-muted-foreground/60"
-                    }`}
-                  />
-                )}
-              </button>
-            );
-          })}
+          {/* Overview / Zoom to Fit (Mod+W) */}
+          <button
+            type="button"
+            onClick={onZoomToFit}
+            className="h-5 px-1.5 sm:px-2 flex items-center gap-1 text-[10px] sm:text-[11px] font-mono border border-border/50 hover:border-primary/50 bg-card/50 hover:bg-primary/10 text-foreground hover:text-primary rounded-md transition-all cursor-pointer active:scale-95 shadow-sm"
+            title={`driftwm Overview (Mod+W) — Zoom to fit all ${visibleWindowsCount} windows`}
+          >
+            <Eye className="w-3 h-3 text-sky-400" />
+            <span className="hidden sm:inline">Overview</span>
+            {visibleWindowsCount > 0 && (
+              <span className="px-1 py-0.2 rounded-full text-[8px] font-bold bg-primary/20 text-primary">
+                {visibleWindowsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Center Focused Window (Mod+C) */}
+          <button
+            type="button"
+            onClick={onCenterWindow}
+            className="h-5 px-1.5 sm:px-2 flex items-center gap-1 text-[10px] sm:text-[11px] font-mono border border-border/50 hover:border-primary/50 bg-card/50 hover:bg-primary/10 text-foreground hover:text-primary rounded-md transition-all cursor-pointer active:scale-95 shadow-sm"
+            title="driftwm Center (Mod+C) — Focus camera on active window"
+          >
+            <Focus className="w-3 h-3 text-amber-400" />
+            <span className="hidden sm:inline">Center</span>
+          </button>
         </div>
 
-        {/* driftwm Layout Mode Switcher Button */}
-        {onToggleLayoutMode && (
-          <>
-            <div className="text-border/80 text-xs px-0.5 hidden xs:inline">|</div>
-            <button
-              type="button"
-              onClick={onToggleLayoutMode}
-              className="h-5 px-2 flex items-center gap-1.5 text-[10px] font-mono border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-bold transition-all rounded-md cursor-pointer active:scale-95 shadow-sm"
-              title={`driftwm layout: ${layoutMode.toUpperCase()} (Click or press Alt+Space to toggle)`}
-            >
-              {layoutMode === "floating" && <Maximize2 className="w-3 h-3" />}
-              {layoutMode === "tiling" && <Columns className="w-3 h-3" />}
-              {layoutMode === "split" && <Grid className="w-3 h-3" />}
-              {layoutMode === "monocle" && <Square className="w-3 h-3" />}
-              <span className="capitalize">{layoutMode}</span>
-            </button>
-          </>
-        )}
+        <div className="text-border/80 text-xs px-0.5 hidden sm:inline">|</div>
+
+        {/* Zoom Controls HUD */}
+        <div className="hidden sm:flex items-center gap-0.5 bg-background/50 border border-border/50 rounded-md p-0.5 text-[10px]">
+          <button
+            type="button"
+            onClick={onZoomOut}
+            className="w-4 h-4 rounded hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
+            title="Zoom Out (Mod+-)"
+          >
+            <ZoomOut className="w-2.5 h-2.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onResetZoom}
+            className="px-1 font-bold text-primary hover:underline transition-all cursor-pointer tabular-nums"
+            title="Reset Zoom to 100% (Mod+0)"
+          >
+            {Math.round(camera.zoom * 100)}%
+          </button>
+          <button
+            type="button"
+            onClick={onZoomIn}
+            className="w-4 h-4 rounded hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
+            title="Zoom In (Mod+=)"
+          >
+            <ZoomIn className="w-2.5 h-2.5" />
+          </button>
+        </div>
       </div>
 
       {/* Center: Clean Spacer */}
