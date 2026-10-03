@@ -247,13 +247,13 @@ export function WindowFrame({
 
   return (
     <div
-      className={`absolute flex flex-col overflow-hidden transition-all duration-200 ease-out animate-in zoom-in-95 fade-in-0 ${
+      className={`absolute flex flex-col overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 fade-in-0 duration-200 ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
-          : "border rounded-2xl shadow-2xl"
+          : "border rounded-2xl shadow-2xl backdrop-blur-xl"
       } ${
         win.isFocused
-          ? "border-primary/60 shadow-2xl shadow-black/20 dark:shadow-black/60 ring-1 ring-primary/30"
+          ? "border-primary/60 shadow-2xl shadow-black/30 dark:shadow-black/70 ring-1 ring-primary/40"
           : "border-border/80 shadow-lg shadow-black/10"
       }`}
       style={
@@ -278,12 +278,13 @@ export function WindowFrame({
     >
       {/* Title bar */}
       <div
-        className={`flex items-center justify-between px-3 h-8 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
+        className={`flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
+          win.isMaximized ? "rounded-none" : "rounded-t-2xl"
+        } ${
           win.isFocused
             ? "bg-card/90 backdrop-blur-md text-foreground font-bold border-primary/50 shadow-sm"
             : "bg-muted/80 text-muted-foreground border-border/60"
         }`}
-        onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
         onDoubleClick={handleTitleDoubleClick}
       >
@@ -338,7 +339,7 @@ export function WindowFrame({
       </div>
 
       {/* Window content */}
-      <div className="flex-1 overflow-hidden bg-card text-card-foreground">
+      <div className={`flex-1 overflow-hidden bg-card text-card-foreground ${win.isMaximized ? "rounded-none" : "rounded-b-2xl"}`}>
         {children}
       </div>
 
