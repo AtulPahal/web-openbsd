@@ -247,14 +247,14 @@ export function WindowFrame({
 
   return (
     <div
-      className={`absolute flex flex-col overflow-hidden transition-shadow duration-150 ${
+      className={`absolute flex flex-col overflow-hidden transition-all duration-200 ease-out animate-in zoom-in-95 fade-in-0 ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
-          : "border rounded-t-lg"
+          : "border rounded-2xl shadow-2xl"
       } ${
         win.isFocused
-          ? "border-primary/60 shadow-xl shadow-black/10 dark:shadow-black/50"
-          : "border-border/80 shadow-md shadow-black/5"
+          ? "border-primary/60 shadow-2xl shadow-black/20 dark:shadow-black/60 ring-1 ring-primary/30"
+          : "border-border/80 shadow-lg shadow-black/10"
       }`}
       style={
         win.isMaximized
@@ -278,10 +278,10 @@ export function WindowFrame({
     >
       {/* Title bar */}
       <div
-        className={`flex items-center justify-between px-2.5 h-8 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
+        className={`flex items-center justify-between px-3 h-8 shrink-0 select-none font-mono text-xs font-semibold tracking-wide border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
           win.isFocused
-            ? "bg-card text-foreground font-bold border-primary/50 shadow-sm"
-            : "bg-muted/70 text-muted-foreground border-border/60"
+            ? "bg-card/90 backdrop-blur-md text-foreground font-bold border-primary/50 shadow-sm"
+            : "bg-muted/80 text-muted-foreground border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}

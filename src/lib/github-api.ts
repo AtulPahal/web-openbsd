@@ -1,10 +1,9 @@
 /**
- * Live GitHub API Client with in-memory caching and offline fallback.
+ * Live GitHub API Client with in-memory caching, timeout protection, and offline fallback.
  * Fetches real user profile, repositories, stars, and language stats.
  */
 
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
-import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 export interface GitHubUser {
   login: string;
@@ -63,6 +62,7 @@ export async function fetchGitHubUser(username = "AtulPahal"): Promise<GitHubUse
       headers: {
         Accept: "application/vnd.github.v3+json",
       },
+      signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(4000) : undefined,
     });
 
     if (!res.ok) {
@@ -100,6 +100,7 @@ export async function fetchGitHubRepos(username = "AtulPahal"): Promise<GitHubRe
         headers: {
           Accept: "application/vnd.github.v3+json",
         },
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(4000) : undefined,
       }
     );
 
