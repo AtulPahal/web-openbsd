@@ -3,16 +3,10 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import type { WindowId, WindowState, AppId, Position, Size, AppState } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
+import { BASE_OFFSET, CASCADE_STEP } from "@/lib/desktop-config";
 
 const TOP_BAR_HEIGHT = 28;
 const DOCK_WIDTH = 56;
-const SNAP_THRESHOLD = 16;
-
-export interface CameraState {
-  x: number;
-  y: number;
-  zoom: number;
-}
 
 function generateId(): WindowId {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -25,148 +19,59 @@ export function useWindowManager() {
   const [windowMap, setWindowMap] = useState<Map<WindowId, WindowState>>(
     () => new Map()
   );
-  const [camera, setCamera] = useState<CameraState>({ x: 0, y: 0, zoom: 1.0 });
-
   const nextZIndexRef = useRef(1);
   const cascadeCountRef = useRef(0);
 
   const windows = Array.from(windowMap.values());
 
-  // Camera Controls
-  const panCamera = useCallback((dx: number, dy: number) => {
-    setCamera((prev) => ({
-      ...prev,
-      x: Math.round(prev.x + dx),
-      y: Math.round(prev.y + dy),
-    }));
-  }, []);
+  // Handle window viewport resizing & orientation changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
 
-  const setZoom = useCallback((newZoom: number) => {
-    setCamera((prev) => ({
-      ...prev,
-      zoom: Math.min(2.0, Math.max(0.3, +newZoom.toFixed(2))),
-    }));
-  }, []);
+      setWindowMap((prev) => {
+        let changed = false;
+        const next = new Map(prev);
 
-  const zoomIn = useCallback(() => {
-    setCamera((prev) => ({
-      ...prev,
-      zoom: Math.min(2.0, +(prev.zoom + 0.15).toFixed(2)),
-    }));
-  }, []);
+        for (const [wid, win] of next) {
+          if (win.isMaximized) {
+            next.set(wid, {
+              ...win,
+              position: { x: 0, y: 0 },
+              size: { width: screenW, height: availableH },
+            });
+            changed = true;
+          } else {
+            // Clamp position so window stays on screen
+            const maxX = Math.max(0, screenW - 100);
+            const maxY = Math.max(0, availableH - 60);
+            const clampedX = Math.min(Math.max(0, win.position.x), maxX);
+            const clampedY = Math.min(Math.max(0, win.position.y), maxY);
 
-  const zoomOut = useCallback(() => {
-    setCamera((prev) => ({
-      ...prev,
-      zoom: Math.max(0.3, +(prev.zoom - 0.15).toFixed(2)),
-    }));
-  }, []);
-
-  const resetZoom = useCallback(() => {
-    setCamera((prev) => ({
-      ...prev,
-      zoom: 1.0,
-    }));
-  }, []);
-
-  const goHome = useCallback(() => {
-    setCamera({ x: 0, y: 0, zoom: 1.0 });
-  }, []);
-
-  // Center camera on a specific window (Mod+C in driftwm)
-  const centerWindow = useCallback(
-    (id: WindowId) => {
-      const win = windowMap.get(id);
-      if (!win) return;
-
-      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-
-      const targetX = Math.round(screenW / 2 - (win.position.x + win.size.width / 2) * camera.zoom);
-      const targetY = Math.round((screenH - TOP_BAR_HEIGHT) / 2 - (win.position.y + win.size.height / 2) * camera.zoom);
-
-      setCamera((prev) => ({
-        ...prev,
-        x: targetX,
-        y: targetY,
-      }));
-    },
-    [windowMap, camera.zoom]
-  );
-
-  // Zoom to fit all open windows on canvas (Mod+W overview in driftwm)
-  const zoomToFit = useCallback(() => {
-    const visibleWins = Array.from(windowMap.values()).filter((w) => !w.isMinimized);
-    if (visibleWins.length === 0) {
-      goHome();
-      return;
-    }
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-    visibleWins.forEach((w) => {
-      minX = Math.min(minX, w.position.x);
-      minY = Math.min(minY, w.position.y);
-      maxX = Math.max(maxX, w.position.x + w.size.width);
-      maxY = Math.max(maxY, w.position.y + w.size.height);
-    });
-
-    const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-    const screenH = typeof window !== "undefined" ? window.innerHeight - TOP_BAR_HEIGHT : 800;
-
-    const boundingW = maxX - minX + 80;
-    const boundingH = maxY - minY + 80;
-
-    const scaleX = screenW / boundingW;
-    const scaleY = screenH / boundingH;
-    const targetZoom = Math.min(1.0, Math.max(0.35, Math.min(scaleX, scaleY)));
-
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-
-    setCamera({
-      zoom: +targetZoom.toFixed(2),
-      x: Math.round(screenW / 2 - centerX * targetZoom),
-      y: Math.round(screenH / 2 - centerY * targetZoom),
-    });
-  }, [windowMap, goHome]);
-
-  // Magnetic edge snapping (driftwm clustering)
-  const calculateSnappedPosition = useCallback(
-    (movingWinId: WindowId, targetPos: Position, winSize: Size): Position => {
-      let snappedX = targetPos.x;
-      let snappedY = targetPos.y;
-
-      const otherWindows = Array.from(windowMap.values()).filter(
-        (w) => w.id !== movingWinId && !w.isMinimized
-      );
-
-      for (const other of otherWindows) {
-        // Snap left edge to other right edge
-        if (Math.abs(targetPos.x - (other.position.x + other.size.width + 12)) < SNAP_THRESHOLD) {
-          snappedX = other.position.x + other.size.width + 12;
+            if (clampedX !== win.position.x || clampedY !== win.position.y) {
+              next.set(wid, {
+                ...win,
+                position: { x: clampedX, y: clampedY },
+              });
+              changed = true;
+            }
+          }
         }
-        // Snap right edge to other left edge
-        if (Math.abs(targetPos.x + winSize.width - (other.position.x - 12)) < SNAP_THRESHOLD) {
-          snappedX = other.position.x - winSize.width - 12;
-        }
-        // Snap top edge to other top edge
-        if (Math.abs(targetPos.y - other.position.y) < SNAP_THRESHOLD) {
-          snappedY = other.position.y;
-        }
-        // Snap bottom edge to other bottom edge
-        if (Math.abs(targetPos.y + winSize.height - (other.position.y + other.size.height)) < SNAP_THRESHOLD) {
-          snappedY = other.position.y + other.size.height - winSize.height;
-        }
-      }
 
-      return { x: snappedX, y: snappedY };
-    },
-    [windowMap]
-  );
+        return changed ? next : prev;
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
 
   const openWindow = useCallback(
     (appId: AppId, appState?: AppState, workspace: number = 1) => {
@@ -179,14 +84,10 @@ export function useWindowManager() {
       const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
       const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
       const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT - 32);
-      const availableW = isMobile ? screenW - 24 : screenW - DOCK_WIDTH - 32;
+      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT - 20);
+      const availableW = isMobile ? screenW - 20 : screenW - DOCK_WIDTH - 20;
 
-      // In driftwm, place new window near camera center or in canvas space
-      const spawnX = Math.round((-camera.x + screenW / 2 - appDef.defaultSize.width / 2) / camera.zoom);
-      const spawnY = Math.round((-camera.y + screenH / 2 - appDef.defaultSize.height / 2) / camera.zoom);
-
-      const offset = (cascadeCountRef.current % 6) * 30;
+      const offset = BASE_OFFSET + (cascadeCountRef.current % 8) * CASCADE_STEP;
       cascadeCountRef.current++;
 
       const newWindow: WindowState = {
@@ -194,8 +95,8 @@ export function useWindowManager() {
         title: appDef.name,
         appId,
         position: isMobile
-          ? { x: 12, y: 12 }
-          : { x: spawnX + offset, y: Math.max(12, spawnY + offset) },
+          ? { x: 8, y: 8 }
+          : { x: Math.min(offset, availableW - appDef.defaultSize.width), y: Math.min(offset, availableH - appDef.defaultSize.height) },
         size: isMobile
           ? { width: availableW, height: availableH }
           : {
@@ -222,7 +123,7 @@ export function useWindowManager() {
         return next;
       });
     },
-    [camera]
+    []
   );
 
   const closeWindow = useCallback((id: WindowId) => {
@@ -274,24 +175,32 @@ export function useWindowManager() {
       const next = new Map(prev);
       if (win.isMaximized) {
         const appDef = APP_REGISTRY[win.appId];
+        const defaultW = appDef?.defaultSize.width ?? 680;
+        const defaultH = appDef?.defaultSize.height ?? 460;
+        const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
+        const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+
         next.set(id, {
           ...win,
           isMaximized: false,
+          position: { x: BASE_OFFSET, y: BASE_OFFSET },
           size: {
-            width: appDef?.defaultSize.width ?? 680,
-            height: appDef?.defaultSize.height ?? 460,
+            width: Math.min(defaultW, screenW - 80),
+            height: Math.min(defaultH, screenH - TOP_BAR_HEIGHT - 60),
           },
         });
       } else {
         const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
         const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+        const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
+
         next.set(id, {
           ...win,
           isMaximized: true,
-          position: { x: 12, y: 12 },
+          position: { x: 0, y: 0 },
           size: {
-            width: screenW - DOCK_WIDTH - 24,
-            height: screenH - TOP_BAR_HEIGHT - 24,
+            width: screenW,
+            height: availableH,
           },
         });
       }
@@ -299,30 +208,38 @@ export function useWindowManager() {
     });
   }, []);
 
-  const moveWindow = useCallback(
-    (id: WindowId, position: Position) => {
-      setWindowMap((prev) => {
-        const win = prev.get(id);
-        if (!win) return prev;
+  const moveWindow = useCallback((id: WindowId, position: Position) => {
+    setWindowMap((prev) => {
+      const win = prev.get(id);
+      if (!win) return prev;
 
-        const snapped = calculateSnappedPosition(id, position, win.size);
+      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
+      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
 
-        const next = new Map(prev);
-        next.set(id, { ...win, position: snapped, isMaximized: false });
-        return next;
-      });
-    },
-    [calculateSnappedPosition]
-  );
+      const clampedPosition: Position = {
+        x: Math.min(Math.max(-win.size.width + 100, position.x), screenW - 100),
+        y: Math.min(Math.max(0, position.y), availableH - 30),
+      };
+
+      const next = new Map(prev);
+      next.set(id, { ...win, position: clampedPosition, isMaximized: false });
+      return next;
+    });
+  }, []);
 
   const resizeWindow = useCallback((id: WindowId, size: Size) => {
     setWindowMap((prev) => {
       const win = prev.get(id);
       if (!win) return prev;
 
+      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
+      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
+
       const clampedSize: Size = {
-        width: Math.max(size.width, win.minSize.width),
-        height: Math.max(size.height, win.minSize.height),
+        width: Math.min(Math.max(size.width, win.minSize.width), screenW),
+        height: Math.min(Math.max(size.height, win.minSize.height), availableH),
       };
 
       const next = new Map(prev);
@@ -331,17 +248,15 @@ export function useWindowManager() {
     });
   }, []);
 
+  const getWindow = useCallback(
+    (id: WindowId): WindowState | undefined => {
+      return windowMap.get(id);
+    },
+    [windowMap]
+  );
+
   return {
     windows,
-    camera,
-    panCamera,
-    setZoom,
-    zoomIn,
-    zoomOut,
-    resetZoom,
-    zoomToFit,
-    centerWindow,
-    goHome,
     openWindow,
     closeWindow,
     focusWindow,
@@ -349,5 +264,6 @@ export function useWindowManager() {
     maximizeWindow,
     moveWindow,
     resizeWindow,
+    getWindow,
   };
 }
