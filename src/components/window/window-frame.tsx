@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { WindowState, Position, Size } from "@/types";
 
 interface WindowFrameProps {
@@ -34,6 +34,9 @@ export function WindowFrame({
   onResize,
   children,
 }: WindowFrameProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+
   const dragRef = useRef<{
     startX: number;
     startY: number;
@@ -51,45 +54,57 @@ export function WindowFrame({
     originH: number;
   } | null>(null);
 
-  // --- Title bar drag (Mouse + Touch with RAF smooth throttling) ---
+  // --- Title bar drag (Mouse + Touch) ---
   const handleTitleStart = useCallback(
     (clientX: number, clientY: number) => {
-      if (win.isMaximized) return;
       onFocus();
 
-      dragRef.current = {
-        startX: clientX,
-        startY: clientY,
-        originX: win.position.x,
-        originY: win.position.y,
-      };
+      if (win.isMaximized) {
+        onMaximize();
+        const estimatedW = win.size.width || 680;
+        const newOriginX = Math.max(0, clientX - estimatedW / 2);
+        dragRef.current = {
+          startX: clientX,
+          startY: clientY,
+          originX: newOriginX,
+          originY: Math.max(0, clientY - 18),
+        };
+      } else {
+        dragRef.current = {
+          startX: clientX,
+          startY: clientY,
+          originX: win.position.x,
+          originY: win.position.y,
+        };
+      }
 
-      let rafId: number | null = null;
+      setIsDragging(true);
 
       const handleMove = (evX: number, evY: number) => {
         if (!dragRef.current) return;
-        if (rafId !== null) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => {
-          if (!dragRef.current) return;
-          const dx = evX - dragRef.current.startX;
-          const dy = evY - dragRef.current.startY;
-          onMove({
-            x: dragRef.current.originX + dx,
-            y: Math.max(0, dragRef.current.originY + dy),
-          });
+        const dx = evX - dragRef.current.startX;
+        const dy = evY - dragRef.current.startY;
+        onMove({
+          x: Math.round(dragRef.current.originX + dx),
+          y: Math.max(0, Math.round(dragRef.current.originY + dy)),
         });
       };
 
-      const handleMouseMove = (ev: MouseEvent) => handleMove(ev.clientX, ev.clientY);
+      const handleMouseMove = (ev: MouseEvent) => {
+        ev.preventDefault();
+        handleMove(ev.clientX, ev.clientY);
+      };
+
       const handleTouchMove = (ev: TouchEvent) => {
         if (ev.touches.length > 0) {
+          ev.preventDefault();
           handleMove(ev.touches[0].clientX, ev.touches[0].clientY);
         }
       };
 
       const handleEnd = () => {
-        if (rafId !== null) cancelAnimationFrame(rafId);
         dragRef.current = null;
+        setIsDragging(false);
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", handleTouchMove);
@@ -97,13 +112,13 @@ export function WindowFrame({
         document.removeEventListener("touchcancel", handleEnd);
       };
 
-      document.addEventListener("mousemove", handleMouseMove, { passive: true });
+      document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleTouchMove, { passive: true });
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
       document.addEventListener("touchend", handleEnd);
       document.addEventListener("touchcancel", handleEnd);
     },
-    [win.isMaximized, win.position.x, win.position.y, onFocus, onMove]
+    [win.isMaximized, win.position.x, win.position.y, win.size.width, onFocus, onMaximize, onMove]
   );
 
   const handleTitleMouseDown = useCallback(
@@ -127,7 +142,7 @@ export function WindowFrame({
     onMaximize();
   }, [onMaximize]);
 
-  // --- Resize handles (Mouse + Touch with RAF smooth throttling) ---
+  // --- Resize handles (Mouse + Touch) ---
   const handleResizeStart = useCallback(
     (direction: ResizeDirection, clientX: number, clientY: number) => {
       if (win.isMaximized) return;
@@ -143,58 +158,59 @@ export function WindowFrame({
         originH: win.size.height,
       };
 
-      let resizeRafId: number | null = null;
+      setIsResizing(true);
 
       const handleResizeMove = (evX: number, evY: number) => {
         if (!resizeRef.current) return;
-        if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
-        resizeRafId = requestAnimationFrame(() => {
-          if (!resizeRef.current) return;
-          const r = resizeRef.current;
-          const dx = evX - r.startX;
-          const dy = evY - r.startY;
+        const r = resizeRef.current;
+        const dx = evX - r.startX;
+        const dy = evY - r.startY;
 
-          let newX = r.originX;
-          let newY = r.originY;
-          let newW = r.originW;
-          let newH = r.originH;
+        let newX = r.originX;
+        let newY = r.originY;
+        let newW = r.originW;
+        let newH = r.originH;
 
-          if (r.direction.includes("e")) newW = r.originW + dx;
-          if (r.direction.includes("w")) {
-            newW = r.originW - dx;
-            newX = r.originX + dx;
-          }
-          if (r.direction.includes("s")) newH = r.originH + dy;
-          if (r.direction.includes("n")) {
-            newH = r.originH - dy;
-            newY = r.originY + dy;
-          }
+        if (r.direction.includes("e")) newW = r.originW + dx;
+        if (r.direction.includes("w")) {
+          newW = r.originW - dx;
+          newX = r.originX + dx;
+        }
+        if (r.direction.includes("s")) newH = r.originH + dy;
+        if (r.direction.includes("n")) {
+          newH = r.originH - dy;
+          newY = r.originY + dy;
+        }
 
-          const clampedW = Math.max(newW, win.minSize.width);
-          const clampedH = Math.max(newH, win.minSize.height);
+        const clampedW = Math.max(newW, win.minSize.width);
+        const clampedH = Math.max(newH, win.minSize.height);
 
-          if (r.direction.includes("w") && clampedW !== newW) {
-            newX = r.originX + r.originW - clampedW;
-          }
-          if (r.direction.includes("n") && clampedH !== newH) {
-            newY = r.originY + r.originH - clampedH;
-          }
+        if (r.direction.includes("w") && clampedW !== newW) {
+          newX = r.originX + r.originW - clampedW;
+        }
+        if (r.direction.includes("n") && clampedH !== newH) {
+          newY = r.originY + r.originH - clampedH;
+        }
 
-          onResize({ width: clampedW, height: clampedH });
-          onMove({ x: newX, y: Math.max(0, newY) });
-        });
+        onResize({ width: clampedW, height: clampedH });
+        onMove({ x: newX, y: Math.max(0, newY) });
       };
 
-      const handleMouseMove = (ev: MouseEvent) => handleResizeMove(ev.clientX, ev.clientY);
+      const handleMouseMove = (ev: MouseEvent) => {
+        ev.preventDefault();
+        handleResizeMove(ev.clientX, ev.clientY);
+      };
+
       const handleTouchMove = (ev: TouchEvent) => {
         if (ev.touches.length > 0) {
+          ev.preventDefault();
           handleResizeMove(ev.touches[0].clientX, ev.touches[0].clientY);
         }
       };
 
       const handleEnd = () => {
-        if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
         resizeRef.current = null;
+        setIsResizing(false);
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", handleTouchMove);
@@ -202,9 +218,9 @@ export function WindowFrame({
         document.removeEventListener("touchcancel", handleEnd);
       };
 
-      document.addEventListener("mousemove", handleMouseMove, { passive: true });
+      document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleTouchMove, { passive: true });
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
       document.addEventListener("touchend", handleEnd);
       document.addEventListener("touchcancel", handleEnd);
     },
@@ -247,7 +263,9 @@ export function WindowFrame({
 
   return (
     <div
-      className={`absolute flex flex-col overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 fade-in-0 duration-200 ${
+      className={`absolute flex flex-col overflow-hidden animate-in zoom-in-95 fade-in-0 duration-200 ${
+        isDragging || isResizing ? "select-none pointer-events-auto" : "transition-[border-color,box-shadow,opacity] duration-150"
+      } ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
           : "border rounded-2xl shadow-2xl backdrop-blur-xl"
@@ -285,6 +303,7 @@ export function WindowFrame({
             ? "bg-card/90 backdrop-blur-md text-foreground font-bold border-primary/50 shadow-sm"
             : "bg-muted/80 text-muted-foreground border-border/60"
         }`}
+        onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
         onDoubleClick={handleTitleDoubleClick}
       >
