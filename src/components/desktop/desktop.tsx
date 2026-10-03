@@ -46,6 +46,8 @@ interface Toast {
 export function Desktop() {
   const {
     windows,
+    layoutMode,
+    toggleLayoutMode,
     openWindow,
     closeWindow,
     focusWindow,
@@ -175,6 +177,16 @@ export function Desktop() {
         setBrightness(customEvent.detail.brightness);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.code === "Space" || e.key === " ")) {
+        e.preventDefault();
+        toggleLayoutMode();
+      } else if (e.altKey && e.key.toLowerCase() === "w") {
+        e.preventDefault();
+        const focusedWin = windows.find((w) => w.isFocused && (w.workspace ?? 1) === activeWorkspace);
+        if (focusedWin) closeWindow(focusedWin.id);
+      }
+    };
 
     window.addEventListener("close-window", handleClose as EventListener);
     window.addEventListener("open-app", handleOpen as EventListener);
@@ -184,8 +196,10 @@ export function Desktop() {
     window.addEventListener("dock-magnification-change", handleDockMagnify);
     window.addEventListener("wallpaper-change", handleWallpaperChange);
     window.addEventListener("brightness-change", handleBrightnessEvt);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("close-window", handleClose as EventListener);
       window.removeEventListener("open-app", handleOpen as EventListener);
       window.removeEventListener("show-notification", handleNotify as EventListener);
@@ -195,7 +209,7 @@ export function Desktop() {
       window.removeEventListener("wallpaper-change", handleWallpaperChange);
       window.removeEventListener("brightness-change", handleBrightnessEvt);
     };
-  }, [closeWindow, activeWorkspace]);
+  }, [closeWindow, activeWorkspace, toggleLayoutMode, windows]);
 
   // Filter windows by current workspace
   const visibleWindows = windows.filter(
@@ -248,13 +262,14 @@ export function Desktop() {
             activeWorkspace={activeWorkspace}
             onSelectWorkspace={(ws) => setActiveWorkspace(ws)}
             windows={windows}
+            layoutMode={layoutMode}
+            onToggleLayoutMode={toggleLayoutMode}
             onToggleNotificationCenter={() => setIsNotificationCenterOpen((prev) => !prev)}
             unreadCount={notificationHistory.length}
             volume={masterVolume}
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
           />
-
           {/* Desktop Wallpaper */}
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"

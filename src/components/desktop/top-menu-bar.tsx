@@ -1,14 +1,18 @@
 "use client";
 
+import { Columns, Grid, Square, Maximize2 } from "lucide-react";
 import { AppLauncher } from "./app-launcher";
 import { SystemTray } from "./system-tray";
 import type { AppId, WindowState } from "@/types";
+import type { DriftLayoutMode } from "@/hooks/use-window-manager";
 
 interface TopMenuBarProps {
   onOpenApp: (appId: AppId) => void;
   activeWorkspace: number;
   onSelectWorkspace: (ws: number) => void;
   windows?: WindowState[];
+  layoutMode?: DriftLayoutMode;
+  onToggleLayoutMode?: () => void;
   onToggleNotificationCenter: () => void;
   unreadCount?: number;
   volume: number;
@@ -21,6 +25,8 @@ export function TopMenuBar({
   activeWorkspace,
   onSelectWorkspace,
   windows = [],
+  layoutMode = "floating",
+  onToggleLayoutMode,
   onToggleNotificationCenter,
   unreadCount = 0,
   volume,
@@ -36,7 +42,7 @@ export function TopMenuBar({
 
   return (
     <div className="h-7 bg-background/90 backdrop-blur border-b border-border/40 flex items-center justify-between px-1.5 sm:px-2 text-xs font-mono text-muted-foreground shrink-0 z-50 select-none overflow-visible">
-      {/* Left: OpenBSD App Launcher + Workspaces */}
+      {/* Left: OpenBSD App Launcher + Workspaces + driftwm Layout Mode */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* OpenBSD Option */}
         <AppLauncher onOpenApp={onOpenApp} />
@@ -54,7 +60,7 @@ export function TopMenuBar({
                 key={ws}
                 type="button"
                 onClick={() => onSelectWorkspace(ws)}
-                className={`h-5 px-1.5 sm:px-2 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono border transition-all duration-150 rounded-none cursor-pointer ${
+                className={`h-5 px-1.5 sm:px-2 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono border transition-all duration-150 rounded-md cursor-pointer ${
                   isActive
                     ? "bg-primary/20 border-primary/60 text-primary font-bold shadow-sm"
                     : "bg-background/40 border-border/40 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
@@ -73,6 +79,25 @@ export function TopMenuBar({
             );
           })}
         </div>
+
+        {/* driftwm Layout Mode Switcher Button */}
+        {onToggleLayoutMode && (
+          <>
+            <div className="text-border/80 text-xs px-0.5 hidden xs:inline">|</div>
+            <button
+              type="button"
+              onClick={onToggleLayoutMode}
+              className="h-5 px-2 flex items-center gap-1.5 text-[10px] font-mono border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-bold transition-all rounded-md cursor-pointer active:scale-95 shadow-sm"
+              title={`driftwm layout: ${layoutMode.toUpperCase()} (Click or press Alt+Space to toggle)`}
+            >
+              {layoutMode === "floating" && <Maximize2 className="w-3 h-3" />}
+              {layoutMode === "tiling" && <Columns className="w-3 h-3" />}
+              {layoutMode === "split" && <Grid className="w-3 h-3" />}
+              {layoutMode === "monocle" && <Square className="w-3 h-3" />}
+              <span className="capitalize">{layoutMode}</span>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Center: Clean Spacer */}
