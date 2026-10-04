@@ -305,7 +305,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             }}
           />
 
-          {/* Desktop Pinned HUD Widgets (UV, Humidity, AQI, Weather, Huge Clock, CPU/GPU Telemetry) */}
+          {/* Desktop Aesthetic Time & Date Widget */}
           {showDesktopHud && <DesktopHud theme={riceTheme} />}
 
           {/* Window Canvas */}
@@ -429,7 +429,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
           className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
         >
           <Eye className="w-4 h-4 text-emerald-400" />
-          <span>{showDesktopHud ? "Hide Desktop Widgets" : "Show Desktop Widgets"}</span>
+          <span>{showDesktopHud ? "Hide Time Widget" : "Show Time Widget"}</span>
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-border/60 my-1" />
         {Object.values(APP_REGISTRY).map((app) => {

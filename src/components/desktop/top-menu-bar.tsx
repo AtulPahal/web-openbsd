@@ -7,12 +7,9 @@ import {
   Bell,
   Cpu,
   Battery,
-  SlidersHorizontal,
-  Compass,
   Music,
   ImageIcon,
 } from "lucide-react";
-import { AppLauncher } from "./app-launcher";
 import { PowerMenu } from "./power-menu";
 import { NixLogo } from "@/components/ui/nix-logo";
 import type { AppId, WindowState } from "@/types";
@@ -165,14 +162,9 @@ export function TopMenuBar({
         </div>
 
         {/* Workspace Label */}
-        <span className="font-semibold text-xs pr-0.5 hidden sm:inline">
+        <span className="font-semibold text-xs pr-1 hidden sm:inline">
           Workspace {activeWorkspace}
         </span>
-
-        <div className="w-px h-3.5 bg-black/10 dark:bg-white/15" />
-
-        {/* macOS Applications Manager (from previous requirement) */}
-        <AppLauncher onOpenApp={onOpenApp} />
       </div>
 
       {/* ================= CENTER ISLAND: MEDIA & LIVE CLOCK ================= */}
