@@ -13,6 +13,8 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { AppLauncher } from "./app-launcher";
+import { PowerMenu } from "./power-menu";
+import { NixLogo } from "@/components/ui/nix-logo";
 import type { AppId, WindowState } from "@/types";
 import type { RiceTheme } from "@/lib/rice-theme-config";
 import { getRealHardwareInfo } from "@/lib/hardware-info";
@@ -29,8 +31,9 @@ interface TopMenuBarProps {
   unreadCount?: number;
   nowPlayingTrack?: string;
   isMediaPlaying?: boolean;
+  onLock?: () => void;
+  onShutdown?: () => void;
 }
-
 export function TopMenuBar({
   onOpenApp,
   activeWorkspace,
@@ -43,11 +46,32 @@ export function TopMenuBar({
   unreadCount = 0,
   nowPlayingTrack,
   isMediaPlaying = false,
+  onLock,
+  onShutdown,
 }: TopMenuBarProps) {
   const workspaces = [1, 2, 3, 4];
+  const [isPowerMenuOpen, setIsPowerMenuOpen] = useState(false);
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
   const [ramUsage, setRamUsage] = useState("6.8G");
+
+  const handleLock = () => {
+    if (onLock) onLock();
+    else window.dispatchEvent(new CustomEvent("system-lock"));
+  };
+
+  const handleRestart = () => {
+    window.location.reload();
+  };
+
+  const handleShutdown = () => {
+    if (onShutdown) onShutdown();
+    else window.dispatchEvent(new CustomEvent("system-shutdown"));
+  };
+
+  const handleSleep = () => {
+    handleLock();
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -82,17 +106,39 @@ export function TopMenuBar({
 
   return (
     <div className="w-full pt-1.5 px-3 z-50 select-none flex items-center justify-between text-xs font-sans shrink-0 pointer-events-none">
-      {/* ================= LEFT ISLAND: LAUNCHER & WORKSPACES ================= */}
+      {/* ================= LEFT ISLAND: START, POWER, WORKSPACES & LAUNCHER ================= */}
       <div
-        className="pointer-events-auto h-8 px-2.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2.5 transition-all"
+        className="pointer-events-auto relative h-8 px-2.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2 transition-all"
         style={{
           backgroundColor: theme.pillBg,
           borderColor: theme.cardBorder,
           color: theme.textColor,
         }}
       >
-        {/* OpenBSD Sunburst Logo Trigger */}
-        <AppLauncher onOpenApp={onOpenApp} />
+        {/* Left Start Button (Nix Snowflake icon from user's screenshot) */}
+        <button
+          type="button"
+          data-power-trigger
+          onClick={() => setIsPowerMenuOpen((prev) => !prev)}
+          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-120 active:scale-90"
+          title="Session & Power Menu (Shutdown, Lock, Restart, Sleep, Logout)"
+        >
+          <NixLogo className="w-4 h-4 drop-shadow-md" />
+        </button>
+
+        {/* Power Menu Dropdown Matching Screenshot #1 */}
+        <PowerMenu
+          isOpen={isPowerMenuOpen}
+          onClose={() => setIsPowerMenuOpen(false)}
+          theme={theme}
+          onLock={handleLock}
+          onRestart={handleRestart}
+          onShutdown={handleShutdown}
+          onSleep={handleSleep}
+        />
+
+        {/* Divider */}
+        <div className="w-px h-3.5 bg-black/10 dark:bg-white/15" />
 
         {/* Workspaces Star & Dots Pill */}
         <div className="flex items-center gap-1.5 px-2 py-1 bg-black/5 dark:bg-white/10 rounded-full">
@@ -119,9 +165,14 @@ export function TopMenuBar({
         </div>
 
         {/* Workspace Label */}
-        <span className="font-semibold text-xs pr-1">
+        <span className="font-semibold text-xs pr-0.5 hidden sm:inline">
           Workspace {activeWorkspace}
         </span>
+
+        <div className="w-px h-3.5 bg-black/10 dark:bg-white/15" />
+
+        {/* macOS Applications Manager (from previous requirement) */}
+        <AppLauncher onOpenApp={onOpenApp} />
       </div>
 
       {/* ================= CENTER ISLAND: MEDIA & LIVE CLOCK ================= */}
