@@ -4,7 +4,8 @@ import { useState } from "react";
 import { clsx } from "clsx";
 import type { WindowState, WindowId, AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
-import { APP_ICON_MAP } from "@/lib/app-icons";
+import { DockSquircleIcon } from "./dock-squircle-icon";
+import { Trash2, Folder } from "lucide-react";
 
 interface DockProps {
   windows: WindowState[];
@@ -14,12 +15,6 @@ interface DockProps {
   dockMagnification?: boolean;
 }
 
-/**
- * Liquid Glass Bottom Dock:
- * - Floating horizontally at bottom center with sleek rounded-xl styling.
- * - Upward proximity magnification (origin-bottom).
- * - Running indicator dots placed neatly below icons.
- */
 export function Dock({
   windows,
   onFocusWindow,
@@ -44,21 +39,21 @@ export function Dock({
   const getScale = (index: number) => {
     if (!dockMagnification || hoveredIndex === null) return 1.0;
     const dist = Math.abs(index - hoveredIndex);
-    if (dist === 0) return 1.35;
-    if (dist === 1) return 1.18;
-    if (dist === 2) return 1.08;
+    if (dist === 0) return 1.32;
+    if (dist === 1) return 1.16;
+    if (dist === 2) return 1.07;
     return 1.0;
   };
 
   return (
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center pointer-events-none select-none max-w-[96vw]">
-      {/* Liquid Glass Bottom Container */}
+    <div className="fixed bottom-3.5 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center pointer-events-none select-none max-w-[96vw]">
+      {/* Liquid Glass Bottom Capsule Container */}
       <div
         onMouseLeave={() => setHoveredIndex(null)}
-        className="pointer-events-auto flex flex-row items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-full liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
+        className="pointer-events-auto flex flex-row items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-full dock-liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
       >
+        {/* Main Application Squircles */}
         {appList.map((app, index) => {
-          const IconComponent = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
           const isRunning = openAppIds[app.id] === true;
           const isActive = activeAppId === app.id;
           const scale = getScale(index);
@@ -89,46 +84,69 @@ export function Dock({
               title={app.name}
               style={{
                 transform: `scale(${scale})`,
-                boxShadow: isActive ? "0 0 15px var(--accent-glow, rgba(245, 158, 11, 0.4))" : undefined,
               }}
-              className={clsx(
-                "group relative flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 cursor-pointer",
-                "rounded-full transition-all duration-150 ease-out origin-bottom active:scale-95",
-                isActive && "bg-primary/25 border border-primary/60 shadow-lg",
-                isRunning && !isActive && "bg-primary/10 hover:bg-primary/20",
-                !isRunning && "hover:bg-black/5 dark:hover:bg-white/10"
-              )}
+              className="group relative flex items-center justify-center shrink-0 w-11 h-11 sm:w-12 sm:h-12 cursor-pointer transition-all duration-150 ease-out origin-bottom active:scale-90"
             >
-              <IconComponent
-                className={clsx(
-                  "w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-150",
-                  "text-muted-foreground group-hover:text-primary",
-                  isActive && "text-primary",
-                  isRunning && !isActive && "text-primary/90"
-                )}
-              />
+              {/* Rich macOS Squircle Icon */}
+              <DockSquircleIcon appId={app.id} />
 
-              {/* Running indicator dot (underneath icon) */}
+              {/* Running indicator dot (matching Image #1: subtle white dot centered underneath) */}
               {isRunning && (
                 <span
                   className={clsx(
-                    "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full border border-background",
+                    "absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full",
                     isActive
-                      ? "bg-primary shadow-primary/50 shadow animate-pulse"
-                      : "bg-muted-foreground/60"
+                      ? "bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]"
+                      : "bg-white/70"
                   )}
                 />
               )}
 
               {/* Window count badge */}
               {winCount > 1 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center w-3.5 h-3.5 sm:w-4 sm:h-4 text-[7px] sm:text-[8px] font-bold text-primary-foreground bg-primary rounded-full shadow-sm">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center w-3.5 h-3.5 sm:w-4 sm:h-4 text-[7px] sm:text-[8px] font-bold text-white bg-primary rounded-full shadow-md">
                   {winCount}
                 </span>
               )}
             </button>
           );
         })}
+
+        {/* Vertical Divider Line (matching Image #1) */}
+        <div className="w-[1px] h-8 bg-white/20 mx-0.5 sm:mx-1 shrink-0" />
+
+        {/* Minimized Documents Stack / Folder */}
+        <button
+          type="button"
+          onClick={() => onOpenApp("file-manager")}
+          title="Documents & Downloads"
+          className="group relative flex items-center justify-center shrink-0 w-11 h-11 sm:w-12 sm:h-12 cursor-pointer transition-all duration-150 ease-out origin-bottom hover:scale-110 active:scale-90"
+        >
+          <div className="w-full h-full rounded-[13px] bg-gradient-to-b from-sky-600 to-blue-800 p-1 flex items-center justify-center relative overflow-hidden shadow-md border border-white/25">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-black/20 pointer-events-none" />
+            <Folder className="w-6 h-6 text-white fill-white/30 drop-shadow" />
+          </div>
+        </button>
+
+        {/* Trash Can (matching Image #1: wastebasket with crumpled colorful paper) */}
+        <button
+          type="button"
+          onClick={() => onOpenApp("file-manager")}
+          title="Trash"
+          className="group relative flex items-center justify-center shrink-0 w-11 h-11 sm:w-12 sm:h-12 cursor-pointer transition-all duration-150 ease-out origin-bottom hover:scale-110 active:scale-90"
+        >
+          <div className="w-full h-full rounded-[13px] bg-gradient-to-b from-slate-200/90 via-slate-300/80 to-slate-400/90 p-1 flex flex-col items-center justify-center relative overflow-hidden shadow-md border border-white/30">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-black/15 pointer-events-none" />
+            {/* Colorful crumpled papers */}
+            <div className="flex gap-0.5 mb-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+            </div>
+            {/* Mesh basket icon */}
+            <Trash2 className="w-5 h-5 text-slate-700" />
+          </div>
+        </button>
       </div>
     </div>
   );
