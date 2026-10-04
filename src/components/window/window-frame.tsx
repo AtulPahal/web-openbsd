@@ -302,8 +302,8 @@ export function WindowFrame({
           win.isMaximized ? "rounded-none" : "rounded-t-lg"
         } ${
           win.isFocused
-            ? "bg-card/90 backdrop-blur-2xl text-foreground font-semibold border-primary/30"
-            : "bg-muted/80 backdrop-blur-lg text-muted-foreground border-border/50"
+            ? "bg-white/10 dark:bg-white/5 backdrop-blur-2xl text-foreground font-semibold border-white/20 border-t border-t-white/35"
+            : "bg-white/5 dark:bg-black/20 backdrop-blur-lg text-muted-foreground border-white/10"
         }`}
         onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
