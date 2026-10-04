@@ -40,7 +40,12 @@ interface Toast {
   message: string;
 }
 
-export function Desktop() {
+interface DesktopProps {
+  onLock?: () => void;
+  onShutdown?: () => void;
+}
+
+export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
   const {
     windows,
     openWindow,
@@ -289,8 +294,9 @@ export function Desktop() {
             unreadCount={notificationHistory.length}
             nowPlayingTrack={isMediaPlaying ? "Machine Girl - Nu Nu Meta Phenomena" : undefined}
             isMediaPlaying={isMediaPlaying}
+            onLock={onLock}
+            onShutdown={onShutdown}
           />
-
           {/* Desktop Wallpaper */}
           <div
             className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-500 ease-out"
