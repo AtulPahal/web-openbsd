@@ -186,44 +186,74 @@ export function TopMenuBar({
       </div>
 
       {/* ================= RIGHT: BATTERY GAUGE, RAM DONUT & SOLID PERIWINKLE PILL ================= */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5 pointer-events-auto">
+      <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto">
         {/* Battery Circular Progress Gauge */}
-        <div className="flex items-center gap-1.5" title="Battery: 100%">
-          <div className="w-4 h-4 rounded-full border-[1.5px] border-[#94a9ff] flex items-center justify-center">
-            <Battery className="w-2.5 h-2.5 text-[#94a9ff] fill-[#94a9ff]" />
+        <div
+          className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
+          title="Battery Status: 100% (Plugged In / Optimal Health)"
+        >
+          <div className="w-5 h-5 rounded-full border-[2.5px] border-[#8da5ff] flex items-center justify-center shrink-0">
+            <Battery className="w-2.5 h-2.5 text-[#8da5ff] fill-[#8da5ff]" />
           </div>
-          <span className="text-xs font-normal text-white/95 tabular-nums">100%</span>
+          <span className="text-xs font-medium text-white/95 tabular-nums">100%</span>
         </div>
 
         {/* RAM Telemetry Circular Donut Gauge */}
-        <div className="flex items-center gap-1.5" title={`RAM Usage: ${ramUsage}`}>
-          <div className="w-4 h-4 rounded-full border-[1.5px] border-[#94a9ff] flex items-center justify-center">
-            <Cpu className="w-2.5 h-2.5 text-[#94a9ff]" />
+        <div
+          onClick={() => onOpenApp("system-monitor")}
+          className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
+          title={`RAM Usage: ${ramUsage} (Click to open System Monitor)`}
+        >
+          <div className="w-5 h-5 rounded-full border-[2.5px] border-[#8da5ff]/35 border-t-[#8da5ff] border-r-[#8da5ff] border-b-[#8da5ff] flex items-center justify-center shrink-0">
+            <Cpu className="w-2.5 h-2.5 text-[#8da5ff]" />
           </div>
-          <span className="text-xs font-normal text-white/95 tabular-nums">{ramUsage}</span>
+          <span className="text-xs font-medium text-white/95 tabular-nums">{ramUsage}</span>
         </div>
 
-        {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth) */}
-        <div className="flex items-center gap-2.5 px-3 py-1 bg-[#94a9ff] text-[#0d111a] rounded-full shadow-sm">
-          {/* Notification Center Bell Trigger */}
+        {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth as Unified Single Element) */}
+        <div
+          onClick={onToggleNotificationCenter}
+          className="h-7 px-3.5 bg-[#8da5ff] hover:bg-[#7e99ff] text-[#0d111a] rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none"
+          title="Control Center & Quick Settings (Notifications, Wi-Fi, Bluetooth)"
+        >
+          {/* Notification Center Bell */}
           <button
             type="button"
-            onClick={onToggleNotificationCenter}
-            className="hover:scale-110 active:scale-95 transition-transform cursor-pointer flex items-center"
-            title="Notifications & Controls"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleNotificationCenter();
+            }}
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            title="Toggle Notifications"
           >
-            <Bell className="w-3.5 h-3.5 text-[#0d111a] fill-[#0d111a]" />
+            <Bell className="w-3.5 h-3.5 text-[#0d111a] fill-[#0d111a] stroke-[2]" />
           </button>
 
           {/* Wi-Fi Icon */}
-          <div title="Wi-Fi: Connected" className="flex items-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleNotificationCenter();
+            }}
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            title="Wi-Fi: Connected (Click for Controls)"
+          >
             <Wifi className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
-          </div>
+          </button>
 
           {/* Bluetooth Icon */}
-          <div title="Bluetooth: Active" className="flex items-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleNotificationCenter();
+            }}
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            title="Bluetooth: Active (Click for Controls)"
+          >
             <Bluetooth className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
-          </div>
+          </button>
         </div>
       </div>
     </header>
