@@ -5,7 +5,6 @@ import { clsx } from "clsx";
 import type { WindowState, WindowId, AppId } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
-import { Trash2 } from "lucide-react";
 
 interface DockProps {
   windows: WindowState[];
@@ -128,18 +127,6 @@ export function Dock({
           );
         })}
 
-        {/* Vertical Divider */}
-        <div className="w-[1px] h-6 sm:h-7 bg-white/20 mx-0.5 sm:mx-1 shrink-0" />
-
-        {/* Trash Can */}
-        <button
-          type="button"
-          onClick={() => onOpenApp("file-manager")}
-          title="Trash"
-          className="group relative flex items-center justify-center shrink-0 w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-all cursor-pointer origin-bottom active:scale-90"
-        >
-          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 transition-colors group-hover:text-white" />
-        </button>
       </div>
     </div>
   );

@@ -101,7 +101,7 @@ export function TopMenuBar({
   }, []);
 
   return (
-    <header className="w-full h-8 sm:h-9 px-3 sm:px-4 bg-[#0d111a]/95 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
+    <header className="w-full h-8 sm:h-9 px-3 sm:px-4 topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
       {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
       <div className="flex items-center gap-2.5 pointer-events-auto relative">
         {/* Nix Start Button */}

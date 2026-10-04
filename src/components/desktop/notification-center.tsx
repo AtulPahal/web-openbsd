@@ -86,12 +86,7 @@ export function NotificationCenter({
   return (
     <div
       ref={panelRef}
-      className="fixed top-10 right-3 z-[70] w-80 sm:w-88 rounded-xl shadow-2xl border backdrop-blur-3xl flex flex-col p-4 space-y-3.5 select-none font-sans text-xs animate-in slide-in-from-top-3 fade-in-0 duration-200"
-      style={{
-        backgroundColor: theme.cardBg,
-        borderColor: theme.cardBorder,
-        color: theme.textColor,
-      }}
+      className="fixed top-10 right-3 z-[70] w-80 sm:w-88 rounded-2xl dock-liquid-glass flex flex-col p-4 space-y-3.5 select-none font-sans text-xs animate-in slide-in-from-top-3 fade-in-0 duration-200 text-foreground"
     >
       {/* 1. TOP ROW: Quick Toggles (Bell, Wi-Fi, Bluetooth) */}
       <div className="flex items-center gap-2">
