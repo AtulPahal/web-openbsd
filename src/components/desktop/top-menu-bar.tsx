@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import {
-  Sparkles,
   Wifi,
   Bell,
   Cpu,
   Battery,
-  Music,
-  ImageIcon,
+  Bluetooth,
 } from "lucide-react";
 import { PowerMenu } from "./power-menu";
 import { NixLogo } from "@/components/ui/nix-logo";
@@ -31,6 +29,7 @@ interface TopMenuBarProps {
   onLock?: () => void;
   onShutdown?: () => void;
 }
+
 export function TopMenuBar({
   onOpenApp,
   activeWorkspace,
@@ -50,7 +49,7 @@ export function TopMenuBar({
   const [isPowerMenuOpen, setIsPowerMenuOpen] = useState(false);
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
-  const [ramUsage, setRamUsage] = useState("6.8G");
+  const [ramUsage, setRamUsage] = useState("8.0G");
 
   const handleLock = () => {
     if (onLock) onLock();
@@ -82,7 +81,7 @@ export function TopMenuBar({
       );
       setDate(
         now.toLocaleDateString("en-US", {
-          weekday: "short",
+          weekday: "long",
           day: "2-digit",
           month: "short",
           year: "numeric",
@@ -97,27 +96,20 @@ export function TopMenuBar({
 
   useEffect(() => {
     const hw = getRealHardwareInfo();
-    const used = (hw.memoryGb * 0.42).toFixed(1);
+    const used = (hw.memoryGb * 0.45).toFixed(1);
     setRamUsage(`${used}G`);
   }, []);
 
   return (
-    <div className="w-full pt-1.5 px-3 z-50 select-none flex items-center justify-between text-xs font-sans shrink-0 pointer-events-none">
-      {/* ================= LEFT ISLAND: START, POWER, WORKSPACES & LAUNCHER ================= */}
-      <div
-        className="pointer-events-auto relative h-8 px-2.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2 transition-all"
-        style={{
-          backgroundColor: theme.pillBg,
-          borderColor: theme.cardBorder,
-          color: theme.textColor,
-        }}
-      >
-        {/* Left Start Button (Nix Snowflake icon from user's screenshot) */}
+    <header className="w-full h-8 sm:h-9 px-3 sm:px-4 bg-[#0d111a]/95 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
+      {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
+      <div className="flex items-center gap-2.5 pointer-events-auto relative">
+        {/* Nix Start Button */}
         <button
           type="button"
           data-power-trigger
           onClick={() => setIsPowerMenuOpen((prev) => !prev)}
-          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-120 active:scale-90"
+          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-115 active:scale-90"
           title="Session & Power Menu (Shutdown, Lock, Restart, Sleep, Logout)"
         >
           <NixLogo className="w-4 h-4 drop-shadow-md" />
@@ -134,11 +126,8 @@ export function TopMenuBar({
           onSleep={handleSleep}
         />
 
-        {/* Divider */}
-        <div className="w-px h-3.5 bg-black/10 dark:bg-white/15" />
-
-        {/* Workspaces Star & Dots Pill */}
-        <div className="flex items-center gap-1.5 px-2 py-1 bg-black/5 dark:bg-white/10 rounded-full">
+        {/* Workspaces Star & Dots Pill (Dark pill with light blue active circle disc) */}
+        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#1b212f] rounded-full border border-white/5">
           {workspaces.map((ws) => {
             const isActive = activeWorkspace === ws;
             return (
@@ -146,15 +135,15 @@ export function TopMenuBar({
                 key={ws}
                 type="button"
                 onClick={() => onSelectWorkspace(ws)}
-                className="w-4 h-4 flex items-center justify-center cursor-pointer transition-transform hover:scale-125"
+                className="cursor-pointer transition-all flex items-center justify-center"
                 title={`Workspace ${ws}`}
               >
                 {isActive ? (
-                  <span className="text-xs leading-none drop-shadow" style={{ color: theme.accent }}>
+                  <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-[#94a9ff] text-[#0d111a] flex items-center justify-center font-bold text-[11px] shadow-sm">
                     ✦
-                  </span>
+                  </div>
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-black/30 dark:bg-white/30" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#94a9ff]/45 hover:bg-[#94a9ff]/80 transition-colors mx-1" />
                 )}
               </button>
             );
@@ -162,99 +151,81 @@ export function TopMenuBar({
         </div>
 
         {/* Workspace Label */}
-        <span className="font-semibold text-xs pr-1 hidden sm:inline">
+        <span className="font-medium text-xs text-white/95 pl-1 hidden xs:inline">
           Workspace {activeWorkspace}
         </span>
       </div>
 
-      {/* ================= CENTER ISLAND: MEDIA & LIVE CLOCK ================= */}
-      <div
-        data-media-trigger
-        onClick={onToggleMediaOverlay}
-        className="pointer-events-auto h-8 px-3.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer"
-        style={{
-          backgroundColor: theme.pillBg,
-          borderColor: theme.cardBorder,
-          color: theme.textColor,
-        }}
-        title="Click to toggle Media Player & Audio Controls"
-      >
-        {/* Status Indicator circles */}
-        <div className="flex items-center gap-1">
-          <span
-            className={`w-2 h-2 rounded-full ${isMediaPlaying ? "animate-pulse" : ""}`}
-            style={{ backgroundColor: isMediaPlaying ? theme.accent : theme.textMuted }}
-          />
-          <span className="w-2 h-2 rounded-full border border-black/30 dark:border-white/30" />
+      {/* ================= CENTER: STATUS RINGS, MEDIA PILL & DATE/TIME ================= */}
+      <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+        {/* Dual Concentric Status Rings */}
+        <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#1b212f] border border-white/5">
+          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[#94a9ff]" />
+          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[#94a9ff]" />
         </div>
 
-        {/* Track info or No media */}
-        <div className="flex items-center gap-1.5 font-medium text-xs truncate max-w-[180px] sm:max-w-xs">
-          <Music className="w-3.5 h-3.5 shrink-0" style={{ color: theme.accent }} />
-          <span className="truncate">
-            {nowPlayingTrack || "No media"}
+        {/* Media Pill */}
+        <div
+          data-media-trigger
+          onClick={onToggleMediaOverlay}
+          className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1b212f] border border-white/5 hover:border-white/20 transition-all hover:scale-[1.02] cursor-pointer shadow-sm text-xs"
+          title="Toggle Media Player Overlay"
+        >
+          <span className="text-emerald-400 font-bold text-xs leading-none">♪</span>
+          <span className="font-normal text-white/90 truncate max-w-[120px] sm:max-w-[200px] md:max-w-[260px]">
+            {nowPlayingTrack || "Garrett Rose - Software en..."}
           </span>
         </div>
 
-        {/* Clock & Date */}
-        <div className="hidden sm:flex items-center gap-1.5 border-l border-black/10 dark:border-white/10 pl-3 font-semibold tabular-nums text-xs">
+        {/* Live Clock & Full Date */}
+        <div className="text-xs font-normal text-white/95 whitespace-nowrap hidden md:flex items-center gap-1.5">
           <span>{time}</span>
           <span className="opacity-40">•</span>
-          <span className="opacity-80">{date}</span>
+          <span>{date}</span>
         </div>
       </div>
 
-      {/* ================= RIGHT ISLAND: TELEMETRY & SYSTEM CONTROLS ================= */}
-      <div
-        className="pointer-events-auto h-8 px-2.5 sm:px-3 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2 sm:gap-3 transition-all"
-        style={{
-          backgroundColor: theme.pillBg,
-          borderColor: theme.cardBorder,
-          color: theme.textColor,
-        }}
-      >
-        {/* Battery Pill */}
-        <div className="flex items-center gap-1.5 text-xs font-bold tabular-nums pr-1">
-          <Battery className="w-4 h-4 text-emerald-500 fill-emerald-500/20" />
-          <span>100%</span>
+      {/* ================= RIGHT: BATTERY GAUGE, RAM DONUT & SOLID PERIWINKLE PILL ================= */}
+      <div className="flex items-center gap-2.5 sm:gap-3.5 pointer-events-auto">
+        {/* Battery Circular Progress Gauge */}
+        <div className="flex items-center gap-1.5" title="Battery: 100%">
+          <div className="w-4 h-4 rounded-full border-[1.5px] border-[#94a9ff] flex items-center justify-center">
+            <Battery className="w-2.5 h-2.5 text-[#94a9ff] fill-[#94a9ff]" />
+          </div>
+          <span className="text-xs font-normal text-white/95 tabular-nums">100%</span>
         </div>
 
-        {/* RAM Telemetry Badge */}
-        <div className="hidden xs:flex items-center gap-1 text-xs font-semibold tabular-nums opacity-85">
-          <Cpu className="w-3.5 h-3.5 opacity-70" />
-          <span>{ramUsage}</span>
+        {/* RAM Telemetry Circular Donut Gauge */}
+        <div className="flex items-center gap-1.5" title={`RAM Usage: ${ramUsage}`}>
+          <div className="w-4 h-4 rounded-full border-[1.5px] border-[#94a9ff] flex items-center justify-center">
+            <Cpu className="w-2.5 h-2.5 text-[#94a9ff]" />
+          </div>
+          <span className="text-xs font-normal text-white/95 tabular-nums">{ramUsage}</span>
         </div>
 
-        {/* Network Wi-Fi Icon */}
-        <div className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer" title="Wi-Fi: Connected">
-          <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-        </div>
-        {/* 3D Wallpaper Carousel Toggle */}
-        <button
-          type="button"
-          onClick={onToggleWallpaperCarousel}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all hover:scale-110 cursor-pointer"
-          title="Wallpaper & Theme Coverflow Carousel"
-        >
-          <ImageIcon className="w-3.5 h-3.5 text-primary" />
-        </button>
+        {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth) */}
+        <div className="flex items-center gap-2.5 px-3 py-1 bg-[#94a9ff] text-[#0d111a] rounded-full shadow-sm">
+          {/* Notification Center Bell Trigger */}
+          <button
+            type="button"
+            onClick={onToggleNotificationCenter}
+            className="hover:scale-110 active:scale-95 transition-transform cursor-pointer flex items-center"
+            title="Notifications & Controls"
+          >
+            <Bell className="w-3.5 h-3.5 text-[#0d111a] fill-[#0d111a]" />
+          </button>
 
-        {/* Notification Center Bell Trigger */}
-        <button
-          type="button"
-          onClick={onToggleNotificationCenter}
-          className="relative p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all hover:scale-110 cursor-pointer"
-          title="Notification Center & Controls"
-        >
-          <Bell className="w-3.5 h-3.5 text-primary" />
-          {unreadCount > 0 && (
-            <span
-              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-background animate-pulse"
-              style={{ backgroundColor: theme.accent }}
-            />
-          )}
-        </button>
+          {/* Wi-Fi Icon */}
+          <div title="Wi-Fi: Connected" className="flex items-center">
+            <Wifi className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
+          </div>
+
+          {/* Bluetooth Icon */}
+          <div title="Bluetooth: Active" className="flex items-center">
+            <Bluetooth className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
