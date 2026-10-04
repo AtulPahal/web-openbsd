@@ -45,6 +45,17 @@ export interface DesktopNotification {
   appId?: AppId;
 }
 
+export type AppCategory =
+  | "All"
+  | "Productivity & Finance"
+  | "Social"
+  | "Utilities"
+  | "Games"
+  | "Entertainment"
+  | "Creativity"
+  | "Information & Reading"
+  | "Other";
+
 /** Registered application identifiers */
 export type AppId =
   | "terminal"
@@ -59,10 +70,13 @@ export type AppId =
   | "calendar"
   | "settings"
   | "ai-studio";
+
 export interface AppDefinition {
   id: AppId;
   name: string;
-  icon: string; // Lucide icon name
+  category: AppCategory;
+  icon: string;
+  gradient?: string;
   defaultSize: Size;
   minSize: Size;
 }
