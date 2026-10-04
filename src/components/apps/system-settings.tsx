@@ -58,6 +58,7 @@ import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 import { GitHubIcon, LinkedInIcon, EmailIcon } from "@/lib/social-icons";
 import { getRealHardwareInfo, type SystemHardwareInfo } from "@/lib/hardware-info";
+import { RICE_THEMES } from "@/lib/rice-theme-config";
 
 type SettingsSection =
   | "wifi"
@@ -74,12 +75,12 @@ type SettingsSection =
   | "updates"
   | "system";
 
-const WALLPAPERS = [
-  { id: "default", name: "OpenBSD Puffy Default", url: "/wallpaper.jpg", thumb: "/wallpaper.jpg" },
-  { id: "dark-minimal", name: "Obsidian Matrix", url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop", thumb: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop" },
-  { id: "neon-cyber", name: "Cyberpunk Geometry", url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1920&auto=format&fit=crop", thumb: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=300&auto=format&fit=crop" },
-  { id: "nordic-dusk", name: "Nordic Minimalist", url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1920&auto=format&fit=crop", thumb: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=300&auto=format&fit=crop" },
-];
+const WALLPAPERS = Object.values(RICE_THEMES).map((t) => ({
+  id: t.id,
+  name: t.name,
+  url: t.wallpaper,
+  thumb: t.thumb,
+}));
 
 export const ACCENT_COLORS = [
   {

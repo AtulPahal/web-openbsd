@@ -61,7 +61,7 @@ export function WallpaperCarousel({
       >
         <div className="flex items-center gap-2 text-white font-bold text-sm">
           <Sparkles className="w-4 h-4 text-primary" />
-          <span>Select Desktop Wallpaper & Aesthetic Rice Theme</span>
+          <span>Select Desktop Wallpaper & Theme</span>
         </div>
         <button
           type="button"
@@ -111,10 +111,10 @@ export function WallpaperCarousel({
                 isCenter ? "border-primary ring-4 ring-primary/40" : "border-white/20 hover:opacity-90"
               }`}
             >
-              {/* Wallpaper Thumbnail */}
+              {/* Wallpaper Thumbnail (Fast lightweight thumb) */}
               <div
                 className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                style={{ backgroundImage: `url('${theme.wallpaper}')` }}
+                style={{ backgroundImage: `url('${theme.thumb || theme.wallpaper}')` }}
               />
 
               {/* Title & Theme Label Overlay */}

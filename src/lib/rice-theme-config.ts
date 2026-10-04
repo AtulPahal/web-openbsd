@@ -1,12 +1,13 @@
 /**
  * Rice Desktop Theme Configuration
- * Faithfully mirrors the aesthetic Linux/Wayland rice shown in the reference screenshots.
+ * Built with the user's curated 6 aesthetic wallpapers and dynamic theme palettes.
  */
 
 export interface RiceTheme {
   id: string;
   name: string;
   wallpaper: string;
+  thumb: string;
   mode: "light" | "dark";
   accent: string;
   accentSecondary: string;
@@ -19,90 +20,96 @@ export interface RiceTheme {
 }
 
 export const RICE_THEMES: Record<string, RiceTheme> = {
-  "white-sanctuary": {
-    id: "white-sanctuary",
-    name: "White Sanctuary",
-    wallpaper: "/wallpapers/white-sanctuary.png",
-    mode: "light",
-    accent: "#0d9488", // Teal / Emerald
-    accentSecondary: "#14b8a6",
-    cardBg: "rgba(255, 255, 255, 0.82)",
-    cardBorder: "rgba(0, 0, 0, 0.08)",
-    textColor: "#0f172a",
-    textMuted: "#64748b",
-    pillBg: "rgba(255, 255, 255, 0.9)",
-    barBg: "rgba(255, 255, 255, 0.85)",
-  },
-  "gothic-atelier": {
-    id: "gothic-atelier",
-    name: "Gothic Atelier",
-    wallpaper: "/wallpapers/gothic-atelier.png",
+  "cyber-game-over": {
+    id: "cyber-game-over",
+    name: "Cyber Game Over",
+    wallpaper: "/wallpapers/cyber-game-over.jpg",
+    thumb: "/wallpapers/thumbs/cyber-game-over.jpg",
     mode: "dark",
-    accent: "#60a5fa", // Ice Blue
-    accentSecondary: "#38bdf8",
-    cardBg: "rgba(15, 23, 42, 0.8)",
-    cardBorder: "rgba(255, 255, 255, 0.12)",
+    accent: "#38bdf8", // Electric Cyan
+    accentSecondary: "#2563eb",
+    cardBg: "rgba(11, 15, 25, 0.85)",
+    cardBorder: "rgba(56, 189, 248, 0.25)",
+    textColor: "#f0f9ff",
+    textMuted: "#7dd3fc",
+    pillBg: "rgba(15, 23, 42, 0.9)",
+    barBg: "rgba(11, 15, 25, 0.92)",
+  },
+  "frieren-azure": {
+    id: "frieren-azure",
+    name: "Frieren Azure",
+    wallpaper: "/wallpapers/frieren-azure.jpg",
+    thumb: "/wallpapers/thumbs/frieren-azure.jpg",
+    mode: "light",
+    accent: "#0284c7", // Sky Azure Blue
+    accentSecondary: "#d97706",
+    cardBg: "rgba(255, 255, 255, 0.88)",
+    cardBorder: "rgba(2, 132, 199, 0.2)",
+    textColor: "#0c4a6e",
+    textMuted: "#0284c7",
+    pillBg: "rgba(255, 255, 255, 0.92)",
+    barBg: "rgba(240, 249, 255, 0.9)",
+  },
+  "heterochromia-dolls": {
+    id: "heterochromia-dolls",
+    name: "Heterochromia Dolls",
+    wallpaper: "/wallpapers/heterochromia-dolls.jpg",
+    thumb: "/wallpapers/thumbs/heterochromia-dolls.jpg",
+    mode: "dark",
+    accent: "#ef4444", // Ruby Eye Crimson
+    accentSecondary: "#3b82f6",
+    cardBg: "rgba(18, 18, 24, 0.86)",
+    cardBorder: "rgba(239, 68, 68, 0.25)",
     textColor: "#f8fafc",
     textMuted: "#94a3b8",
+    pillBg: "rgba(20, 20, 30, 0.92)",
+    barBg: "rgba(14, 14, 20, 0.92)",
+  },
+  "dual-gaze": {
+    id: "dual-gaze",
+    name: "Dual Gaze",
+    wallpaper: "/wallpapers/dual-gaze.png",
+    thumb: "/wallpapers/thumbs/dual-gaze.png",
+    mode: "dark",
+    accent: "#38bdf8", // Luminous Cyan
+    accentSecondary: "#f43f5e",
+    cardBg: "rgba(14, 22, 36, 0.85)",
+    cardBorder: "rgba(56, 189, 248, 0.22)",
+    textColor: "#f0f9ff",
+    textMuted: "#93c5fd",
     pillBg: "rgba(15, 23, 42, 0.9)",
-    barBg: "rgba(10, 15, 30, 0.88)",
+    barBg: "rgba(10, 17, 30, 0.9)",
   },
-  "night-train": {
-    id: "night-train",
-    name: "Night Train",
-    wallpaper: "/wallpapers/night-train.png",
+  "golden-rose-yor": {
+    id: "golden-rose-yor",
+    name: "Golden Rose Yor",
+    wallpaper: "/wallpapers/golden-rose-yor.png",
+    thumb: "/wallpapers/thumbs/golden-rose-yor.png",
     mode: "dark",
-    accent: "#f43f5e", // Rose / Pink
-    accentSecondary: "#fb7185",
-    cardBg: "rgba(26, 18, 38, 0.82)",
-    cardBorder: "rgba(244, 63, 94, 0.22)",
-    textColor: "#fdf2f8",
-    textMuted: "#d4a5b8",
-    pillBg: "rgba(28, 18, 42, 0.92)",
-    barBg: "rgba(18, 12, 30, 0.9)",
+    accent: "#f59e0b", // Warm Antique Gold
+    accentSecondary: "#e11d48",
+    cardBg: "rgba(28, 19, 24, 0.88)",
+    cardBorder: "rgba(245, 158, 11, 0.25)",
+    textColor: "#fffbeb",
+    textMuted: "#fcd34d",
+    pillBg: "rgba(32, 20, 26, 0.92)",
+    barBg: "rgba(22, 14, 18, 0.92)",
   },
-  "crimson-carnival": {
-    id: "crimson-carnival",
-    name: "Crimson Carnival",
-    wallpaper: "/wallpapers/crimson-carnival.png",
-    mode: "dark",
-    accent: "#f87171", // Coral / Red
-    accentSecondary: "#ef4444",
-    cardBg: "rgba(34, 18, 18, 0.85)",
-    cardBorder: "rgba(239, 68, 68, 0.25)",
-    textColor: "#fff1f2",
-    textMuted: "#fda4af",
-    pillBg: "rgba(38, 16, 16, 0.92)",
-    barBg: "rgba(24, 10, 10, 0.9)",
-  },
-  "pastel-mirror": {
-    id: "pastel-mirror",
-    name: "Pastel Mirror",
-    wallpaper: "/wallpapers/pastel-mirror.png",
+  "office-roxy": {
+    id: "office-roxy",
+    name: "Office Roxy",
+    wallpaper: "/wallpapers/office-roxy.png",
+    thumb: "/wallpapers/thumbs/office-roxy.png",
     mode: "light",
-    accent: "#b45309", // Warm Amber
-    accentSecondary: "#f59e0b",
-    cardBg: "rgba(255, 248, 252, 0.88)",
-    cardBorder: "rgba(217, 119, 6, 0.15)",
-    textColor: "#292524",
-    textMuted: "#78716c",
-    pillBg: "rgba(255, 250, 252, 0.92)",
-    barBg: "rgba(255, 245, 250, 0.9)",
-  },
-  "carousel-dream": {
-    id: "carousel-dream",
-    name: "Carousel Dream",
-    wallpaper: "/wallpapers/carousel-dream.png",
-    mode: "light",
-    accent: "#7c3aed", // Lilac / Purple
-    accentSecondary: "#a855f7",
-    cardBg: "rgba(255, 250, 255, 0.85)",
-    cardBorder: "rgba(124, 58, 237, 0.15)",
-    textColor: "#1e1b4b",
-    textMuted: "#6b7280",
-    pillBg: "rgba(255, 252, 255, 0.92)",
-    barBg: "rgba(252, 248, 255, 0.9)",
+    accent: "#2563eb", // Cobalt Royal Blue
+    accentSecondary: "#0284c7",
+    cardBg: "rgba(248, 250, 252, 0.9)",
+    cardBorder: "rgba(37, 99, 235, 0.18)",
+    textColor: "#1e293b",
+    textMuted: "#64748b",
+    pillBg: "rgba(255, 255, 255, 0.92)",
+    barBg: "rgba(241, 245, 249, 0.92)",
   },
 };
 
-export const DEFAULT_RICE_THEME = RICE_THEMES["white-sanctuary"];
+export const DEFAULT_RICE_THEME = RICE_THEMES["golden-rose-yor"];
