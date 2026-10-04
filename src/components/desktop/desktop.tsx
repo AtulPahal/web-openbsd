@@ -6,6 +6,9 @@ import { WindowFrame } from "@/components/window/window-frame";
 import { Dock } from "@/components/desktop/dock";
 import { TopMenuBar } from "@/components/desktop/top-menu-bar";
 import { NotificationCenter } from "@/components/desktop/notification-center";
+import { DesktopHud } from "@/components/desktop/desktop-hud";
+import { MediaOverlay } from "@/components/desktop/media-overlay";
+import { WallpaperCarousel } from "@/components/desktop/wallpaper-carousel";
 import { Terminal } from "@/components/apps/terminal";
 import { FileManager } from "@/components/apps/file-manager";
 import { TextEditor } from "@/components/apps/text-editor";
@@ -29,6 +32,8 @@ import {
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
+import { DEFAULT_RICE_THEME, RICE_THEMES, type RiceTheme } from "@/lib/rice-theme-config";
+import { Sparkles, ImageIcon, Eye, Music } from "lucide-react";
 
 interface Toast {
   id: string;
@@ -49,28 +54,36 @@ export function Desktop() {
 
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
-  const [wallpaper, setWallpaper] = useState<string>(SYSTEM_CONFIG.wallpaper);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [riceTheme, setRiceTheme] = useState<RiceTheme>(DEFAULT_RICE_THEME);
+  const [wallpaper, setWallpaper] = useState<string>(DEFAULT_RICE_THEME.wallpaper);
+  const [isDarkMode, setIsDarkMode] = useState(DEFAULT_RICE_THEME.mode === "dark");
   const [dockMagnification, setDockMagnification] = useState(true);
   const [masterVolume, setMasterVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
+  const [isMediaPlaying, setIsMediaPlaying] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Aesthetic Rice Overlays
+  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+  const [isMediaOverlayOpen, setIsMediaOverlayOpen] = useState(false);
+  const [isWallpaperCarouselOpen, setIsWallpaperCarouselOpen] = useState(false);
+  const [showDesktopHud, setShowDesktopHud] = useState(true);
+
   const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
     {
       id: "init-1",
-      title: "System Active",
-      message: `${SYSTEM_CONFIG.name} ${SYSTEM_CONFIG.osVersion} booted successfully.`,
-      timestamp: "Just now",
+      title: "Screenshot captured",
+      message: "You can paste the image from the clipboard.",
+      timestamp: "10:52",
     },
     {
       id: "init-2",
-      title: "PF Firewall",
-      message: "Proactively secure rules loaded.",
-      timestamp: "Just now",
+      title: "Home Manager",
+      message: "System environment and rice themes synchronized.",
+      timestamp: "10:45",
     },
   ]);
-  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const nextIdRef = useRef(0);
 
   const addNotification = (title: string, message: string, appId?: AppId, duration = 2500) => {
@@ -100,7 +113,12 @@ export function Desktop() {
   };
 
   const handleOpenApp = (appId: AppId, appState?: AppState) => {
-    openWindow(appId, appState, activeWorkspace);
+    const existing = windows.find((w) => w.appId === appId && !w.isMinimized);
+    if (existing) {
+      focusWindow(existing.id);
+    } else {
+      openWindow(appId, appState, activeWorkspace);
+    }
   };
 
   const handleVolumeChange = (newLevel: number, muted = isMuted) => {
@@ -114,6 +132,29 @@ export function Desktop() {
       );
     }
   };
+
+  // Synchronize CSS variables and theme attributes dynamically
+  const applyRiceTheme = (newTheme: RiceTheme) => {
+    setRiceTheme(newTheme);
+    setWallpaper(newTheme.wallpaper);
+    const isDark = newTheme.mode === "dark";
+    setIsDarkMode(isDark);
+
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", isDark);
+      document.documentElement.style.setProperty("--primary", newTheme.accent);
+      document.documentElement.style.setProperty("--accent", newTheme.accent);
+      document.documentElement.style.setProperty("--ring", newTheme.accent);
+      document.documentElement.style.setProperty("--accent-color", newTheme.accent);
+      document.documentElement.style.setProperty("--accent-glow", `${newTheme.accent}60`);
+      document.documentElement.style.setProperty("--sidebar-primary", newTheme.accent);
+      document.documentElement.style.setProperty("--sidebar-ring", newTheme.accent);
+    }
+  };
+
+  useEffect(() => {
+    applyRiceTheme(DEFAULT_RICE_THEME);
+  }, []);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -158,7 +199,9 @@ export function Desktop() {
     const handleWallpaperChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ wallpaper: string }>;
       if (customEvent.detail?.wallpaper) {
-        setWallpaper(customEvent.detail.wallpaper);
+        const foundTheme = Object.values(RICE_THEMES).find((t) => t.wallpaper === customEvent.detail.wallpaper);
+        if (foundTheme) applyRiceTheme(foundTheme);
+        else setWallpaper(customEvent.detail.wallpaper);
       }
     };
     const handleBrightnessEvt = (e: Event) => {
@@ -189,7 +232,6 @@ export function Desktop() {
     };
   }, [closeWindow, activeWorkspace]);
 
-  // Filter windows by current workspace
   const visibleWindows = windows.filter(
     (w) => (w.workspace ?? 1) === activeWorkspace
   );
@@ -234,29 +276,34 @@ export function Desktop() {
       <ContextMenuTrigger className="w-full h-full">
         {/* Desktop Container Wrapper */}
         <div className="h-full min-h-[100dvh] w-full bg-background flex flex-col overflow-hidden relative select-none">
-          {/* Top Menu Bar */}
+          {/* Aesthetic Floating Pill Top Menu Bar */}
           <TopMenuBar
             onOpenApp={handleOpenApp}
             activeWorkspace={activeWorkspace}
             onSelectWorkspace={(ws) => setActiveWorkspace(ws)}
             windows={windows}
+            theme={riceTheme}
             onToggleNotificationCenter={() => setIsNotificationCenterOpen((prev) => !prev)}
+            onToggleMediaOverlay={() => setIsMediaOverlayOpen((prev) => !prev)}
+            onToggleWallpaperCarousel={() => setIsWallpaperCarouselOpen((prev) => !prev)}
             unreadCount={notificationHistory.length}
-            volume={masterVolume}
-            isMuted={isMuted}
-            onVolumeChange={handleVolumeChange}
+            nowPlayingTrack={isMediaPlaying ? "Machine Girl - Nu Nu Meta Phenomena" : undefined}
+            isMediaPlaying={isMediaPlaying}
           />
 
           {/* Desktop Wallpaper */}
           <div
-            className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-300"
+            className="absolute inset-0 pointer-events-none bg-cover bg-center transition-all duration-500 ease-out"
             style={{
               backgroundImage: `url('${wallpaper}')`,
             }}
           />
 
+          {/* Desktop Pinned HUD Widgets (UV, Humidity, AQI, Weather, Huge Clock, CPU/GPU Telemetry) */}
+          {showDesktopHud && <DesktopHud theme={riceTheme} />}
+
           {/* Window Canvas */}
-          <div className="flex-1 relative overflow-hidden pl-0 pr-9 sm:pr-11 md:pr-14">
+          <div className="flex-1 relative overflow-hidden pl-0 pr-9 sm:pr-11 md:pr-14 z-20">
             {visibleWindows.map((win) => (
               <WindowFrame
                 key={win.id}
@@ -272,6 +319,24 @@ export function Desktop() {
               </WindowFrame>
             ))}
           </div>
+
+          {/* Floating Media Player Dropdown */}
+          <MediaOverlay
+            isOpen={isMediaOverlayOpen}
+            onClose={() => setIsMediaOverlayOpen(false)}
+            theme={riceTheme}
+            volume={masterVolume}
+            isMuted={isMuted}
+            onVolumeChange={handleVolumeChange}
+          />
+
+          {/* 3D Wallpaper Coverflow Carousel */}
+          <WallpaperCarousel
+            isOpen={isWallpaperCarouselOpen}
+            onClose={() => setIsWallpaperCarouselOpen(false)}
+            currentTheme={riceTheme}
+            onSelectTheme={applyRiceTheme}
+          />
 
           {/* OpenBSD Right-Side Dock */}
           <Dock
@@ -289,11 +354,11 @@ export function Desktop() {
           />
 
           {/* Toast Notification Toasts */}
-          <div className="fixed top-9 right-4 z-40 flex flex-col gap-1.5 pointer-events-none">
+          <div className="fixed top-11 right-4 z-40 flex flex-col gap-1.5 pointer-events-none">
             {toasts.map((toast) => (
               <div
                 key={toast.id}
-                className="w-64 px-3 py-2 rounded-2xl bg-card/90 backdrop-blur-xl border border-border shadow-2xl text-xs font-mono text-foreground animate-in slide-in-from-top-2 fade-in-0"
+                className="w-64 px-3.5 py-2.5 rounded-2xl bg-card/90 backdrop-blur-2xl border border-border shadow-2xl text-xs font-sans text-foreground animate-in slide-in-from-top-2 fade-in-0"
               >
                 {toast.message}
               </div>
@@ -308,7 +373,7 @@ export function Desktop() {
             />
           )}
 
-          {/* Notification Center Drawer */}
+          {/* Notification & Quick Settings Center Drawer */}
           <NotificationCenter
             isOpen={isNotificationCenterOpen}
             onClose={() => setIsNotificationCenterOpen(false)}
@@ -328,23 +393,46 @@ export function Desktop() {
             volume={masterVolume}
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
+            theme={riceTheme}
           />
         </div>
       </ContextMenuTrigger>
 
       {/* Desktop Context Menu */}
-      <ContextMenuContent className="w-52 bg-card/95 backdrop-blur-xl border-border/80 font-mono text-xs rounded-2xl p-1.5 shadow-2xl">
-        <div className="px-2 py-1 text-[10px] text-primary font-bold tracking-wider">
-          {SYSTEM_CONFIG.name.toUpperCase()} DESKTOP
+      <ContextMenuContent className="w-64 bg-card/95 backdrop-blur-2xl border-border/80 font-sans text-xs rounded-2xl p-1.5 shadow-2xl">
+        <div className="px-2.5 py-1 text-[10px] text-primary font-bold tracking-wider uppercase">
+          {riceTheme.name.toUpperCase()} DESKTOP
         </div>
-        <ContextMenuSeparator className="bg-border/60" />
+        <ContextMenuSeparator className="bg-border/60 my-1" />
+        <ContextMenuItem
+          onClick={() => setIsWallpaperCarouselOpen(true)}
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+        >
+          <ImageIcon className="w-4 h-4 text-primary" />
+          <span>Switch Wallpaper & Theme</span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => setIsMediaOverlayOpen((v) => !v)}
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+        >
+          <Music className="w-4 h-4 text-sky-400" />
+          <span>Toggle Media Player Overlay</span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => setShowDesktopHud((v) => !v)}
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+        >
+          <Eye className="w-4 h-4 text-emerald-400" />
+          <span>{showDesktopHud ? "Hide Desktop Widgets" : "Show Desktop Widgets"}</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator className="bg-border/60 my-1" />
         {Object.values(APP_REGISTRY).map((app) => {
           const IconComp = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
           return (
             <ContextMenuItem
               key={app.id}
               onClick={() => handleOpenApp(app.id)}
-              className="gap-2.5 px-2 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl"
+              className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
             >
               <IconComp className="w-4 h-4 text-primary" />
               <span>Open {app.name}</span>
