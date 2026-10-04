@@ -303,7 +303,7 @@ export function Desktop() {
           {showDesktopHud && <DesktopHud theme={riceTheme} />}
 
           {/* Window Canvas */}
-          <div className="flex-1 relative overflow-hidden pl-0 pr-9 sm:pr-11 md:pr-14 z-20">
+          <div className="flex-1 relative overflow-hidden px-2 sm:px-4 pb-20 sm:pb-24 z-20">
             {visibleWindows.map((win) => (
               <WindowFrame
                 key={win.id}

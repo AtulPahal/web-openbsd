@@ -15,10 +15,10 @@ interface DockProps {
 }
 
 /**
- * Liquid Glass Right-Side OpenBSD Dock:
- * - Ultra-smooth frosted acrylic pill with soft UI reflections.
- * - Dynamic glowing active halo.
- * - Proximity magnification and zero scrollbars.
+ * Liquid Glass Bottom Dock:
+ * - Floating horizontally at bottom center with sleek rounded-2xl styling.
+ * - Upward proximity magnification (origin-bottom).
+ * - Running indicator dots placed neatly below icons.
  */
 export function Dock({
   windows,
@@ -51,11 +51,11 @@ export function Dock({
   };
 
   return (
-    <div className="fixed right-1 sm:right-2 md:right-3 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center justify-center pointer-events-none select-none">
-      {/* Liquid Glass Pill Container */}
+    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center pointer-events-none select-none max-w-[96vw]">
+      {/* Liquid Glass Bottom Container */}
       <div
         onMouseLeave={() => setHoveredIndex(null)}
-        className="pointer-events-auto flex flex-col items-center gap-1 sm:gap-1.5 md:gap-2 p-1.5 sm:p-2 rounded-3xl liquid-glass transition-all duration-300 overflow-hidden"
+        className="pointer-events-auto flex flex-row items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
       >
         {appList.map((app, index) => {
           const IconComponent = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
@@ -92,27 +92,27 @@ export function Dock({
                 boxShadow: isActive ? "0 0 15px var(--accent-glow, rgba(245, 158, 11, 0.4))" : undefined,
               }}
               className={clsx(
-                "group relative flex items-center justify-center shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 cursor-pointer",
-                "rounded-2xl transition-all duration-150 ease-out origin-center active:scale-95",
+                "group relative flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 cursor-pointer",
+                "rounded-xl transition-all duration-150 ease-out origin-bottom active:scale-95",
                 isActive && "bg-primary/25 border border-primary/60 shadow-lg",
                 isRunning && !isActive && "bg-primary/10 hover:bg-primary/20",
-                !isRunning && "hover:bg-white/10 dark:hover:bg-white/5"
+                !isRunning && "hover:bg-black/5 dark:hover:bg-white/10"
               )}
             >
               <IconComponent
                 className={clsx(
-                  "w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-colors duration-150",
+                  "w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-150",
                   "text-muted-foreground group-hover:text-primary",
                   isActive && "text-primary",
                   isRunning && !isActive && "text-primary/90"
                 )}
               />
 
-              {/* Running indicator dot */}
+              {/* Running indicator dot (underneath icon) */}
               {isRunning && (
                 <span
                   className={clsx(
-                    "absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-background",
+                    "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full border border-background",
                     isActive
                       ? "bg-primary shadow-primary/50 shadow animate-pulse"
                       : "bg-muted-foreground/60"
@@ -122,7 +122,7 @@ export function Dock({
 
               {/* Window count badge */}
               {winCount > 1 && (
-                <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-3 h-3 sm:w-3.5 sm:h-3.5 text-[6px] sm:text-[7px] font-bold text-primary-foreground bg-primary rounded-full shadow-sm">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center w-3.5 h-3.5 sm:w-4 sm:h-4 text-[7px] sm:text-[8px] font-bold text-primary-foreground bg-primary rounded-full shadow-sm">
                   {winCount}
                 </span>
               )}
