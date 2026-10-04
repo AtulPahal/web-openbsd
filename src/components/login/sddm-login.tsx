@@ -135,12 +135,12 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
             transition: "transform 0.15s ease-out, box-shadow 0.3s ease",
             boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px var(--accent-glow, rgba(245, 158, 11, 0.2))`,
           }}
-          className="group relative bg-black/45 hover:bg-black/55 backdrop-blur-3xl border border-white/20 hover:border-primary/80 p-7 sm:p-9 rounded-3xl flex flex-col items-center w-full max-w-[350px] cursor-pointer overflow-hidden"
+          className="group relative bg-black/45 hover:bg-black/55 backdrop-blur-3xl border border-white/20 hover:border-primary/80 p-7 sm:p-9 rounded-2xl flex flex-col items-center w-full max-w-[350px] cursor-pointer overflow-hidden shadow-2xl"
           suppressHydrationWarning
         >
           {/* Specular Radial Shine Overlay */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"
+            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
             style={{
               background: `radial-gradient(circle 220px at ${shine.x}% ${shine.y}%, rgba(255, 255, 255, 0.15), transparent 80%)`,
             }}
@@ -170,7 +170,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
               e.stopPropagation();
               handleUnlock();
             }}
-            className="w-full py-3.5 px-5 bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl flex items-center justify-center gap-2.5 shadow-xl transition-all active:scale-95 cursor-pointer text-xs sm:text-sm tracking-wide group-hover:shadow-primary/30"
+            className="w-full py-3.5 px-5 bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-xl flex items-center justify-center gap-2.5 shadow-xl transition-all active:scale-95 cursor-pointer text-xs sm:text-sm tracking-wide group-hover:shadow-primary/30"
             suppressHydrationWarning
           >
             <Unlock className="w-4 h-4 animate-bounce" />
@@ -191,7 +191,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
         <div className="flex gap-2 sm:gap-4" suppressHydrationWarning>
           <button
             type="button"
-            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
+            className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
             onClick={() => window.location.reload()}
             suppressHydrationWarning
           >
@@ -200,7 +200,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           </button>
           <button
             type="button"
-            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
+            className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
             onClick={() => window.close()}
             suppressHydrationWarning
           >
