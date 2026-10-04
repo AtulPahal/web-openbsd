@@ -69,7 +69,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
         <div className="space-y-3">
           {/* UV INDEX */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,
@@ -99,7 +99,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
 
           {/* HUMIDITY */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,
@@ -128,7 +128,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
 
           {/* AQI (Air Quality Index) */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,
@@ -158,7 +158,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
 
         {/* WEATHER BOTTOM LEFT WIDGET */}
         <div
-          className="p-4 sm:p-5 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border mt-4"
+          className="p-4 sm:p-5 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border mt-4"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: theme.cardBorder,
@@ -195,7 +195,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
         <div className="space-y-3 w-full">
           {/* CPU TEMPERATURE */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,
@@ -224,7 +224,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
 
           {/* CPU USAGE */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,
@@ -253,7 +253,7 @@ export function DesktopHud({ theme }: DesktopHudProps) {
 
           {/* GPU TEMPERATURE */}
           <div
-            className="p-3.5 sm:p-4 rounded-2xl shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
+            className="p-3.5 sm:p-4 rounded-lg shadow-xl backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] border text-left"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: theme.cardBorder,

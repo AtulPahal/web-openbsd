@@ -16,7 +16,7 @@ interface DockProps {
 
 /**
  * Liquid Glass Bottom Dock:
- * - Floating horizontally at bottom center with sleek rounded-2xl styling.
+ * - Floating horizontally at bottom center with sleek rounded-xl styling.
  * - Upward proximity magnification (origin-bottom).
  * - Running indicator dots placed neatly below icons.
  */
@@ -55,7 +55,7 @@ export function Dock({
       {/* Liquid Glass Bottom Container */}
       <div
         onMouseLeave={() => setHoveredIndex(null)}
-        className="pointer-events-auto flex flex-row items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
+        className="pointer-events-auto flex flex-row items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-xl liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
       >
         {appList.map((app, index) => {
           const IconComponent = APP_ICON_MAP[app.icon] ?? APP_ICON_MAP.Terminal;
@@ -93,7 +93,7 @@ export function Dock({
               }}
               className={clsx(
                 "group relative flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 cursor-pointer",
-                "rounded-xl transition-all duration-150 ease-out origin-bottom active:scale-95",
+                "rounded-lg transition-all duration-150 ease-out origin-bottom active:scale-95",
                 isActive && "bg-primary/25 border border-primary/60 shadow-lg",
                 isRunning && !isActive && "bg-primary/10 hover:bg-primary/20",
                 !isRunning && "hover:bg-black/5 dark:hover:bg-white/10"

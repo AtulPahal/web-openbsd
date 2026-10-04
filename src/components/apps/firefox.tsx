@@ -384,7 +384,7 @@ export function Firefox({ windowId }: { windowId: string }) {
           <div className="h-full w-full overflow-y-auto p-6 sm:p-10 flex flex-col items-center justify-start space-y-8 scrollbar-thin">
             {/* Firefox Brand Wordmark */}
             <div className="flex flex-col items-center gap-2 mt-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center shadow-xl shadow-rose-500/20">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center shadow-xl shadow-rose-500/20">
                 <Flame className="w-10 h-10 text-white fill-white" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-[#fbfbfe] flex items-center gap-2">
@@ -486,7 +486,7 @@ export function Firefox({ windowId }: { windowId: string }) {
         ) : isDirectFrameBlocked ? (
           /* --- External Frame Protection View --- */
           <div className="h-full w-full bg-[#1c1b22] p-6 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary shadow-xl shadow-primary/10">
+            <div className="w-14 h-14 rounded-lg bg-primary/15 border border-primary/40 flex items-center justify-center text-primary shadow-xl shadow-primary/10">
               <Shield className="w-7 h-7" />
             </div>
 

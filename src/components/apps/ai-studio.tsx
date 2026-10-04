@@ -198,7 +198,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
 
           {/* Primary Classification Result Card */}
           <div
-            className="p-4 rounded-2xl border flex flex-col gap-2 shadow-lg transition-all"
+            className="p-4 rounded-lg border flex flex-col gap-2 shadow-lg transition-all"
             style={{
               backgroundColor: `${activeClassMeta.color}15`,
               borderColor: `${activeClassMeta.color}60`,

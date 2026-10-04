@@ -270,7 +270,7 @@ export function WindowFrame({
       } ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
-          : "border rounded-2xl"
+          : "border rounded-lg"
       } ${
         win.isFocused
           ? "border-primary/60 ring-2 ring-primary/40 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),0_0_30px_var(--accent-glow)]"
@@ -299,7 +299,7 @@ export function WindowFrame({
       {/* Liquid Glass Title Bar */}
       <div
         className={`group/titlebar flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
-          win.isMaximized ? "rounded-none" : "rounded-t-2xl"
+          win.isMaximized ? "rounded-none" : "rounded-t-lg"
         } ${
           win.isFocused
             ? "bg-card/90 backdrop-blur-2xl text-foreground font-semibold border-primary/30"
@@ -366,7 +366,7 @@ export function WindowFrame({
       {/* Window Content */}
       <div
         className={`flex-1 overflow-hidden bg-card/95 backdrop-blur-2xl text-card-foreground ${
-          win.isMaximized ? "rounded-none" : "rounded-b-2xl"
+          win.isMaximized ? "rounded-none" : "rounded-b-lg"
         }`}
       >
         {children}

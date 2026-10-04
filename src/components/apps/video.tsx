@@ -177,7 +177,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="w-16 h-16 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center justify-center text-primary mb-4 shadow-lg shadow-primary/10">
+        <div className="w-16 h-16 rounded-xl bg-primary/15 border-2 border-primary/40 flex items-center justify-center text-primary mb-4 shadow-lg shadow-primary/10">
           <Clapperboard className="w-8 h-8" />
         </div>
         <p className="text-3xl font-bold text-primary tracking-wider">mpv</p>
