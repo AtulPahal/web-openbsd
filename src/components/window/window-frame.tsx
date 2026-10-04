@@ -263,18 +263,18 @@ export function WindowFrame({
 
   return (
     <div
-      className={`absolute flex flex-col overflow-hidden ${
+      className={`absolute flex flex-col overflow-hidden liquid-window ${
         isDragging || isResizing
           ? "select-none pointer-events-auto"
-          : "transition-[box-shadow,border-color] duration-150"
+          : "transition-[box-shadow,border-color] duration-200"
       } ${
         win.isMaximized
           ? "border-b border-border shadow-none rounded-none inset-0"
-          : "border rounded-2xl shadow-2xl backdrop-blur-2xl"
+          : "border rounded-3xl"
       } ${
         win.isFocused
-          ? "border-primary/60 shadow-2xl shadow-black/40 dark:shadow-black/80 ring-1 ring-primary/40"
-          : "border-border/80 shadow-lg shadow-black/10"
+          ? "border-primary/60 ring-2 ring-primary/40 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),0_0_30px_var(--accent-glow)]"
+          : "border-border/70 shadow-xl shadow-black/20"
       }`}
       style={
         win.isMaximized
@@ -296,20 +296,20 @@ export function WindowFrame({
       onMouseDown={onFocus}
       onTouchStart={onFocus}
     >
-      {/* macOS Style Title Bar */}
+      {/* Liquid Glass Title Bar */}
       <div
-        className={`group/titlebar flex items-center justify-between px-3 h-8.5 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
-          win.isMaximized ? "rounded-none" : "rounded-t-2xl"
+        className={`group/titlebar flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
+          win.isMaximized ? "rounded-none" : "rounded-t-3xl"
         } ${
           win.isFocused
-            ? "bg-card/95 backdrop-blur-xl text-foreground font-semibold border-primary/40 shadow-sm"
-            : "bg-muted/85 text-muted-foreground border-border/60"
+            ? "bg-card/90 backdrop-blur-2xl text-foreground font-semibold border-primary/30"
+            : "bg-muted/80 backdrop-blur-lg text-muted-foreground border-border/50"
         }`}
         onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
         onDoubleClick={handleTitleDoubleClick}
       >
-        {/* Left: macOS Traffic Light Buttons */}
+        {/* Left: macOS Liquid Jewel Traffic Light Buttons */}
         <div className="flex items-center gap-2 shrink-0 group/lights">
           {/* Close: Red */}
           <button
@@ -320,7 +320,7 @@ export function WindowFrame({
             }}
             aria-label="Close"
             title="Close"
-            className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[8px] leading-none select-none"
+            className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] hover:brightness-110 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/75 text-transparent font-bold text-[8px] leading-none select-none active:scale-90"
           >
             ✕
           </button>
@@ -334,7 +334,7 @@ export function WindowFrame({
             }}
             aria-label="Minimize"
             title="Minimize"
-            className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[8px] leading-none select-none"
+            className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] hover:brightness-110 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/75 text-transparent font-bold text-[8px] leading-none select-none active:scale-90"
           >
             —
           </button>
@@ -348,7 +348,7 @@ export function WindowFrame({
             }}
             aria-label={win.isMaximized ? "Restore" : "Maximize"}
             title={win.isMaximized ? "Restore" : "Maximize"}
-            className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] hover:brightness-90 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/70 text-transparent font-bold text-[7px] leading-none select-none"
+            className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] hover:brightness-110 flex items-center justify-center transition-all cursor-pointer shadow-sm group-hover/lights:text-black/75 text-transparent font-bold text-[7px] leading-none select-none active:scale-90"
           >
             +
           </button>
@@ -365,8 +365,8 @@ export function WindowFrame({
 
       {/* Window Content */}
       <div
-        className={`flex-1 overflow-hidden bg-card text-card-foreground ${
-          win.isMaximized ? "rounded-none" : "rounded-b-2xl"
+        className={`flex-1 overflow-hidden bg-card/95 backdrop-blur-2xl text-card-foreground ${
+          win.isMaximized ? "rounded-none" : "rounded-b-3xl"
         }`}
       >
         {children}
