@@ -108,7 +108,7 @@ export function TopMenuBar({
     <div className="w-full pt-1.5 px-3 z-50 select-none flex items-center justify-between text-xs font-sans shrink-0 pointer-events-none">
       {/* ================= LEFT ISLAND: START, POWER, WORKSPACES & LAUNCHER ================= */}
       <div
-        className="pointer-events-auto relative h-8 px-2.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2 transition-all"
+        className="pointer-events-auto relative h-8 px-2.5 rounded-lg shadow-lg border backdrop-blur-2xl flex items-center gap-2 transition-all"
         style={{
           backgroundColor: theme.pillBg,
           borderColor: theme.cardBorder,
@@ -141,7 +141,7 @@ export function TopMenuBar({
         <div className="w-px h-3.5 bg-black/10 dark:bg-white/15" />
 
         {/* Workspaces Star & Dots Pill */}
-        <div className="flex items-center gap-1.5 px-2 py-1 bg-black/5 dark:bg-white/10 rounded-full">
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-black/5 dark:bg-white/10 rounded-md">
           {workspaces.map((ws) => {
             const isActive = activeWorkspace === ws;
             return (
@@ -179,7 +179,7 @@ export function TopMenuBar({
       <div
         data-media-trigger
         onClick={onToggleMediaOverlay}
-        className="pointer-events-auto h-8 px-3.5 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer"
+        className="pointer-events-auto h-8 px-3.5 rounded-lg shadow-lg border backdrop-blur-2xl flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer"
         style={{
           backgroundColor: theme.pillBg,
           borderColor: theme.cardBorder,
@@ -214,7 +214,7 @@ export function TopMenuBar({
 
       {/* ================= RIGHT ISLAND: TELEMETRY & SYSTEM CONTROLS ================= */}
       <div
-        className="pointer-events-auto h-8 px-2.5 sm:px-3 rounded-full shadow-lg border backdrop-blur-2xl flex items-center gap-2 sm:gap-3 transition-all"
+        className="pointer-events-auto h-8 px-2.5 sm:px-3 rounded-lg shadow-lg border backdrop-blur-2xl flex items-center gap-2 sm:gap-3 transition-all"
         style={{
           backgroundColor: theme.pillBg,
           borderColor: theme.cardBorder,
@@ -234,7 +234,7 @@ export function TopMenuBar({
         </div>
 
         {/* Network Wi-Fi Icon */}
-        <div className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer" title="Wi-Fi: Connected">
+        <div className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors cursor-pointer" title="Wi-Fi: Connected">
           <Wifi className="w-3.5 h-3.5 text-emerald-500" />
         </div>
 
@@ -242,7 +242,7 @@ export function TopMenuBar({
         <button
           type="button"
           onClick={onToggleWallpaperCarousel}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all hover:scale-110 cursor-pointer"
+          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-all hover:scale-110 cursor-pointer"
           title="Wallpaper & Theme Coverflow Carousel"
         >
           <ImageIcon className="w-3.5 h-3.5 text-primary" />
@@ -252,7 +252,7 @@ export function TopMenuBar({
         <button
           type="button"
           onClick={onToggleNotificationCenter}
-          className="relative p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all hover:scale-110 cursor-pointer"
+          className="relative p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-all hover:scale-110 cursor-pointer"
           title="Notification Center & Controls"
         >
           <Bell className="w-3.5 h-3.5 text-primary" />

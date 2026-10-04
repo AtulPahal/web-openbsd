@@ -86,7 +86,7 @@ export function NotificationCenter({
   return (
     <div
       ref={panelRef}
-      className="fixed top-10 right-3 z-[70] w-80 sm:w-88 rounded-3xl shadow-2xl border backdrop-blur-3xl flex flex-col p-4 space-y-3.5 select-none font-sans text-xs animate-in slide-in-from-top-3 fade-in-0 duration-200"
+      className="fixed top-10 right-3 z-[70] w-80 sm:w-88 rounded-xl shadow-2xl border backdrop-blur-3xl flex flex-col p-4 space-y-3.5 select-none font-sans text-xs animate-in slide-in-from-top-3 fade-in-0 duration-200"
       style={{
         backgroundColor: theme.cardBg,
         borderColor: theme.cardBorder,
@@ -98,7 +98,7 @@ export function NotificationCenter({
         <button
           type="button"
           onClick={onToggleDnd}
-          className={`flex-1 py-2.5 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
             !isDndOn ? "shadow-md" : "opacity-60"
           }`}
           style={{
@@ -113,7 +113,7 @@ export function NotificationCenter({
         <button
           type="button"
           onClick={() => setWifiActive(!wifiActive)}
-          className={`flex-1 py-2.5 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
             wifiActive ? "bg-black/5 dark:bg-white/10" : "opacity-40"
           }`}
           title={wifiActive ? "Wi-Fi Connected" : "Wi-Fi Disabled"}
@@ -124,7 +124,7 @@ export function NotificationCenter({
         <button
           type="button"
           onClick={() => setBtActive(!btActive)}
-          className={`flex-1 py-2.5 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
             btActive ? "bg-black/5 dark:bg-white/10" : "opacity-40"
           }`}
           title={btActive ? "Bluetooth Active" : "Bluetooth Off"}
@@ -134,7 +134,7 @@ export function NotificationCenter({
       </div>
 
       {/* 2. SECOND ROW: Theme Toggle + Brightness Slider */}
-      <div className="flex items-center gap-2.5 bg-black/5 dark:bg-white/5 p-2 rounded-2xl">
+      <div className="flex items-center gap-2.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
         <button
           type="button"
           onClick={() => {
@@ -145,7 +145,7 @@ export function NotificationCenter({
               );
             }
           }}
-          className="p-2 rounded-xl bg-black/5 dark:bg-white/10 hover:scale-105 transition-all cursor-pointer shrink-0"
+          className="p-2 rounded-md bg-black/5 dark:bg-white/10 hover:scale-105 transition-all cursor-pointer shrink-0"
           title="Toggle Dark / Light Mode"
         >
           {theme.mode === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -192,9 +192,9 @@ export function NotificationCenter({
             notifications.map((n) => (
               <div
                 key={n.id}
-                className="group relative p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-start gap-2.5 transition-all hover:bg-black/10 dark:hover:bg-white/10"
+                className="group relative p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-start gap-2.5 transition-all hover:bg-black/10 dark:hover:bg-white/10"
               >
-                <div className="p-1.5 rounded-xl bg-black/5 dark:bg-white/10 shrink-0 mt-0.5">
+                <div className="p-1.5 rounded-md bg-black/5 dark:bg-white/10 shrink-0 mt-0.5">
                   <ImageIcon className="w-3.5 h-3.5 opacity-70" />
                 </div>
                 <div className="flex-1 min-w-0 pr-4">
@@ -220,7 +220,7 @@ export function NotificationCenter({
 
       {/* 4. EMBEDDED MINI CALENDAR (Exact match to Image #5) */}
       <div
-        className="p-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 space-y-2.5 cursor-pointer"
+        className="p-3.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 space-y-2.5 cursor-pointer"
         onClick={onOpenCalendar}
         title="Click to open full Calendar App"
       >

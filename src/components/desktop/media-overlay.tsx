@@ -101,7 +101,7 @@ export function MediaOverlay({
   return (
     <div
       ref={containerRef}
-      className="fixed top-9 left-1/2 -translate-x-1/2 z-[70] flex items-center p-3 sm:p-4 rounded-3xl shadow-2xl border backdrop-blur-3xl animate-in slide-in-from-top-3 fade-in-0 duration-200 select-none max-w-[94vw] sm:max-w-2xl"
+      className="fixed top-9 left-1/2 -translate-x-1/2 z-[70] flex items-center p-3 sm:p-4 rounded-xl shadow-2xl border backdrop-blur-3xl animate-in slide-in-from-top-3 fade-in-0 duration-200 select-none max-w-[94vw] sm:max-w-2xl"
       style={{
         backgroundColor: theme.mode === "dark" ? "rgba(10, 15, 30, 0.92)" : "rgba(255, 255, 255, 0.92)",
         borderColor: theme.cardBorder,
@@ -165,7 +165,7 @@ export function MediaOverlay({
       <div className="flex-1 flex flex-col sm:flex-row items-center gap-4 pl-4 min-w-0">
         {/* Album Cover Art */}
         <div
-          className="w-24 h-24 rounded-2xl bg-cover bg-center shadow-lg shrink-0 border border-black/10 dark:border-white/10 overflow-hidden"
+          className="w-24 h-24 rounded-lg bg-cover bg-center shadow-lg shrink-0 border border-black/10 dark:border-white/10 overflow-hidden"
           style={{ backgroundImage: `url('${currentTrack.cover}')` }}
         />
 

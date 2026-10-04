@@ -364,7 +364,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             {toasts.map((toast) => (
               <div
                 key={toast.id}
-                className="w-64 px-3.5 py-2.5 rounded-2xl bg-card/90 backdrop-blur-2xl border border-border shadow-2xl text-xs font-sans text-foreground animate-in slide-in-from-top-2 fade-in-0"
+                className="w-64 px-3.5 py-2.5 rounded-lg bg-card/90 backdrop-blur-2xl border border-border shadow-2xl text-xs font-sans text-foreground animate-in slide-in-from-top-2 fade-in-0"
               >
                 {toast.message}
               </div>
@@ -405,28 +405,28 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
       </ContextMenuTrigger>
 
       {/* Desktop Context Menu */}
-      <ContextMenuContent className="w-64 bg-card/95 backdrop-blur-2xl border-border/80 font-sans text-xs rounded-2xl p-1.5 shadow-2xl">
+      <ContextMenuContent className="w-64 bg-card/95 backdrop-blur-2xl border-border/80 font-sans text-xs rounded-lg p-1.5 shadow-2xl">
         <div className="px-2.5 py-1 text-[10px] text-primary font-bold tracking-wider uppercase">
           {riceTheme.name.toUpperCase()} DESKTOP
         </div>
         <ContextMenuSeparator className="bg-border/60 my-1" />
         <ContextMenuItem
           onClick={() => setIsWallpaperCarouselOpen(true)}
-          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
         >
           <ImageIcon className="w-4 h-4 text-primary" />
           <span>Switch Wallpaper & Theme</span>
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => setIsMediaOverlayOpen((v) => !v)}
-          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
         >
           <Music className="w-4 h-4 text-sky-400" />
           <span>Toggle Media Player Overlay</span>
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => setShowDesktopHud((v) => !v)}
-          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
         >
           <Eye className="w-4 h-4 text-emerald-400" />
           <span>{showDesktopHud ? "Hide Desktop Widgets" : "Show Desktop Widgets"}</span>
@@ -438,7 +438,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             <ContextMenuItem
               key={app.id}
               onClick={() => handleOpenApp(app.id)}
-              className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-xl font-medium"
+              className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
             >
               <IconComp className="w-4 h-4 text-primary" />
               <span>Open {app.name}</span>

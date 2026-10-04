@@ -84,13 +84,13 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
           {/* Main Glassmorphic Container (matching screenshot) */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-4xl max-h-[85vh] bg-[#1e1e24]/85 dark:bg-[#121217]/90 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),inset_0_1px_1px_0_rgba(255,255,255,0.25)] flex flex-col overflow-hidden text-white font-sans animate-in zoom-in-95 duration-200"
+            className="w-full max-w-4xl max-h-[85vh] bg-[#1e1e24]/85 dark:bg-[#121217]/90 backdrop-blur-3xl border border-white/20 rounded-xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),inset_0_1px_1px_0_rgba(255,255,255,0.25)] flex flex-col overflow-hidden text-white font-sans animate-in zoom-in-95 duration-200"
           >
             {/* 1. Header (A Applications with live search) */}
             <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* App Store 'A' Logo */}
-                <div className="w-7 h-7 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center text-white font-serif font-bold italic text-base shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-white/15 border border-white/25 flex items-center justify-center text-white font-serif font-bold italic text-base shrink-0 shadow-sm">
                   A
                 </div>
 
@@ -139,7 +139,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                       isActive
                         ? "bg-white/25 text-white font-semibold shadow-sm border border-white/30"
                         : "bg-white/10 hover:bg-white/15 text-white/75 hover:text-white border border-transparent"
@@ -175,7 +175,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
                       >
                         {/* macOS Squircle Icon */}
                         <div
-                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr ${app.gradient || "from-blue-500 to-indigo-600"} flex items-center justify-center text-white shadow-xl shadow-black/40 border border-white/20 transition-all duration-200 group-hover:scale-105 group-hover:shadow-2xl group-hover:border-white/40`}
+                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-tr ${app.gradient || "from-blue-500 to-indigo-600"} flex items-center justify-center text-white shadow-xl shadow-black/40 border border-white/20 transition-all duration-200 group-hover:scale-105 group-hover:shadow-2xl group-hover:border-white/40`}
                         >
                           <IconComponent className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow-md" />
                         </div>

@@ -107,7 +107,7 @@ export function WallpaperCarousel({
                 opacity,
                 transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
-              className={`absolute w-64 sm:w-80 h-44 sm:h-56 rounded-3xl overflow-hidden cursor-pointer shadow-2xl border-2 transition-all group ${
+              className={`absolute w-64 sm:w-80 h-44 sm:h-56 rounded-xl overflow-hidden cursor-pointer shadow-2xl border-2 transition-all group ${
                 isCenter ? "border-primary ring-4 ring-primary/40" : "border-white/20 hover:opacity-90"
               }`}
             >
@@ -154,7 +154,7 @@ export function WallpaperCarousel({
             onSelectTheme(themesList[activeIndex]);
             onClose();
           }}
-          className="px-6 py-2.5 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-wide shadow-xl transition-all active:scale-95 cursor-pointer"
+          className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-wide shadow-xl transition-all active:scale-95 cursor-pointer"
         >
           Apply {themesList[activeIndex].name}
         </button>
