@@ -37,17 +37,17 @@ export function PowerMenu({
 
   return (
     <>
-      {/* ================= 1. FROSTED DESKTOP BACKDROP BLUR OVERLAY ================= */}
+      {/* Invisible transparent click-outside dismisser (NO screen blur) */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-[75] bg-black/40 backdrop-blur-md transition-all duration-200 animate-in fade-in-0 select-none"
+        className="fixed inset-0 z-[75] select-none"
       />
 
-      {/* ================= 2. POWER MENU PANEL ATTACHED DIRECTLY UNDER TOPBAR ================= */}
+      {/* Power Menu attached directly under topbar with internal liquid glass blur only */}
       <div
         ref={menuRef}
         onClick={(e) => e.stopPropagation()}
-        className="absolute top-full left-0 z-[80] w-56 sm:w-60 p-2.5 rounded-b-2xl rounded-t-none bg-[#0c121d]/90 backdrop-blur-3xl border-x border-b border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.25)] flex flex-col space-y-1 text-white font-sans select-none animate-in slide-in-from-top-1 fade-in-0 duration-150"
+        className="absolute top-full left-0 z-[80] w-56 sm:w-60 p-2.5 rounded-b-2xl rounded-t-none bg-[#0c121d]/85 backdrop-blur-3xl border-x border-b border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.25)] flex flex-col space-y-1 text-white font-sans select-none animate-in slide-in-from-top-1 fade-in-0 duration-150"
       >
         {/* 1. Shutdown (Liquid Glass item; turns vibrant rose/pink ONLY on hover) */}
         <button
