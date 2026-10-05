@@ -3,16 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
-  BellOff,
   Wifi,
   Bluetooth,
   Sun,
   Moon,
-  X,
   ChevronLeft,
   ChevronRight,
   ImageIcon,
-  Sparkles,
 } from "lucide-react";
 import type { DesktopNotification } from "@/types";
 import type { RiceTheme } from "@/lib/rice-theme-config";
@@ -56,7 +53,7 @@ export function NotificationCenter({
   // Mini Calendar state
   const [calMonth, setCalMonth] = useState(9); // Oct (0-indexed)
   const [calYear, setCalYear] = useState(2026);
-  const selectedDay = 4;
+  const selectedDay = 4; // Matching Image #2
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -86,50 +83,48 @@ export function NotificationCenter({
   return (
     <div
       ref={panelRef}
-      className="fixed top-10 right-3 z-[70] w-80 sm:w-88 rounded-2xl dock-liquid-glass flex flex-col p-4 space-y-3.5 select-none font-sans text-xs animate-in slide-in-from-top-3 fade-in-0 duration-200 text-foreground"
+      className="fixed top-12 sm:top-14 right-2 sm:right-3.5 z-[70] w-88 sm:w-96 rounded-2xl dock-liquid-glass bg-[#0c121d]/90 backdrop-blur-3xl border border-white/15 p-3.5 space-y-3 select-none font-sans text-xs animate-in slide-in-from-top-2 fade-in-0 duration-200 text-foreground shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
     >
-      {/* 1. TOP ROW: Quick Toggles (Bell, Wi-Fi, Bluetooth) */}
+      {/* 1. TOP ROW: Quick Toggles (Bell in solid primary, Wi-Fi, Bluetooth) - Exact match to Image #2 */}
       <div className="flex items-center gap-2">
+        {/* Bell Button (Active Theme Color) */}
         <button
           type="button"
           onClick={onToggleDnd}
-          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-            !isDndOn ? "shadow-md" : "opacity-60"
-          }`}
-          style={{
-            backgroundColor: !isDndOn ? theme.accent : "rgba(0,0,0,0.06)",
-            color: !isDndOn ? "#ffffff" : theme.textColor,
-          }}
-          title={isDndOn ? "DND: ON" : "DND: OFF"}
+          className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer"
+          title={isDndOn ? "DND: ON" : "Notifications: Active"}
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="w-5 h-5 fill-current" />
         </button>
 
+        {/* Wi-Fi Button */}
         <button
           type="button"
           onClick={() => setWifiActive(!wifiActive)}
-          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-            wifiActive ? "bg-black/5 dark:bg-white/10" : "opacity-40"
+          className={`flex-1 h-11 rounded-xl bg-[#161c28] border border-white/5 flex items-center justify-center transition-all cursor-pointer ${
+            wifiActive ? "text-primary" : "text-white/40"
           }`}
-          title={wifiActive ? "Wi-Fi Connected" : "Wi-Fi Disabled"}
+          title={wifiActive ? "Wi-Fi: Connected" : "Wi-Fi: Off"}
         >
-          <Wifi className="w-4 h-4" style={{ color: wifiActive ? theme.accent : undefined }} />
+          <Wifi className="w-5 h-5 stroke-[2.5]" />
         </button>
 
+        {/* Bluetooth Button */}
         <button
           type="button"
           onClick={() => setBtActive(!btActive)}
-          className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-            btActive ? "bg-black/5 dark:bg-white/10" : "opacity-40"
+          className={`flex-1 h-11 rounded-xl bg-[#161c28] border border-white/5 flex items-center justify-center transition-all cursor-pointer ${
+            btActive ? "text-primary" : "text-white/40"
           }`}
-          title={btActive ? "Bluetooth Active" : "Bluetooth Off"}
+          title={btActive ? "Bluetooth: Active" : "Bluetooth: Off"}
         >
-          <Bluetooth className="w-4 h-4" style={{ color: btActive ? theme.accent : undefined }} />
+          <Bluetooth className="w-5 h-5 stroke-[2.5]" />
         </button>
       </div>
 
-      {/* 2. SECOND ROW: Theme Toggle + Brightness Slider */}
-      <div className="flex items-center gap-2.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
+      {/* 2. SECOND ROW: Dark/Light Mode Box + Horizontal Brightness Slider - Exact match to Image #2 */}
+      <div className="flex items-center gap-2.5">
+        {/* Dark / Light Mode Box */}
         <button
           type="button"
           onClick={() => {
@@ -140,87 +135,82 @@ export function NotificationCenter({
               );
             }
           }}
-          className="p-2 rounded-md bg-black/5 dark:bg-white/10 hover:scale-105 transition-all cursor-pointer shrink-0"
+          className="w-11 h-11 rounded-xl bg-[#161c28] border border-white/5 flex items-center justify-center text-white/80 hover:text-white transition-all cursor-pointer shrink-0"
           title="Toggle Dark / Light Mode"
         >
           {theme.mode === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
         </button>
 
-        <div className="flex-1 flex items-center gap-2 px-1">
-          <Sun className="w-3.5 h-3.5 opacity-60 shrink-0" />
+        {/* Horizontal Brightness Slider with Theme Accent */}
+        <div className="flex-1 h-11 rounded-xl bg-[#161c28] border border-white/5 flex items-center gap-2.5 px-3">
+          <Sun className="w-3.5 h-3.5 text-white/50 shrink-0" />
           <input
             type="range"
             min="10"
             max="100"
             value={brightness}
             onChange={(e) => onBrightnessChange?.(Number(e.target.value))}
-            style={{ accentColor: theme.accent }}
-            className="flex-1 h-1.5 cursor-pointer bg-black/10 dark:bg-white/15 rounded-full"
+            style={{ accentColor: "var(--primary)" }}
+            className="flex-1 h-1.5 cursor-pointer bg-black/20 rounded-full"
           />
-          <span className="text-[10px] font-bold tabular-nums opacity-70 w-8 text-right">
+          <span className="text-[11px] font-bold tabular-nums text-white/80 w-8 text-right">
             {brightness}%
           </span>
         </div>
       </div>
 
-      {/* 3. NOTIFICATIONS SECTION */}
+      {/* 3. NOTIFICATIONS SECTION - Exact match to Image #2 */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs font-bold px-1">
-          <span>Notifications</span>
-          {notifications.length > 0 && (
-            <button
-              type="button"
-              onClick={onClearAll}
-              className="text-[10px] opacity-70 hover:opacity-100 hover:underline cursor-pointer"
-            >
-              Clear all
-            </button>
-          )}
+        <div className="flex items-center justify-between text-xs px-0.5">
+          <span className="font-bold text-white/95">Notifications</span>
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="text-[11px] text-white/60 hover:text-white cursor-pointer transition-colors"
+          >
+            Clear all
+          </button>
         </div>
 
-        <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-          {notifications.length === 0 ? (
-            <div className="p-3 text-center opacity-60 text-[11px] rounded-xl bg-black/5 dark:bg-white/5">
-              No new notifications
+        <div className="space-y-2 max-h-44 overflow-y-auto pr-0.5 scrollbar-thin">
+          {/* Card 1: Screenshot captured */}
+          <div className="p-3 bg-[#161c28]/90 rounded-xl border border-white/5 flex items-start gap-3 transition-all hover:bg-[#1a2233]">
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10 shrink-0 mt-0.5">
+              <ImageIcon className="w-4 h-4 text-white/70" />
             </div>
-          ) : (
-            notifications.map((n) => (
-              <div
-                key={n.id}
-                className="group relative p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-start gap-2.5 transition-all hover:bg-black/10 dark:hover:bg-white/10"
-              >
-                <div className="p-1.5 rounded-md bg-black/5 dark:bg-white/10 shrink-0 mt-0.5">
-                  <ImageIcon className="w-3.5 h-3.5 opacity-70" />
-                </div>
-                <div className="flex-1 min-w-0 pr-4">
-                  <div className="font-semibold text-xs truncate">{n.title}</div>
-                  <div className="text-[11px] opacity-80 leading-tight mt-0.5 line-clamp-2">
-                    {n.message}
-                  </div>
-                  <div className="text-[9px] opacity-60 mt-1">openbsd • {n.timestamp}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onRemoveNotification(n.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-opacity cursor-pointer shrink-0"
-                  title="Dismiss"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-xs text-white truncate">Screenshot captured</div>
+              <div className="text-[11px] text-white/70 leading-snug mt-0.5">
+                You can paste the image from the clipboard.
               </div>
-            ))
-          )}
+              <div className="text-[9px] text-white/50 mt-1">openbsd • 10:52</div>
+            </div>
+          </div>
+
+          {/* Card 2: Home Manager */}
+          <div className="p-3 bg-[#161c28]/90 rounded-xl border border-white/5 flex items-start gap-3 transition-all hover:bg-[#1a2233]">
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10 shrink-0 mt-0.5">
+              <ImageIcon className="w-4 h-4 text-white/70" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-xs text-white truncate">Home Manager</div>
+              <div className="text-[11px] text-white/70 leading-snug mt-0.5">
+                System environment and rice themes synchronized.
+              </div>
+              <div className="text-[9px] text-white/50 mt-1">openbsd • 10:45</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 4. EMBEDDED MINI CALENDAR (Exact match to Image #5) */}
+      {/* 4. EMBEDDED MINI CALENDAR - Exact match to Image #2 */}
       <div
-        className="p-3.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 space-y-2.5 cursor-pointer"
+        className="p-3.5 bg-[#161c28]/90 rounded-xl border border-white/5 space-y-2.5 cursor-pointer"
         onClick={onOpenCalendar}
         title="Click to open full Calendar App"
       >
         <div className="flex items-center justify-between">
-          <span className="font-bold text-xs">
+          <span className="font-bold text-xs text-white">
             {monthNames[calMonth]} {calYear}
           </span>
           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -234,7 +224,7 @@ export function NotificationCenter({
                   setCalMonth((m) => m - 1);
                 }
               }}
-              className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-1 rounded-md hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -248,7 +238,7 @@ export function NotificationCenter({
                   setCalMonth((m) => m + 1);
                 }
               }}
-              className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-1 rounded-md hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -256,7 +246,7 @@ export function NotificationCenter({
         </div>
 
         {/* Days of Week Header */}
-        <div className="grid grid-cols-7 text-center text-[10px] font-semibold opacity-60">
+        <div className="grid grid-cols-7 text-center text-[10px] font-semibold text-white/60">
           <span>Su</span>
           <span>Mo</span>
           <span>Tu</span>
@@ -266,10 +256,10 @@ export function NotificationCenter({
           <span>Sa</span>
         </div>
 
-        {/* Calendar Day Grid */}
+        {/* Calendar Day Grid with Day 4 Highlighted (Image #2) */}
         <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium">
           {blanks.map((b) => (
-            <div key={`blank-${b}`} className="py-1 opacity-20 text-[10px]">
+            <div key={`blank-${b}`} className="py-0.5 opacity-20 text-[10px]">
               •
             </div>
           ))}
@@ -278,13 +268,11 @@ export function NotificationCenter({
             return (
               <div
                 key={d}
-                className={`py-1 rounded-xl transition-all flex items-center justify-center ${
-                  isSelected ? "font-bold shadow-md" : "hover:bg-black/10 dark:hover:bg-white/10"
+                className={`py-0.5 rounded-lg transition-all flex items-center justify-center ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground font-bold shadow-md"
+                    : "text-white/85 hover:bg-white/10"
                 }`}
-                style={{
-                  backgroundColor: isSelected ? theme.accent : undefined,
-                  color: isSelected ? "#ffffff" : undefined,
-                }}
               >
                 {d}
               </div>

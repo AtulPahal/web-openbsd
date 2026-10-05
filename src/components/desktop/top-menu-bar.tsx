@@ -217,6 +217,7 @@ export function TopMenuBar({
 
         {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth as Unified Single Element) */}
         <div
+          data-notif-trigger
           onClick={onToggleNotificationCenter}
           className="h-7 px-3.5 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none"
           title="Control Center & Quick Settings (Notifications, Wi-Fi, Bluetooth)"
