@@ -100,13 +100,7 @@ export function TopMenuBar({
   }, []);
 
   return (
-    <header
-      className={`relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0 transition-all ${
-        isPowerMenuOpen
-          ? "rounded-tl-2xl rounded-tr-2xl rounded-br-2xl rounded-bl-none"
-          : "rounded-2xl"
-      }`}
-    >
+    <header className="relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 rounded-2xl topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
       {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
       <div className="flex items-center gap-2.5 pointer-events-auto">
         {/* Nix Start Button */}
