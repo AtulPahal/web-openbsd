@@ -21,7 +21,7 @@ interface TopMenuBarProps {
   windows?: WindowState[];
   theme: RiceTheme;
   onToggleNotificationCenter: () => void;
-  onToggleMediaOverlay: () => void;
+  onToggleMediaOverlay?: () => void;
   onToggleWallpaperCarousel: () => void;
   unreadCount?: number;
   nowPlayingTrack?: string;
@@ -161,33 +161,11 @@ export function TopMenuBar({
         onSleep={handleSleep}
       />
 
-      {/* ================= CENTER: STATUS RINGS, MEDIA PILL & DATE/TIME ================= */}
-      <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-        {/* Dual Concentric Status Rings */}
-        <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#1b212f] border border-white/5">
-          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-primary" />
-          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-primary" />
-        </div>
-
-        {/* Media Pill */}
-        <div
-          data-media-trigger
-          onClick={onToggleMediaOverlay}
-          className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1b212f] border border-white/5 hover:border-white/20 transition-all hover:scale-[1.02] cursor-pointer shadow-sm text-xs"
-          title="Toggle Media Player Overlay"
-        >
-          <span className="text-emerald-400 font-bold text-xs leading-none">♪</span>
-          <span className="font-normal text-white/90 truncate max-w-[120px] sm:max-w-[200px] md:max-w-[260px]">
-            {nowPlayingTrack || "Garrett Rose - Software en..."}
-          </span>
-        </div>
-
-        {/* Live Clock & Full Date */}
-        <div className="text-xs font-normal text-white/95 whitespace-nowrap hidden md:flex items-center gap-1.5">
-          <span>{time}</span>
-          <span className="opacity-40">•</span>
-          <span>{date}</span>
-        </div>
+      {/* ================= CENTER: LIVE CLOCK & DATE ================= */}
+      <div className="flex items-center gap-2 pointer-events-auto text-xs font-medium text-white/95 whitespace-nowrap">
+        <span>{time}</span>
+        <span className="opacity-40">•</span>
+        <span>{date}</span>
       </div>
 
       {/* ================= RIGHT: BATTERY GAUGE, RAM DONUT & SOLID PERIWINKLE PILL ================= */}

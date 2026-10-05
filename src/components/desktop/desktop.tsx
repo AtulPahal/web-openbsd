@@ -7,7 +7,6 @@ import { Dock } from "@/components/desktop/dock";
 import { TopMenuBar } from "@/components/desktop/top-menu-bar";
 import { NotificationCenter } from "@/components/desktop/notification-center";
 import { DesktopHud } from "@/components/desktop/desktop-hud";
-import { MediaOverlay } from "@/components/desktop/media-overlay";
 import { WallpaperCarousel } from "@/components/desktop/wallpaper-carousel";
 import { Terminal } from "@/components/apps/terminal";
 import { FileManager } from "@/components/apps/file-manager";
@@ -293,7 +292,6 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             windows={windows}
             theme={riceTheme}
             onToggleNotificationCenter={() => setIsNotificationCenterOpen((prev) => !prev)}
-            onToggleMediaOverlay={() => setIsMediaOverlayOpen((prev) => !prev)}
             onToggleWallpaperCarousel={() => setIsWallpaperCarouselOpen((prev) => !prev)}
             unreadCount={notificationHistory.length}
             nowPlayingTrack={isMediaPlaying ? "Machine Girl - Nu Nu Meta Phenomena" : undefined}
@@ -329,16 +327,6 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
               </WindowFrame>
             ))}
           </div>
-
-          {/* Floating Media Player Dropdown */}
-          <MediaOverlay
-            isOpen={isMediaOverlayOpen}
-            onClose={() => setIsMediaOverlayOpen(false)}
-            theme={riceTheme}
-            volume={masterVolume}
-            isMuted={isMuted}
-            onVolumeChange={handleVolumeChange}
-          />
 
           {/* 3D Wallpaper Coverflow Carousel */}
           <WallpaperCarousel
@@ -420,13 +408,6 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
         >
           <ImageIcon className="w-4 h-4 text-primary" />
           <span>Switch Wallpaper & Theme</span>
-        </ContextMenuItem>
-        <ContextMenuItem
-          onClick={() => setIsMediaOverlayOpen((v) => !v)}
-          className="gap-2.5 px-2.5 py-1.5 cursor-pointer focus:bg-primary/20 focus:text-primary rounded-md font-medium"
-        >
-          <Music className="w-4 h-4 text-sky-400" />
-          <span>Toggle Media Player Overlay</span>
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => setShowDesktopHud((v) => !v)}
