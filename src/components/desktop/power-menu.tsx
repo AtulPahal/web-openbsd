@@ -41,7 +41,7 @@ export function PowerMenu({
   return (
     <div
       ref={menuRef}
-      className="absolute top-9 left-0 z-[80] w-52 p-2 rounded-xl bg-[#0f141c]/95 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_0_rgba(255,255,255,0.15)] flex flex-col space-y-1 text-white font-sans select-none animate-in slide-in-from-top-2 fade-in-0 duration-150"
+      className="absolute top-full left-0 z-[80] w-56 sm:w-60 p-2.5 rounded-b-2xl rounded-t-none bg-[#0c121d]/95 backdrop-blur-3xl border-x border-b border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] flex flex-col space-y-1.5 text-white font-sans select-none animate-in slide-in-from-top-1 fade-in-0 duration-150"
     >
       {/* 1. Shutdown (Solid Pastel Rose/Pink Pill Button) */}
       <button
