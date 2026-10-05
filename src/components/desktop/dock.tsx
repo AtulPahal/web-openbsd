@@ -45,9 +45,15 @@ export function Dock({
   };
 
   return (
-    <div className="fixed bottom-3.5 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center pointer-events-none select-none max-w-[96vw]">
+    <nav
+      role="navigation"
+      aria-label="Applications dock"
+      className="fixed bottom-3.5 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center pointer-events-none select-none max-w-[96vw]"
+    >
       {/* Liquid Glass Bottom Container with Less Rounded (rounded-2xl) Corners */}
       <div
+        role="toolbar"
+        aria-label="Dock application launchers"
         onMouseLeave={() => setHoveredIndex(null)}
         className="pointer-events-auto flex flex-row items-center gap-1 sm:gap-2 p-2 sm:p-2.5 rounded-2xl dock-liquid-glass transition-all duration-300 overflow-x-auto sm:overflow-visible scrollbar-none shadow-2xl"
       >
@@ -80,7 +86,7 @@ export function Dock({
                   onOpenApp(app.id);
                 }
               }}
-              aria-label={app.name}
+              aria-label={`${app.name}${isRunning ? (isActive ? " (Active)" : " (Running)") : ""}`}
               title={app.name}
               style={{
                 transform: `scale(${scale})`,
@@ -88,7 +94,7 @@ export function Dock({
               }}
               className={clsx(
                 "group relative flex items-center justify-center shrink-0 w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 cursor-pointer",
-                "rounded-xl transition-all duration-150 ease-out origin-bottom active:scale-90",
+                "rounded-xl transition-all duration-150 ease-out origin-bottom active:scale-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                 isActive && "bg-primary/25 border border-primary/60 shadow-lg text-primary",
                 isRunning && !isActive && "bg-white/10 hover:bg-white/20 text-white/90",
                 !isRunning && "hover:bg-white/10 text-white/60 hover:text-white"
@@ -128,6 +134,6 @@ export function Dock({
         })}
 
       </div>
-    </div>
+    </nav>
   );
 }

@@ -57,12 +57,15 @@ export function PowerMenu({
       {/* Symmetrical Floating Liquid Glass Power Menu */}
       <div
         ref={menuRef}
+        role="menu"
+        aria-label="Session and power options"
         onClick={(e) => e.stopPropagation()}
         className="absolute top-11 sm:top-12 left-0 z-[80] w-56 sm:w-60 p-2.5 rounded-2xl dock-liquid-glass flex flex-col space-y-1 text-white font-sans select-none animate-in slide-in-from-top-2 fade-in-0 duration-150 shadow-2xl"
       >
         {/* 1. Shutdown (Liquid Glass item; turns vibrant rose/pink ONLY on hover) */}
         <button
           type="button"
+          role="menuitem"
           onClick={() => {
             onClose();
             onShutdown();
@@ -76,6 +79,7 @@ export function PowerMenu({
         {/* 2. Lock */}
         <button
           type="button"
+          role="menuitem"
           onClick={() => {
             onClose();
             onLock();
@@ -90,6 +94,7 @@ export function PowerMenu({
         {/* 3. Restart */}
         <button
           type="button"
+          role="menuitem"
           onClick={() => {
             onClose();
             onRestart();
@@ -104,6 +109,7 @@ export function PowerMenu({
         {/* 4. Sleep */}
         <button
           type="button"
+          role="menuitem"
           onClick={() => {
             onClose();
             onSleep();
@@ -122,6 +128,7 @@ export function PowerMenu({
         {/* 5. Logout */}
         <button
           type="button"
+          role="menuitem"
           onClick={() => {
             onClose();
             onLock();

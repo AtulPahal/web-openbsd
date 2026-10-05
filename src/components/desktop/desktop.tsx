@@ -310,8 +310,8 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
           {/* Desktop Aesthetic Time & Date Widget */}
           {showDesktopHud && <DesktopHud theme={riceTheme} />}
 
-          {/* Window Canvas */}
-          <div className="flex-1 relative overflow-hidden px-2 sm:px-4 pb-20 sm:pb-24 z-20">
+          {/* Window Canvas (Semantic <main>) */}
+          <main role="main" aria-label="Desktop workspace" className="flex-1 relative overflow-hidden px-2 sm:px-4 pb-20 sm:pb-24 z-20">
             {visibleWindows.map((win) => (
               <WindowFrame
                 key={win.id}
@@ -326,7 +326,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
                 {renderAppContent(win.appId, win.id, win.appState)}
               </WindowFrame>
             ))}
-          </div>
+          </main>
 
           {/* 3D Wallpaper Coverflow Carousel */}
           <WallpaperCarousel

@@ -262,7 +262,9 @@ export function WindowFrame({
   const HANDLE_SIZE = 8;
 
   return (
-    <div
+    <section
+      role="region"
+      aria-label={win.title}
       className={`absolute flex flex-col overflow-hidden liquid-window ${
         isDragging || isResizing
           ? "select-none pointer-events-auto"
@@ -297,7 +299,7 @@ export function WindowFrame({
       onTouchStart={onFocus}
     >
       {/* Liquid Glass Title Bar */}
-      <div
+      <header
         className={`group/titlebar flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
           win.isMaximized ? "rounded-none" : "rounded-t-lg"
         } ${
@@ -355,13 +357,13 @@ export function WindowFrame({
         </div>
 
         {/* Center: Window Title */}
-        <div className="flex-1 text-center truncate px-2 font-medium text-foreground/90 tracking-wide pointer-events-none text-[11px]">
+        <h2 className="flex-1 text-center truncate px-2 font-medium text-foreground/90 tracking-wide pointer-events-none text-[11px]">
           {win.title}
-        </div>
+        </h2>
 
         {/* Right: Balance Spacer */}
         <div className="w-12 shrink-0" />
-      </div>
+      </header>
 
       {/* Window Content */}
       <div
@@ -427,6 +429,6 @@ export function WindowFrame({
           />
         </>
       )}
-    </div>
+    </section>
   );
 }
