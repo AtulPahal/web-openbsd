@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { User, ArrowRight, Power, RotateCcw, Unlock, Sparkles, Shield, Fingerprint } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
-
+import { extractPywalFromImage, applyPywalTheme, getSavedPywalTheme } from "@/lib/pywal";
 interface SDDMLoginProps {
   onLogin: () => void;
 }
@@ -21,6 +21,19 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
 
   useEffect(() => {
     setMounted(true);
+
+    // Apply pywal extracted theme from wallpaper so login screen immediately adopts it
+    const initPywal = async () => {
+      const saved = getSavedPywalTheme();
+      if (saved) {
+        applyPywalTheme(saved);
+      } else {
+        const pal = await extractPywalFromImage(SYSTEM_CONFIG.wallpaper);
+        applyPywalTheme(pal);
+      }
+    };
+    initPywal();
+
     const updateTime = () => {
       const now = new Date();
       setTime(

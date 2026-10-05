@@ -33,8 +33,8 @@ import { APP_REGISTRY } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { DEFAULT_RICE_THEME, RICE_THEMES, type RiceTheme } from "@/lib/rice-theme-config";
+import { extractPywalFromImage, applyPywalTheme } from "@/lib/pywal";
 import { Sparkles, ImageIcon, Eye, Music } from "lucide-react";
-
 interface Toast {
   id: string;
   message: string;
@@ -139,21 +139,25 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
   };
 
   // Synchronize CSS variables and theme attributes dynamically
-  const applyRiceTheme = (newTheme: RiceTheme) => {
+  // Synchronize CSS variables and Pywal theme attributes dynamically from wallpaper
+  const applyRiceTheme = async (newTheme: RiceTheme) => {
     setRiceTheme(newTheme);
     setWallpaper(newTheme.wallpaper);
     const isDark = newTheme.mode === "dark";
     setIsDarkMode(isDark);
 
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", isDark);
-      document.documentElement.style.setProperty("--primary", newTheme.accent);
-      document.documentElement.style.setProperty("--accent", newTheme.accent);
-      document.documentElement.style.setProperty("--ring", newTheme.accent);
-      document.documentElement.style.setProperty("--accent-color", newTheme.accent);
-      document.documentElement.style.setProperty("--accent-glow", `${newTheme.accent}60`);
-      document.documentElement.style.setProperty("--sidebar-primary", newTheme.accent);
-      document.documentElement.style.setProperty("--sidebar-ring", newTheme.accent);
+    try {
+      const pywal = await extractPywalFromImage(newTheme.wallpaper);
+      applyPywalTheme(pywal);
+    } catch (e) {
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.toggle("dark", isDark);
+        document.documentElement.style.setProperty("--primary", newTheme.accent);
+        document.documentElement.style.setProperty("--accent", newTheme.accent);
+        document.documentElement.style.setProperty("--ring", newTheme.accent);
+        document.documentElement.style.setProperty("--accent-color", newTheme.accent);
+        document.documentElement.style.setProperty("--accent-glow", `${newTheme.accent}60`);
+      }
     }
   };
 
