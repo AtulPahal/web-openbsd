@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Figtree } from "next/font/google";
 import "./globals.css";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-figtree",
+  display: "swap",
+});
 export const metadata: Metadata = {
   title: SYSTEM_CONFIG.productTitle,
   description: SYSTEM_CONFIG.productDescription,
@@ -36,11 +43,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="dark h-full antialiased"
+      className={`${figtree.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
       <body
-        className="h-full min-h-[100dvh] w-full overflow-hidden bg-background text-foreground font-mono select-none touch-manipulation"
+        className="h-full min-h-[100dvh] w-full overflow-hidden bg-background text-foreground font-sans select-none touch-manipulation"
         suppressHydrationWarning
       >
         {children}

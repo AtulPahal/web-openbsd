@@ -100,22 +100,29 @@ export function TopMenuBar({
   }, []);
 
   return (
-    <header className="relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 rounded-2xl topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
+    <header
+      role="banner"
+      aria-label="System top bar"
+      className="relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 rounded-2xl topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0"
+    >
       {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
       <div className="flex items-center gap-2.5 pointer-events-auto">
         {/* Nix Start Button */}
         <button
           type="button"
           data-power-trigger
+          aria-haspopup="menu"
+          aria-expanded={isPowerMenuOpen}
+          aria-label="Session and power menu"
           onClick={() => setIsPowerMenuOpen((prev) => !prev)}
-          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-115 active:scale-90"
+          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-115 active:scale-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded-md"
           title="Session & Power Menu (Shutdown, Lock, Restart, Sleep, Logout)"
         >
           <NixLogo className="w-4 h-4 drop-shadow-md" />
         </button>
 
-        {/* Workspaces Star & Dots Pill (Dark pill with light blue active circle disc) */}
-        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#1b212f] rounded-full border border-white/5">
+        {/* Workspaces Navigation Pill */}
+        <nav aria-label="Workspaces" className="flex items-center gap-1 px-1.5 py-0.5 bg-[#1b212f] rounded-full border border-white/5">
           {workspaces.map((ws) => {
             const isActive = activeWorkspace === ws;
             return (
@@ -123,7 +130,9 @@ export function TopMenuBar({
                 key={ws}
                 type="button"
                 onClick={() => onSelectWorkspace(ws)}
-                className="cursor-pointer transition-all flex items-center justify-center"
+                aria-label={`Switch to Workspace ${ws}`}
+                aria-current={isActive ? "page" : undefined}
+                className="cursor-pointer transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded-full"
                 title={`Workspace ${ws}`}
               >
                 {isActive ? (
@@ -136,11 +145,11 @@ export function TopMenuBar({
               </button>
             );
           })}
-        </div>
+        </nav>
 
-        {/* Workspace Label */}
-        <span className="font-medium text-xs text-white/95 pl-1 hidden xs:inline">
-          Workspace {activeWorkspace}
+        {/* Workspace Label - Tone Medium */}
+        <span className="font-medium text-xs text-white/60 pl-1 hidden xs:inline">
+          Workspace <span className="text-white/85 font-semibold">{activeWorkspace}</span>
         </span>
       </div>
 
@@ -155,12 +164,15 @@ export function TopMenuBar({
         onSleep={handleSleep}
       />
 
-      {/* ================= CENTER: LIVE CLOCK & DATE ================= */}
-      <div className="flex items-center gap-2 pointer-events-auto text-xs font-medium text-white/95 whitespace-nowrap">
-        <span>{time}</span>
-        <span className="opacity-40">•</span>
-        <span>{date}</span>
-      </div>
+      {/* ================= CENTER: LIVE CLOCK & DATE (Semantic <time> and Tone Hierarchy) ================= */}
+      <time
+        dateTime={new Date().toISOString()}
+        className="flex items-center gap-2 pointer-events-auto text-xs font-medium whitespace-nowrap"
+      >
+        <span className="text-white/85 font-semibold">{time}</span>
+        <span className="text-white/30">•</span>
+        <span className="text-white/60">{date}</span>
+      </time>
 
       {/* ================= RIGHT: BATTERY GAUGE, RAM DONUT & SOLID PERIWINKLE PILL ================= */}
       <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto">
@@ -190,18 +202,29 @@ export function TopMenuBar({
         {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth as Unified Single Element) */}
         <div
           data-notif-trigger
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
+          aria-label="Control Center & Quick Settings"
           onClick={onToggleNotificationCenter}
-          className="h-7 px-3.5 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onToggleNotificationCenter();
+            }
+          }}
+          className="h-7 px-3.5 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           title="Control Center & Quick Settings (Notifications, Wi-Fi, Bluetooth)"
         >
           {/* Notification Center Bell */}
           <button
             type="button"
+            aria-label="Toggle notifications panel"
             onClick={(e) => {
               e.stopPropagation();
               onToggleNotificationCenter();
             }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
             title="Toggle Notifications"
           >
             <Bell className="w-3.5 h-3.5 fill-current stroke-[2]" />
@@ -210,11 +233,12 @@ export function TopMenuBar({
           {/* Wi-Fi Icon */}
           <button
             type="button"
+            aria-label="Toggle Wi-Fi connection"
             onClick={(e) => {
               e.stopPropagation();
               onToggleNotificationCenter();
             }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
             title="Wi-Fi: Connected (Click for Controls)"
           >
             <Wifi className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -223,11 +247,12 @@ export function TopMenuBar({
           {/* Bluetooth Icon */}
           <button
             type="button"
+            aria-label="Toggle Bluetooth"
             onClick={(e) => {
               e.stopPropagation();
               onToggleNotificationCenter();
             }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
+            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
             title="Bluetooth: Active (Click for Controls)"
           >
             <Bluetooth className="w-3.5 h-3.5 stroke-[2.5]" />
