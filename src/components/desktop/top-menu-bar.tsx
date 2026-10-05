@@ -72,13 +72,12 @@ export function TopMenuBar({
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setTime(
-        now.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
+      const rawHours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const ampm = rawHours >= 12 ? "PM" : "AM";
+      const hours12 = rawHours % 12 || 12;
+      setTime(`${hours12}:${minutes} ${ampm}`);
+
       setDate(
         now.toLocaleDateString("en-US", {
           weekday: "long",
@@ -101,9 +100,15 @@ export function TopMenuBar({
   }, []);
 
   return (
-    <header className="w-full h-8 sm:h-9 px-3 sm:px-4 topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0">
+    <header
+      className={`relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0 transition-all ${
+        isPowerMenuOpen
+          ? "rounded-tl-2xl rounded-tr-2xl rounded-br-2xl rounded-bl-none"
+          : "rounded-2xl"
+      }`}
+    >
       {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
-      <div className="flex items-center gap-2.5 pointer-events-auto relative">
+      <div className="flex items-center gap-2.5 pointer-events-auto">
         {/* Nix Start Button */}
         <button
           type="button"
@@ -114,17 +119,6 @@ export function TopMenuBar({
         >
           <NixLogo className="w-4 h-4 drop-shadow-md" />
         </button>
-
-        {/* Power Menu Dropdown Matching Screenshot #1 */}
-        <PowerMenu
-          isOpen={isPowerMenuOpen}
-          onClose={() => setIsPowerMenuOpen(false)}
-          theme={theme}
-          onLock={handleLock}
-          onRestart={handleRestart}
-          onShutdown={handleShutdown}
-          onSleep={handleSleep}
-        />
 
         {/* Workspaces Star & Dots Pill (Dark pill with light blue active circle disc) */}
         <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#1b212f] rounded-full border border-white/5">
@@ -155,6 +149,17 @@ export function TopMenuBar({
           Workspace {activeWorkspace}
         </span>
       </div>
+
+      {/* Power Menu Dropdown Directly Attached under Topbar (Exact match to Image #2) */}
+      <PowerMenu
+        isOpen={isPowerMenuOpen}
+        onClose={() => setIsPowerMenuOpen(false)}
+        theme={theme}
+        onLock={handleLock}
+        onRestart={handleRestart}
+        onShutdown={handleShutdown}
+        onSleep={handleSleep}
+      />
 
       {/* ================= CENTER: STATUS RINGS, MEDIA PILL & DATE/TIME ================= */}
       <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
