@@ -139,11 +139,11 @@ export function TopMenuBar({
                 title={`Workspace ${ws}`}
               >
                 {isActive ? (
-                  <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-[#94a9ff] text-[#0d111a] flex items-center justify-center font-bold text-[11px] shadow-sm">
+                  <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-[11px] shadow-sm">
                     ✦
                   </div>
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#94a9ff]/45 hover:bg-[#94a9ff]/80 transition-colors mx-1" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/45 hover:bg-primary/80 transition-colors mx-1" />
                 )}
               </button>
             );
@@ -160,8 +160,8 @@ export function TopMenuBar({
       <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
         {/* Dual Concentric Status Rings */}
         <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#1b212f] border border-white/5">
-          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[#94a9ff]" />
-          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[#94a9ff]" />
+          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-primary" />
+          <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-primary" />
         </div>
 
         {/* Media Pill */}
@@ -192,8 +192,8 @@ export function TopMenuBar({
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
           title="Battery Status: 100% (Plugged In / Optimal Health)"
         >
-          <div className="w-5 h-5 rounded-full border-[2.5px] border-[#8da5ff] flex items-center justify-center shrink-0">
-            <Battery className="w-2.5 h-2.5 text-[#8da5ff] fill-[#8da5ff]" />
+          <div className="w-5 h-5 rounded-full border-[2.5px] border-primary flex items-center justify-center shrink-0">
+            <Battery className="w-2.5 h-2.5 text-primary fill-primary" />
           </div>
           <span className="text-xs font-medium text-white/95 tabular-nums">100%</span>
         </div>
@@ -204,8 +204,8 @@ export function TopMenuBar({
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
           title={`RAM Usage: ${ramUsage} (Click to open System Monitor)`}
         >
-          <div className="w-5 h-5 rounded-full border-[2.5px] border-[#8da5ff]/35 border-t-[#8da5ff] border-r-[#8da5ff] border-b-[#8da5ff] flex items-center justify-center shrink-0">
-            <Cpu className="w-2.5 h-2.5 text-[#8da5ff]" />
+          <div className="w-5 h-5 rounded-full border-[2.5px] border-primary/35 border-t-primary border-r-primary border-b-primary flex items-center justify-center shrink-0">
+            <Cpu className="w-2.5 h-2.5 text-primary" />
           </div>
           <span className="text-xs font-medium text-white/95 tabular-nums">{ramUsage}</span>
         </div>
@@ -213,7 +213,7 @@ export function TopMenuBar({
         {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth as Unified Single Element) */}
         <div
           onClick={onToggleNotificationCenter}
-          className="h-7 px-3.5 bg-[#8da5ff] hover:bg-[#7e99ff] text-[#0d111a] rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none"
+          className="h-7 px-3.5 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none"
           title="Control Center & Quick Settings (Notifications, Wi-Fi, Bluetooth)"
         >
           {/* Notification Center Bell */}
@@ -226,7 +226,7 @@ export function TopMenuBar({
             className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
             title="Toggle Notifications"
           >
-            <Bell className="w-3.5 h-3.5 text-[#0d111a] fill-[#0d111a] stroke-[2]" />
+            <Bell className="w-3.5 h-3.5 fill-current stroke-[2]" />
           </button>
 
           {/* Wi-Fi Icon */}
@@ -239,7 +239,7 @@ export function TopMenuBar({
             className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
             title="Wi-Fi: Connected (Click for Controls)"
           >
-            <Wifi className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
+            <Wifi className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>
 
           {/* Bluetooth Icon */}
@@ -252,7 +252,7 @@ export function TopMenuBar({
             className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center"
             title="Bluetooth: Active (Click for Controls)"
           >
-            <Bluetooth className="w-3.5 h-3.5 text-[#0d111a] stroke-[2.5]" />
+            <Bluetooth className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>
         </div>
       </div>
