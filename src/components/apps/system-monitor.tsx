@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Activity,
@@ -9,7 +9,6 @@ import {
   Wifi,
   Search,
   XCircle,
-  Shield,
   ArrowUpRight,
   ArrowDownLeft,
   Server,
@@ -24,7 +23,9 @@ import {
   INITIAL_UPTIME,
   NETWORK_CONFIG,
 } from "@/lib/system-monitor-config";
-import { getRealHardwareInfo, type SystemHardwareInfo } from "@/lib/hardware-info";
+import { getRealHardwareInfo } from "@/lib/hardware-info";
+import type { SystemHardwareInfo } from "@/lib/hardware-info";
+
 function jitter(base: number, range: number): number {
   const delta = (Math.random() - 0.5) * 2 * range;
   return Math.max(0, +(base + delta).toFixed(1));
@@ -236,8 +237,8 @@ function ResourcesTab({
   hwInfo: SystemHardwareInfo;
 }) {
   const memTotal = hwInfo.memoryGb * 1024;
-  const memUsed = Math.round(memTotal * 0.42);
-  const memPct = 42;
+  const memUsed = Math.round(memTotal * 0.45);
+  const memPct = 45;
   return (
     <div className="flex flex-col gap-3 p-3 font-mono text-xs">
       {/* CPU Live Chart Card */}
@@ -279,7 +280,7 @@ function ResourcesTab({
           <span className="font-bold text-primary tabular-nums">0.12, 0.08, 0.06</span>
         </div>
         <div className="p-2.5 bg-background/40 border border-border/40 rounded-lg flex items-center justify-between">
-          <span className="text-muted-foreground">System Uptime:</span>
+          <span className="text-muted-foreground">Simulated Uptime:</span>
           <span className="font-bold text-emerald-400 tabular-nums">{formatUptime(uptime)}</span>
         </div>
       </div>
@@ -320,7 +321,7 @@ function NetworkTab({
       </div>
 
       {/* Interfaces List */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* em0 */}
         <div className="p-3 bg-card/30 border border-border/60 rounded-lg space-y-2">
           <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
@@ -388,7 +389,7 @@ function NetworkTab({
 }
 
 export function SystemMonitor({ windowId }: { windowId: string }) {
-  const [hwInfo, setHwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
+  const [hwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
   const [processes, setProcesses] = useState<ProcessInfo[]>(INITIAL_PROCESSES);
   const [cpuUsage, setCpuUsage] = useState(INITIAL_CPU_USAGE);
   const [uptime, setUptime] = useState(INITIAL_UPTIME);
@@ -402,12 +403,11 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
   const handleKillProcess = (pid: number) => {
     setProcesses((prev) => prev.filter((p) => p.pid !== pid));
   };
+
   useEffect(() => {
-    setHwInfo(getRealHardwareInfo());
-  }, []);
-  useEffect(() => {
+    const startedAt = performance.now();
     const timerId = setInterval(() => {
-      setUptime((u) => u + 1);
+      setUptime(INITIAL_UPTIME + Math.floor((performance.now() - startedAt) / 1000));
 
       setProcesses((prev) =>
         prev.map((p) => ({
@@ -435,10 +435,16 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
     return () => clearInterval(timerId);
   }, []);
 
+  const memTotalGb = hwInfo.memoryGb;
+  const memUsedGb = (memTotalGb * 0.45).toFixed(1);
+
   return (
-    <div className="flex h-full flex-col bg-background font-mono text-foreground text-xs select-none" data-window-id={windowId}>
-      {/* Top Real-time Header Cards */}
-      <div className="grid grid-cols-3 gap-2 p-2 border-b border-border/60 bg-card/40">
+    <div className="@container flex h-full flex-col bg-background font-sans text-foreground text-xs select-none" data-window-id={windowId}>
+      <p className="px-3 py-1 text-[10px] text-muted-foreground border-b border-border/60">
+        Simulated CPU, memory, processes, network traffic and uptime; browser hardware values are estimates.
+      </p>
+      {/* Simulated Metric Header Cards */}
+      <div className="grid grid-cols-1 @min-[440px]:grid-cols-3 gap-2 p-2 border-b border-border/60 bg-card/40">
         <div className="p-2 bg-background/60 border border-border/50 rounded flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5 text-primary" />
@@ -452,7 +458,7 @@ export function SystemMonitor({ windowId }: { windowId: string }) {
             <HardDrive className="w-3.5 h-3.5 text-sky-400" />
             <span className="text-[11px] font-bold">RAM</span>
           </div>
-          <span className="font-bold text-sky-400 tabular-nums">847 / 2048 MB</span>
+          <span className="font-bold text-sky-400 tabular-nums">{memUsedGb} / {memTotalGb} GB</span>
         </div>
 
         <div className="p-2 bg-background/60 border border-border/50 rounded flex items-center justify-between">

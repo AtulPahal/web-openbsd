@@ -109,7 +109,7 @@ export function Resume({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="flex h-full w-full flex-col bg-background font-mono text-sm"
+      className="flex h-full w-full flex-col bg-background font-sans text-sm"
       data-window-id={windowId}
     >
       {/* Top bar */}

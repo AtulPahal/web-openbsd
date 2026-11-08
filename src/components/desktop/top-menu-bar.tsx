@@ -1,17 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Wifi,
-  Bell,
-  Cpu,
-  Battery,
-  Bluetooth,
-} from "lucide-react";
+import { Wifi, Bell, Cpu, Bluetooth } from "lucide-react";
 import { PowerMenu } from "./power-menu";
 import { NixLogo } from "@/components/ui/nix-logo";
 import type { AppId, WindowState } from "@/types";
-import type { RiceTheme } from "@/lib/rice-theme-config";
 import { getRealHardwareInfo } from "@/lib/hardware-info";
 
 interface TopMenuBarProps {
@@ -19,246 +12,92 @@ interface TopMenuBarProps {
   activeWorkspace: number;
   onSelectWorkspace: (ws: number) => void;
   windows?: WindowState[];
-  theme: RiceTheme;
   onToggleNotificationCenter: () => void;
-  onToggleMediaOverlay?: () => void;
-  onToggleWallpaperCarousel: () => void;
+  isNotificationCenterOpen: boolean;
   unreadCount?: number;
-  nowPlayingTrack?: string;
-  isMediaPlaying?: boolean;
   onLock?: () => void;
   onShutdown?: () => void;
 }
 
+const WORKSPACES = [1, 2, 3, 4];
+
 export function TopMenuBar({
-  onOpenApp,
-  activeWorkspace,
-  onSelectWorkspace,
-  windows = [],
-  theme,
-  onToggleNotificationCenter,
-  onToggleMediaOverlay,
-  onToggleWallpaperCarousel,
-  unreadCount = 0,
-  nowPlayingTrack,
-  isMediaPlaying = false,
-  onLock,
-  onShutdown,
+  onOpenApp, activeWorkspace, onSelectWorkspace, windows = [],
+  onToggleNotificationCenter, isNotificationCenterOpen, unreadCount = 0,
+  onLock, onShutdown,
 }: TopMenuBarProps) {
-  const workspaces = [1, 2, 3, 4];
   const [isPowerMenuOpen, setIsPowerMenuOpen] = useState(false);
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  const [ramUsage, setRamUsage] = useState("8.0G");
-
-  const handleLock = () => {
-    if (onLock) onLock();
-    else window.dispatchEvent(new CustomEvent("system-lock"));
-  };
-
-  const handleRestart = () => {
-    window.location.reload();
-  };
-
-  const handleShutdown = () => {
-    if (onShutdown) onShutdown();
-    else window.dispatchEvent(new CustomEvent("system-shutdown"));
-  };
-
-  const handleSleep = () => {
-    handleLock();
-  };
+  const [now, setNow] = useState<Date | null>(null);
+  const [memory] = useState(() => getRealHardwareInfo().memoryGb);
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const rawHours = now.getHours();
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const ampm = rawHours >= 12 ? "PM" : "AM";
-      const hours12 = rawHours % 12 || 12;
-      setTime(`${hours12}:${minutes} ${ampm}`);
-
-      setDate(
-        now.toLocaleDateString("en-US", {
-          weekday: "long",
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      );
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    const update = () => setNow(new Date());
+    update();
+    const interval = window.setInterval(update, 1000);
+    return () => window.clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const hw = getRealHardwareInfo();
-    const used = (hw.memoryGb * 0.45).toFixed(1);
-    setRamUsage(`${used}G`);
-  }, []);
 
   return (
-    <header
-      role="banner"
-      aria-label="System top bar"
-      className="relative mx-2 sm:mx-3 mt-2 sm:mt-2.5 h-9 sm:h-10 px-3 sm:px-4 rounded-2xl topbar-liquid-glass flex items-center justify-between text-xs font-sans select-none text-white z-50 shrink-0"
-    >
-      {/* ================= LEFT: START BUTTON, WORKSPACES & WORKSPACE LABEL ================= */}
-      <div className="flex items-center gap-2.5 pointer-events-auto">
-        {/* Nix Start Button */}
+    <header aria-label="System top bar" className="system-topbar topbar-liquid-glass relative z-50 flex shrink-0 items-center justify-between rounded-2xl font-sans text-xs">
+      <div className="flex shrink-0 items-center gap-2">
         <button
-          type="button"
-          data-power-trigger
-          aria-haspopup="menu"
-          aria-expanded={isPowerMenuOpen}
-          aria-label="Session and power menu"
-          onClick={() => setIsPowerMenuOpen((prev) => !prev)}
-          className="w-5 h-5 flex items-center justify-center cursor-pointer transition-transform hover:scale-115 active:scale-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded-md"
-          title="Session & Power Menu (Shutdown, Lock, Restart, Sleep, Logout)"
-        >
-          <NixLogo className="w-4 h-4 drop-shadow-md" />
-        </button>
-
-        {/* Workspaces Navigation Pill */}
-        <nav aria-label="Workspaces" className="flex items-center gap-1 px-1.5 py-0.5 bg-[#1b212f] rounded-full border border-white/5">
-          {workspaces.map((ws) => {
-            const isActive = activeWorkspace === ws;
-            return (
-              <button
-                key={ws}
-                type="button"
-                onClick={() => onSelectWorkspace(ws)}
-                aria-label={`Switch to Workspace ${ws}`}
-                aria-current={isActive ? "page" : undefined}
-                className="cursor-pointer transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded-full"
-                title={`Workspace ${ws}`}
-              >
-                {isActive ? (
-                  <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-[11px] shadow-sm">
-                    ✦
-                  </div>
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/45 hover:bg-primary/80 transition-colors mx-1" />
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Workspace Label - Tone Medium */}
-        <span className="font-medium text-xs text-white/60 pl-1 hidden xs:inline">
-          Workspace <span className="text-white/85 font-semibold">{activeWorkspace}</span>
-        </span>
-      </div>
-
-      {/* Power Menu Dropdown Directly Attached under Topbar (Exact match to Image #2) */}
-      <PowerMenu
-        isOpen={isPowerMenuOpen}
-        onClose={() => setIsPowerMenuOpen(false)}
-        theme={theme}
-        onLock={handleLock}
-        onRestart={handleRestart}
-        onShutdown={handleShutdown}
-        onSleep={handleSleep}
-      />
-
-      {/* ================= CENTER: LIVE CLOCK & DATE (Semantic <time> and Tone Hierarchy) ================= */}
-      <time
-        dateTime={new Date().toISOString()}
-        className="flex items-center gap-2 pointer-events-auto text-xs font-medium whitespace-nowrap"
-      >
-        <span className="text-white/85 font-semibold">{time}</span>
-        <span className="text-white/30">•</span>
-        <span className="text-white/60">{date}</span>
-      </time>
-
-      {/* ================= RIGHT: BATTERY GAUGE, RAM DONUT & SOLID PERIWINKLE PILL ================= */}
-      <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto">
-        {/* Battery Circular Progress Gauge */}
-        <div
-          className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
-          title="Battery Status: 100% (Plugged In / Optimal Health)"
-        >
-          <div className="w-5 h-5 rounded-full border-[2.5px] border-primary flex items-center justify-center shrink-0">
-            <Battery className="w-2.5 h-2.5 text-primary fill-primary" />
-          </div>
-          <span className="text-xs font-medium text-white/95 tabular-nums">100%</span>
-        </div>
-
-        {/* RAM Telemetry Circular Donut Gauge */}
-        <div
-          onClick={() => onOpenApp("system-monitor")}
-          className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
-          title={`RAM Usage: ${ramUsage} (Click to open System Monitor)`}
-        >
-          <div className="w-5 h-5 rounded-full border-[2.5px] border-primary/35 border-t-primary border-r-primary border-b-primary flex items-center justify-center shrink-0">
-            <Cpu className="w-2.5 h-2.5 text-primary" />
-          </div>
-          <span className="text-xs font-medium text-white/95 tabular-nums">{ramUsage}</span>
-        </div>
-
-        {/* Solid Periwinkle Controls Pill (Bell, Wi-Fi, Bluetooth as Unified Single Element) */}
-        <div
-          data-notif-trigger
-          role="button"
-          tabIndex={0}
-          aria-haspopup="dialog"
-          aria-label="Control Center & Quick Settings"
-          onClick={onToggleNotificationCenter}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onToggleNotificationCenter();
-            }
+          type="button" data-power-trigger aria-haspopup="menu"
+          aria-controls={isPowerMenuOpen ? "power-menu" : undefined}
+          aria-expanded={isPowerMenuOpen} aria-label="Session and power menu"
+          onClick={() => {
+            if (isNotificationCenterOpen) onToggleNotificationCenter();
+            setIsPowerMenuOpen((open) => !open);
           }}
-          className="h-7 px-3.5 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md flex items-center gap-3 cursor-pointer transition-all active:scale-95 select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-          title="Control Center & Quick Settings (Notifications, Wi-Fi, Bluetooth)"
+          className="flex size-7 items-center justify-center rounded-md hover:bg-foreground/10"
         >
-          {/* Notification Center Bell */}
-          <button
-            type="button"
-            aria-label="Toggle notifications panel"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleNotificationCenter();
-            }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
-            title="Toggle Notifications"
-          >
-            <Bell className="w-3.5 h-3.5 fill-current stroke-[2]" />
-          </button>
-
-          {/* Wi-Fi Icon */}
-          <button
-            type="button"
-            aria-label="Toggle Wi-Fi connection"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleNotificationCenter();
-            }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
-            title="Wi-Fi: Connected (Click for Controls)"
-          >
-            <Wifi className="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
-
-          {/* Bluetooth Icon */}
-          <button
-            type="button"
-            aria-label="Toggle Bluetooth"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleNotificationCenter();
-            }}
-            className="hover:scale-115 active:scale-90 transition-transform cursor-pointer flex items-center focus-visible:ring-1 focus-visible:ring-primary-foreground focus-visible:outline-none rounded-full"
-            title="Bluetooth: Active (Click for Controls)"
-          >
-            <Bluetooth className="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
-        </div>
+          <NixLogo aria-hidden="true" className="size-5" />
+        </button>
+        <nav aria-label="Workspaces" className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-1 py-0.5">
+          {WORKSPACES.map((workspace) => (
+            <button
+              key={workspace} type="button"
+              aria-label={`Switch to Workspace ${workspace}`}
+              aria-pressed={activeWorkspace === workspace}
+              onClick={() => onSelectWorkspace(workspace)}
+              title={`Workspace ${workspace}${windows.some((win) => (win.workspace ?? 1) === workspace) ? " (open windows)" : ""}`}
+              className={`flex size-6 items-center justify-center rounded-full ${activeWorkspace === workspace ? "bg-primary text-primary-foreground" : "hover:bg-foreground/10"}`}
+            >
+              {activeWorkspace === workspace ? <span aria-hidden="true">✦</span> : <span aria-hidden="true" className={`rounded-full ${windows.some((win) => (win.workspace ?? 1) === workspace) ? "size-2 bg-primary" : "size-1.5 bg-primary/40"}`} />}
+            </button>
+          ))}
+        </nav>
+        <span className="hidden lg:inline text-tone-medium">Workspace {activeWorkspace}</span>
       </div>
+
+      <button type="button" onClick={() => onOpenApp("calendar")} aria-label="Open Calendar" className="min-w-0 rounded-md px-1 py-1 hover:bg-foreground/10">
+        <time dateTime={now?.toISOString()} className="flex items-center justify-center gap-2 whitespace-nowrap tabular-nums">
+          <span className="font-semibold text-tone-high">{now?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) ?? "—"}</span>
+          <span aria-hidden="true" className="hidden md:inline text-tone-low">•</span>
+          <span className="hidden md:inline text-tone-medium">{now?.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "2-digit", year: "numeric" })}</span>
+        </time>
+      </button>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <button type="button" onClick={() => onOpenApp("system-monitor")} aria-label="Open System Monitor" title={`Browser-reported memory estimate: ${memory} GB; not live usage`} className="hidden sm:flex items-center gap-1.5 rounded-md p-1 hover:bg-foreground/10">
+          <Cpu aria-hidden="true" className="size-4 text-primary" />
+          <span className="hidden lg:inline text-tone-medium">{memory} GB</span>
+        </button>
+        <button
+          type="button" data-notif-trigger aria-haspopup="dialog"
+          aria-label={`Control Center & Quick Settings${unreadCount ? `, ${unreadCount} notifications` : ""}`}
+          aria-controls={isNotificationCenterOpen ? "notification-center" : undefined}
+          aria-expanded={isNotificationCenterOpen}
+          onClick={() => { setIsPowerMenuOpen(false); onToggleNotificationCenter(); }}
+          className="relative flex h-8 items-center gap-2 rounded-full bg-primary px-3 text-primary-foreground hover:opacity-90"
+        >
+          <Bell aria-hidden="true" className="size-3.5" />
+          <Wifi aria-hidden="true" className="size-3.5" />
+          <Bluetooth aria-hidden="true" className="hidden xs:block size-3.5" />
+          {unreadCount > 0 && <span aria-hidden="true" className="absolute right-0 top-0 size-2 rounded-full bg-destructive ring-1 ring-background" />}
+        </button>
+      </div>
+      <PowerMenu isOpen={isPowerMenuOpen} onClose={() => setIsPowerMenuOpen(false)} onLock={() => onLock?.()} onShutdown={() => onShutdown?.()} onSleep={() => onLock?.()} onRestart={() => window.location.reload()} />
     </header>
   );
 }

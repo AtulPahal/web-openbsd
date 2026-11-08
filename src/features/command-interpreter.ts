@@ -356,9 +356,10 @@ export class CommandInterpreter {
   }
 
   private cmdRm(args: string[]): string {
-    if (args.length === 0) return "usage: rm [-r] <path> ...";
-    const targets = args.filter((a) => !a.startsWith("-"));
-    for (const t of targets) {
+    if (args.length === 0) return "usage: rm <path> ...";
+    const unsupportedFlag = args.find((arg) => arg.startsWith("-"));
+    if (unsupportedFlag) return `rm: unsupported option: ${unsupportedFlag}; recursive removal is not supported`;
+    for (const t of args) {
       const ok = this.fs.remove(t, this.cwd);
       if (!ok) return `rm: ${t}: No such file or directory`;
     }
@@ -387,27 +388,40 @@ export class CommandInterpreter {
         results.push(`wc: ${a}: No such file or directory`);
         continue;
       }
-      const lines = content.split("\n").length;
+      let lines = 0;
+      for (let i = 0; i < content.length; i++) {
+        if (content.charCodeAt(i) === 10) lines++;
+      }
       const words = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
-      const chars = content.length;
-      results.push(`${String(lines).padStart(4)} ${String(words).padStart(4)} ${String(chars).padStart(4)} ${a}`);
+      const bytes = new TextEncoder().encode(content).byteLength;
+      results.push(`${String(lines).padStart(4)} ${String(words).padStart(4)} ${String(bytes).padStart(4)} ${a}`);
     }
     return results.join("\n");
   }
 
   private cmdHead(args: string[], fromEnd = false): string {
+    const cmd = fromEnd ? "tail" : "head";
     let n = 10;
     const files: string[] = [];
     for (let i = 0; i < args.length; i++) {
-      if (args[i] === "-n" && args[i + 1]) {
-        n = parseInt(args[++i]) || 10;
-      } else if (args[i].startsWith("-") && /^\d+$/.test(args[i].slice(1))) {
-        n = parseInt(args[i].slice(1));
+      let count: string | undefined;
+      if (args[i] === "-n") {
+        count = args[++i];
+        if (count === undefined) return `usage: ${cmd} [-n N] <file>`;
+      } else if (args[i].startsWith("-n")) {
+        count = args[i].slice(2);
+      } else if (/^-\d+$/.test(args[i])) {
+        count = args[i].slice(1);
       } else {
         files.push(args[i]);
       }
+      if (count !== undefined) {
+        if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count))) {
+          return `${cmd}: invalid line count: ${count}`;
+        }
+        n = Number(count);
+      }
     }
-    const cmd = fromEnd ? "tail" : "head";
     if (files.length === 0) return `usage: ${cmd} [-n N] <file>`;
     const results: string[] = [];
     for (const f of files) {
@@ -416,10 +430,10 @@ export class CommandInterpreter {
         results.push(`${cmd}: ${f}: No such file or directory`);
         continue;
       }
-      const lines = content.split("\n");
-      const slice = fromEnd ? lines.slice(-n) : lines.slice(0, n);
+      const lines = content.match(/[^\n]*\n|[^\n]+$/g) ?? [];
+      const slice = n === 0 ? [] : fromEnd ? lines.slice(-n) : lines.slice(0, n);
       if (files.length > 1) results.push(`==> ${f} <==`);
-      results.push(slice.join("\n"));
+      results.push(slice.join(""));
     }
     return results.join("\n");
   }
@@ -430,21 +444,21 @@ export class CommandInterpreter {
       const profile = await fetchGitHubUser(user);
       const repos = await fetchGitHubRepos(user);
 
-      let output = `GitHub Profile: @${profile.login} (${profile.name || "Atul Pahal"})\n`;
-      output += `Bio: ${profile.bio || "AI/ML Engineer & Full-Stack Developer"}\n`;
+      let output = `GitHub Profile: @${profile.login} (${profile.name || profile.login})\n`;
+      output += `Bio: ${profile.bio || "Not provided"}\n`;
       output += `URL: ${profile.html_url}\n`;
       output += `Public Repos: ${profile.public_repos} | Followers: ${profile.followers} | Following: ${profile.following}\n\n`;
       output += `LATEST REPOSITORIES:\n`;
 
       repos.slice(0, 5).forEach((r) => {
-        output += `  * ${r.name} (${r.language || "TypeScript"}) \u2605 ${r.stargazers_count}\n`;
+        output += `  * ${r.name} (${r.language || "Not specified"}) \u2605 ${r.stargazers_count}\n`;
         if (r.description) output += `    ${r.description}\n`;
         output += `    ${r.html_url}\n`;
       });
 
       return output;
-    } catch {
-      return `github: unable to fetch profile for @${user}`;
+    } catch (error) {
+      return `github: ${error instanceof Error ? error.message : `fetch unavailable for @${user}`}`;
     }
   }
 

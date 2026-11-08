@@ -13,6 +13,42 @@ interface TerminalLine {
 
 const MAX_LINES = 500;
 
+/** Render SGR tokens without interpreting output as HTML. */
+function renderAnsiContent(content: string): React.ReactNode {
+  if (!content.includes("\x1b[")) return content;
+  const parts = content.split(/(\x1b\[[0-9;]*m)/g);
+  let color: string | undefined;
+  let backgroundColor: string | undefined;
+  let bold = false;
+  return parts.map((part, index) => {
+    if (/^\x1b\[[0-9;]*m$/.test(part)) {
+      const codes = part.slice(2, -1).split(";").map(Number);
+      for (let position = 0; position < codes.length; position++) {
+        const code = codes[position];
+        if (code === 0) { color = undefined; backgroundColor = undefined; bold = false; }
+        else if (code === 1) bold = true;
+        else if (code === 22) bold = false;
+        else if (code === 39) color = undefined;
+        else if (code === 49) backgroundColor = undefined;
+        else if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97)) color = `var(--color${code >= 90 ? code - 90 + 8 : code - 30})`;
+        else if ((code >= 40 && code <= 47) || (code >= 100 && code <= 107)) backgroundColor = `var(--color${code >= 100 ? code - 100 + 8 : code - 40})`;
+        else if ((code === 38 || code === 48) && codes[position + 1] === 5) {
+          const slot = codes[position + 2];
+          const value = slot < 16 ? `var(--color${slot})` : slot === 220 ? "var(--primary)" : slot === 81 ? "var(--accent-secondary)" : slot >= 232 ? `rgb(${8 + (slot - 232) * 10} ${8 + (slot - 232) * 10} ${8 + (slot - 232) * 10})` : `rgb(${[Math.floor((slot - 16) / 36), Math.floor((slot - 16) / 6) % 6, (slot - 16) % 6].map((channel) => channel === 0 ? 0 : 55 + channel * 40).join(" ")})`;
+          if (code === 38) color = value; else backgroundColor = value;
+          position += 2;
+        } else if ((code === 38 || code === 48) && codes[position + 1] === 2 && codes.length > position + 4) {
+          const value = `rgb(${codes.slice(position + 2, position + 5).join(" ")})`;
+          if (code === 38) color = value; else backgroundColor = value;
+          position += 4;
+        }
+      }
+      return null;
+    }
+    return <span key={index} style={{ color, backgroundColor, fontWeight: bold ? 700 : undefined }}>{part}</span>;
+  });
+}
+
 export function Terminal({ windowId }: { windowId: string }) {
   // Stable instances
   const fs = useMemo(() => new VirtualFS(), []);
@@ -75,7 +111,7 @@ export function Terminal({ windowId }: { windowId: string }) {
         return;
       }
       if (trimmed === "shutdown") {
-        window.close();
+        window.dispatchEvent(new CustomEvent("system-shutdown"));
         return;
       }
 
@@ -83,6 +119,13 @@ export function Terminal({ windowId }: { windowId: string }) {
       setCommandHistory((prev) => [...prev, trimmed]);
 
       const result = interpreter.execute(trimmed);
+
+      if (result === "\x1BCLEAR") {
+        setLines([]);
+        setInputVal("");
+        setHistoryIndex(null);
+        return;
+      }
 
       if (typeof result === "string") {
         appendLines([
@@ -179,7 +222,7 @@ export function Terminal({ windowId }: { windowId: string }) {
           {lines.map((line) => (
             <pre
               key={line.id}
-              className={`whitespace-pre-wrap leading-relaxed text-xs ${
+              className={`whitespace-pre-wrap break-words leading-relaxed text-xs ${
                 line.type === "input"
                   ? "text-primary font-semibold"
                   : line.type === "pending"
@@ -187,23 +230,24 @@ export function Terminal({ windowId }: { windowId: string }) {
                   : "text-foreground/85"
               }`}
             >
-              {line.content}
+              {renderAnsiContent(line.content)}
             </pre>
           ))}
 
           {/* Current Active Input Line */}
           <div className="flex items-center gap-2 pt-1">
-            <span className="text-primary font-semibold shrink-0 text-xs sm:text-sm">
+            <span className="max-w-[65%] truncate text-primary font-semibold shrink-0 text-xs sm:text-sm" title={prompt}>
               {prompt}
             </span>
             <input
               ref={inputRef}
+              aria-label="Terminal command"
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={handleKeyDown}
               style={{ caretColor: "var(--primary)" }}
-              className="flex-1 bg-transparent outline-none border-none text-foreground font-mono text-base sm:text-sm p-0 m-0 focus:ring-0"
+              className="min-w-0 flex-1 bg-transparent outline-none border-none text-foreground font-mono text-xs sm:text-sm p-0 m-0 focus:ring-0"
               autoFocus
               spellCheck={false}
               autoComplete="off"

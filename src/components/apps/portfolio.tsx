@@ -17,14 +17,13 @@ import {
   CheckCircle2,
   Cpu,
   Layers,
-  Star,
-  GitFork,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PORTFOLIO_DATA, ALL_TECH_TAGS } from "@/lib/portfolio-data";
 import type { Project, SkillCategory, Education, Certification } from "@/lib/portfolio-data";
 import { GitHubIcon, LinkedInIcon, EmailIcon } from "@/lib/social-icons";
-import { fetchGitHubUser, fetchGitHubRepos, type GitHubUser, type GitHubRepo } from "@/lib/github-api";
+import { fetchGitHubUser } from "@/lib/github-api";
+import type { GitHubUser } from "@/lib/github-api";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   github: GitHubIcon,
@@ -84,7 +83,7 @@ function HeroHeader() {
   );
 }
 
-function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
+function AboutTab({ ghUser, ghError }: { ghUser: GitHubUser | null; ghError: string | null }) {
   return (
     <div className="p-4 space-y-4 text-xs font-mono">
       {/* Quick Stats Grid */}
@@ -95,9 +94,9 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
             <GitHubIcon className="w-3.5 h-3.5 text-primary" />
           </div>
           <div className="text-xl font-bold text-primary mt-2">
-            {ghUser ? `${ghUser.public_repos}+ Repos` : "12+ Repos"}
+            {ghUser ? `${ghUser.public_repos} Repos` : ghError ? "Unavailable" : "Loading…"}
           </div>
-          <div className="text-[10px] text-muted-foreground/80 mt-0.5">Live GitHub Projects</div>
+          <div className="text-[10px] text-muted-foreground/80 mt-0.5">GitHub Public Repositories</div>
         </div>
 
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
@@ -115,7 +114,7 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
             <Cpu className="w-3.5 h-3.5 text-sky-400" />
           </div>
           <div className="text-xl font-bold text-sky-400 mt-2">100% Web</div>
-          <div className="text-[10px] text-muted-foreground/80 mt-0.5">ONNX Runtime Local</div>
+          <div className="text-[10px] text-muted-foreground/80 mt-0.5">JavaScript Demo Heuristics</div>
         </div>
 
         <div className="p-3 bg-card/40 border border-border/60 rounded-lg flex flex-col justify-between">
@@ -127,6 +126,7 @@ function AboutTab({ ghUser }: { ghUser: GitHubUser | null }) {
           <div className="text-[10px] text-muted-foreground/80 mt-0.5">IIT Hyderabad & HARTRON</div>
         </div>
       </div>
+      {ghError && <p role="alert" className="text-xs text-destructive">{ghError}</p>}
 
       {/* Bio Card */}
       <div className="p-3.5 bg-card/30 border border-border/60 rounded-lg space-y-2">
@@ -399,9 +399,12 @@ function EducationTab() {
 
 export function Portfolio({ windowId }: { windowId: string }) {
   const [ghUser, setGhUser] = useState<GitHubUser | null>(null);
+  const [ghError, setGhError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchGitHubUser("AtulPahal").then(setGhUser).catch(() => {});
+    fetchGitHubUser("AtulPahal").then(setGhUser).catch((error: unknown) => {
+      setGhError(error instanceof Error ? error.message : "GitHub profile fetch unavailable");
+    });
   }, []);
 
   return (
@@ -433,7 +436,7 @@ export function Portfolio({ windowId }: { windowId: string }) {
         </TabsList>
 
         <TabsContent value="about" className="flex-1 overflow-auto">
-          <AboutTab ghUser={ghUser} />
+          <AboutTab ghUser={ghUser} ghError={ghError} />
         </TabsContent>
         <TabsContent value="skills" className="flex-1 overflow-auto">
           <SkillsTab />

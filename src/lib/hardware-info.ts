@@ -50,8 +50,8 @@ export function getRealHardwareInfo(): SystemHardwareInfo {
 
   const conn = nav.connection;
   const networkType = conn?.effectiveType ? `${conn.effectiveType.toUpperCase()} (${conn.type || "Wi-Fi"})` : "OpenBSD-5G";
-  const downlinkMbps = conn?.downlink || 100;
-  const rttMs = conn?.rtt || 25;
+  const downlinkMbps = conn?.downlink ?? 100;
+  const rttMs = conn?.rtt ?? 25;
 
   return {
     cpuCores,

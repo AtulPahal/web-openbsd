@@ -1,15 +1,23 @@
 "use client";
 
-import { Home, HardDrive, Download, ArrowLeft, ArrowRight, ArrowUp, ChevronRight } from "lucide-react";
-import { useState, useCallback, useMemo } from "react";
 import {
+  Home,
+  HardDrive,
+  Download,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ChevronRight,
   Folder,
   File,
   FileText,
   FileCode,
+  Music,
+  Film,
 } from "lucide-react";
+import { useState, useCallback, useMemo, useSyncExternalStore } from "react";
 import { Separator } from "@/components/ui/separator";
-import { VirtualFS } from "@/features/virtual-fs";
+import { VirtualFS, subscribeFileSystem, getFileSystemRevision } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
 import { SYSTEM_PATHS } from "@/lib/system-config";
 import { getFileAssociation } from "@/lib/file-associations";
@@ -55,10 +63,27 @@ function getFileIcon(node: FSNode) {
     case "cfg":
     case "log":
       return FileText;
+    case "mp3":
+    case "wav":
+    case "ogg":
+      return Music;
+    case "mp4":
+    case "webm":
+    case "mov":
+      return Film;
     default:
       return File;
   }
 }
+
+const PLACES = [
+  { name: "Home", path: SYSTEM_PATHS.home, icon: Home },
+  { name: "Documents", path: SYSTEM_PATHS.documents, icon: FileText },
+  { name: "Downloads", path: SYSTEM_PATHS.downloads, icon: Download },
+  { name: "Music", path: SYSTEM_PATHS.music, icon: Music },
+  { name: "Videos", path: SYSTEM_PATHS.videos, icon: Film },
+  { name: "Root", path: SYSTEM_PATHS.root, icon: HardDrive },
+];
 
 // --- Places Sidebar Item ---
 
@@ -66,21 +91,20 @@ function PlaceItem({
   name,
   path,
   icon: Icon,
-  currentPath,
+  isSelected,
   onClick,
 }: {
   name: string;
   path: string;
   icon: React.ElementType;
-  currentPath: string;
+  isSelected: boolean;
   onClick: (path: string) => void;
 }) {
-  const isSelected = currentPath === path || currentPath.startsWith(path + "/");
   return (
     <button
       type="button"
       onClick={() => onClick(path)}
-      className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors ${
+      className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors cursor-pointer ${
         isSelected
           ? "bg-primary/15 text-primary font-medium"
           : "text-foreground/80 hover:bg-accent/20 hover:text-foreground"
@@ -91,13 +115,6 @@ function PlaceItem({
     </button>
   );
 }
-
-const PLACES = [
-  { name: "Home", path: SYSTEM_PATHS.home, icon: Home },
-  { name: "Documents", path: SYSTEM_PATHS.documents, icon: FileText },
-  { name: "Downloads", path: SYSTEM_PATHS.downloads, icon: Download },
-  { name: "Root", path: SYSTEM_PATHS.root, icon: HardDrive },
-];
 
 interface SortIndicatorProps {
   column: SortKey;
@@ -115,9 +132,8 @@ function SortIndicator({ column, currentKey, direction }: SortIndicatorProps) {
 }
 
 export function FileManager({ windowId }: { windowId: string }) {
-  // VirtualFS is a plain class instance — use useMemo so it is stable
-  // across renders without triggering react-hooks/refs lint errors.
   const fs = useMemo(() => new VirtualFS(), []);
+  useSyncExternalStore(subscribeFileSystem, getFileSystemRevision, () => 0);
 
   const [currentPath, setCurrentPath] = useState<string>(SYSTEM_PATHS.home);
   const [history, setHistory] = useState<string[]>([SYSTEM_PATHS.home]);
@@ -125,6 +141,17 @@ export function FileManager({ windowId }: { windowId: string }) {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // Determine the single best-matching Place in sidebar
+  const activePlacePath = useMemo(() => {
+    const matches = PLACES.filter((p) => {
+      if (p.path === "/") return currentPath === "/";
+      return currentPath === p.path || currentPath.startsWith(p.path + "/");
+    });
+    if (matches.length === 0) return "/";
+    matches.sort((a, b) => b.path.length - a.path.length);
+    return matches[0].path;
+  }, [currentPath]);
 
   const goBack = useCallback(() => {
     if (historyIndex > 0) {
@@ -141,6 +168,7 @@ export function FileManager({ windowId }: { windowId: string }) {
       setSelectedPath(null);
     }
   }, [history, historyIndex]);
+
   const navigateTo = useCallback(
     (path: string) => {
       const node = fs.getNode(path);
@@ -158,11 +186,10 @@ export function FileManager({ windowId }: { windowId: string }) {
     [fs, historyIndex]
   );
 
-  const currentContents = useMemo(() => {
+  const currentContents = (() => {
     const items = fs.listDirectory(currentPath);
     const sorted = [...items].sort((a, b) => {
       let cmp = 0;
-      // directories always first
       if (a.type === "directory" && b.type !== "directory") return -1;
       if (a.type !== "directory" && b.type === "directory") return 1;
 
@@ -184,7 +211,7 @@ export function FileManager({ windowId }: { windowId: string }) {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return sorted;
-  }, [currentPath, sortKey, sortDir, fs]);
+  })();
 
   const handleSort = useCallback(
     (key: SortKey) => {
@@ -236,46 +263,49 @@ export function FileManager({ windowId }: { windowId: string }) {
   }, [currentPath]);
 
   return (
-    <div className="relative flex h-full flex-col bg-background text-sm" data-window-id={windowId}>
+    <div className="@container relative flex h-full flex-col bg-background text-sm" data-window-id={windowId}>
       {/* Top Toolbar (Dolphin Style) */}
       <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-2 py-1.5">
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
+            aria-label="Back"
             onClick={goBack}
             disabled={historyIndex === 0}
-            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30 cursor-pointer"
           >
             <ArrowLeft className="size-4" />
           </button>
           <button
             type="button"
+            aria-label="Forward"
             onClick={goForward}
             disabled={historyIndex === history.length - 1}
-            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30 cursor-pointer"
           >
             <ArrowRight className="size-4" />
           </button>
           <button
             type="button"
+            aria-label="Parent directory"
             onClick={() => parentPath && navigateTo(parentPath)}
             disabled={!parentPath}
-            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30"
+            className="p-1 rounded text-muted-foreground hover:bg-accent/30 hover:text-foreground disabled:opacity-30 cursor-pointer"
           >
             <ArrowUp className="size-4" />
           </button>
         </div>
 
-        <div className="flex-1 flex items-center bg-background/50 border border-border rounded px-2 h-7 overflow-hidden ml-1">
+        <div className="flex-1 flex items-center bg-background/50 border border-border rounded px-2 h-7 overflow-x-auto scrollbar-none ml-1">
           {pathSegments.map((seg, i) => (
-            <span key={seg.path} className="flex items-center">
+            <span key={seg.path} className="flex items-center shrink-0">
               {i > 0 && (
                 <ChevronRight className="mx-0.5 size-3 text-muted-foreground/60" />
               )}
               <button
                 type="button"
                 onClick={() => navigateTo(seg.path)}
-                className="rounded px-1.5 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/40 hover:text-primary"
+                className="rounded px-1.5 py-0.5 font-mono text-xs text-foreground/80 hover:bg-accent/40 hover:text-primary cursor-pointer"
               >
                 {seg.name === "/" ? "root" : seg.name}
               </button>
@@ -287,7 +317,7 @@ export function FileManager({ windowId }: { windowId: string }) {
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar — Places */}
-        <div className="w-32 sm:w-40 shrink-0 border-r border-border bg-muted/10 hidden sm:flex flex-col py-2">
+        <div className="w-40 shrink-0 border-r border-border bg-muted/10 hidden @min-[560px]:flex flex-col py-2">
           <div className="px-3 pb-1 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
             Places
           </div>
@@ -298,7 +328,7 @@ export function FileManager({ windowId }: { windowId: string }) {
                 name={place.name}
                 path={place.path}
                 icon={place.icon}
-                currentPath={currentPath}
+                isSelected={activePlacePath === place.path}
                 onClick={navigateTo}
               />
             ))}
@@ -314,51 +344,50 @@ export function FileManager({ windowId }: { windowId: string }) {
             <button
               type="button"
               onClick={() => handleSort("name")}
-              className="flex flex-1 items-center px-2 py-1 text-left hover:text-foreground"
+              className="flex flex-1 items-center px-2 py-1 text-left hover:text-foreground cursor-pointer"
             >
               Name <SortIndicator column="name" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("size")}
-              className="flex w-20 items-center justify-end px-2 py-1 text-right hover:text-foreground"
+              className="flex w-16 sm:w-20 items-center justify-end px-2 py-1 text-right hover:text-foreground cursor-pointer"
             >
               Size <SortIndicator column="size" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("permissions")}
-              className="hidden md:flex w-24 items-center px-2 py-1 text-left hover:text-foreground"
+              className="hidden @min-[640px]:flex w-24 items-center px-2 py-1 text-left hover:text-foreground cursor-pointer"
             >
               Perms <SortIndicator column="permissions" currentKey={sortKey} direction={sortDir} />
             </button>
             <button
               type="button"
               onClick={() => handleSort("modified")}
-              className="hidden lg:flex w-32 items-center px-2 py-1 text-left hover:text-foreground"
+              className="hidden @min-[760px]:flex w-32 items-center px-2 py-1 text-left hover:text-foreground cursor-pointer"
             >
               Modified <SortIndicator column="modified" currentKey={sortKey} direction={sortDir} />
             </button>
           </div>
 
           {/* File list */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
             <div className="min-w-0">
               {/* Go up entry */}
               {parentPath !== null && (
                 <button
                   type="button"
-                  className="flex w-full items-center border-b border-border/30 px-2 py-1 text-left text-xs hover:bg-accent/20"
-                  onDoubleClick={() => navigateTo(parentPath)}
-                  onClick={() => setSelectedPath(null)}
+                  className="flex w-full items-center border-b border-border/30 px-2 py-1.5 text-left text-xs hover:bg-accent/20 cursor-pointer"
+                  onClick={() => navigateTo(parentPath)}
                 >
                   <div className="flex flex-1 items-center gap-2">
                     <ArrowUp className="size-3.5 text-muted-foreground" />
-                    <span className="text-muted-foreground">..</span>
+                    <span className="text-muted-foreground font-mono">..</span>
                   </div>
-                  <div className="w-20" />
-                  <div className="w-24" />
-                  <div className="w-32" />
+                  <div className="w-16 sm:w-20 shrink-0" />
+                  <div className="hidden @min-[640px]:block w-24 shrink-0" />
+                  <div className="hidden @min-[760px]:block w-32 shrink-0" />
                 </button>
               )}
 
@@ -382,13 +411,11 @@ export function FileManager({ windowId }: { windowId: string }) {
                         ? "bg-primary/15 text-foreground"
                         : "hover:bg-accent/20"
                     }`}
-                    onClick={() => {
-                      if (selectedPath === node.path) {
-                        handleDoubleClick(node);
-                      } else {
-                        setSelectedPath(node.path);
-                      }
+                    onClick={() => setSelectedPath(node.path)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") { event.preventDefault(); handleDoubleClick(node); }
                     }}
+                    title={`Double-click or press Enter to open ${node.name}`}
                     onDoubleClick={() => handleDoubleClick(node)}
                   >
                     <div className="flex flex-1 items-center gap-2 overflow-hidden">
@@ -410,10 +437,10 @@ export function FileManager({ windowId }: { windowId: string }) {
                     <div className="w-16 sm:w-20 shrink-0 text-right font-mono text-muted-foreground text-[11px]">
                       {isDir ? "-" : formatSize(node.size)}
                     </div>
-                    <div className="hidden md:block w-24 shrink-0 px-2 font-mono text-muted-foreground text-[11px]">
+                    <div className="hidden @min-[640px]:block w-24 shrink-0 px-2 font-mono text-muted-foreground text-[11px]">
                       {node.permissions}
                     </div>
-                    <div className="hidden lg:block w-32 shrink-0 font-mono text-muted-foreground text-[11px]">
+                    <div className="hidden @min-[760px]:block w-32 shrink-0 font-mono text-muted-foreground text-[11px]">
                       {formatDate(node.modified)}
                     </div>
                   </button>
@@ -429,12 +456,11 @@ export function FileManager({ windowId }: { windowId: string }) {
               {currentContents.length !== 1 ? "s" : ""}
             </span>
             {selectedPath && (
-              <span className="font-mono">{selectedPath}</span>
+              <span className="font-mono truncate ml-2">{selectedPath}</span>
             )}
           </div>
         </div>
       </div>
-
     </div>
   );
 }

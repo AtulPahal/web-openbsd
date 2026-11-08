@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { User, ArrowRight, Power, RotateCcw, Unlock, Sparkles, Shield, Fingerprint } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { User, ArrowRight, Power, RotateCcw, Unlock, Shield } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
-import { extractPywalFromImage, applyPywalTheme, getSavedPywalTheme } from "@/lib/pywal";
+import { extractPywalFromImage, applyPywalTheme, getSavedPywalTheme, getSavedWallpaper, getSavedDarkMode } from "@/lib/pywal";
+
 interface SDDMLoginProps {
   onLogin: () => void;
 }
@@ -11,28 +12,34 @@ interface SDDMLoginProps {
 export function SDDMLogin({ onLogin }: SDDMLoginProps) {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
-  const [mounted, setMounted] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [wallpaper] = useState(getSavedWallpaper);
 
   // 3D Parallax Tilt State
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [shine, setShine] = useState({ x: 50, y: 50 });
   const cardRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setMounted(true);
+  const handleUnlock = useCallback(() => {
+    if (isUnlocking) return;
+    setIsUnlocking(true);
+    setTimeout(() => {
+      onLogin();
+    }, 450);
+  }, [isUnlocking, onLogin]);
 
-    // Apply pywal extracted theme from wallpaper so login screen immediately adopts it
-    const initPywal = async () => {
-      const saved = getSavedPywalTheme();
-      if (saved) {
-        applyPywalTheme(saved);
-      } else {
-        const pal = await extractPywalFromImage(SYSTEM_CONFIG.wallpaper);
-        applyPywalTheme(pal);
-      }
-    };
-    initPywal();
+  useEffect(() => {
+    let cancelled = false;
+    const saved = getSavedPywalTheme();
+    if (saved && saved.wallpaper === wallpaper) applyPywalTheme(saved, getSavedDarkMode());
+    else extractPywalFromImage(wallpaper).then((palette) => {
+      if (!cancelled) applyPywalTheme(palette, getSavedDarkMode());
+    }).catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [wallpaper]);
+
+  useEffect(() => {
 
     const updateTime = () => {
       const now = new Date();
@@ -79,42 +86,27 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
     setShine({ x: 50, y: 50 });
   };
 
-  const handleUnlock = () => {
-    if (isUnlocking) return;
-    setIsUnlocking(true);
-    setTimeout(() => {
-      onLogin();
-    }, 450);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleUnlock();
-    }
-  };
 
   useEffect(() => {
     const handleGlobalKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
+      if ((e.key === "Enter" || e.key === " ") && !(e.target instanceof Element && e.target.closest("button, input, textarea, select, a"))) {
+        e.preventDefault();
         handleUnlock();
       }
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [isUnlocking]);
+  }, [handleUnlock]);
 
   return (
     <div
-      className={`relative min-h-[100dvh] h-full w-full bg-cover bg-center flex flex-col justify-between p-4 sm:p-8 select-none overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`relative min-h-[100dvh] h-full w-full bg-cover bg-center flex flex-col justify-between p-4 sm:p-8 select-none overflow-y-auto overflow-x-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isUnlocking
           ? "scale-110 opacity-0 blur-md pointer-events-none"
           : "scale-100 opacity-100 blur-0"
       }`}
-      style={{ backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')` }}
+      style={{ backgroundImage: `url('${wallpaper}')` }}
       suppressHydrationWarning
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
     >
       {/* Ambient Floating 3D Glowing Orbs */}
       <div className="absolute top-1/4 left-1/5 w-80 h-80 rounded-full bg-primary/20 blur-[100px] pointer-events-none animate-pulse duration-1000" />
@@ -126,13 +118,13 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-wider font-sans drop-shadow-2xl"
           suppressHydrationWarning
         >
-          {mounted ? time : "--:--"}
+          {time || "--:--"}
         </h1>
         <p
           className="text-sm sm:text-lg md:text-xl text-white/90 mt-1 sm:mt-2 font-semibold text-center drop-shadow-md tracking-wide"
           suppressHydrationWarning
         >
-          {mounted ? date : ""}
+          {date}
         </p>
       </div>
 
@@ -142,7 +134,6 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          onClick={handleUnlock}
           style={{
             transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1, 1, 1)`,
             transition: "transform 0.15s ease-out, box-shadow 0.3s ease",
@@ -214,7 +205,7 @@ export function SDDMLogin({ onLogin }: SDDMLoginProps) {
           <button
             type="button"
             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white flex items-center gap-2 cursor-pointer text-xs font-mono transition-all backdrop-blur-md shadow-md active:scale-95"
-            onClick={() => window.close()}
+            onClick={() => window.dispatchEvent(new CustomEvent("system-shutdown"))}
             suppressHydrationWarning
           >
             <Power className="w-3.5 h-3.5" />

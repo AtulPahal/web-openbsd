@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import type { WindowState, Position, Size } from "@/types";
 
 interface WindowFrameProps {
@@ -11,6 +11,7 @@ interface WindowFrameProps {
   onFocus: () => void;
   onMove: (position: Position) => void;
   onResize: (size: Size) => void;
+  isVisible?: boolean;
   children: React.ReactNode;
 }
 
@@ -33,9 +34,12 @@ export function WindowFrame({
   onMove,
   onResize,
   children,
+  isVisible = true,
 }: WindowFrameProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const interactionCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => interactionCleanup.current?.(), []);
 
   const dragRef = useRef<{
     startX: number;
@@ -57,17 +61,19 @@ export function WindowFrame({
   // --- Title bar drag (Mouse + Touch) ---
   const handleTitleStart = useCallback(
     (clientX: number, clientY: number) => {
+      interactionCleanup.current?.();
       onFocus();
 
       if (win.isMaximized) {
         onMaximize();
-        const estimatedW = win.size.width || 680;
-        const newOriginX = Math.max(0, clientX - estimatedW / 2);
+        const restoredW = win.prevBounds?.size.width || 680;
+        const canvasLeft = document.querySelector('[aria-label="Desktop workspace"]')?.getBoundingClientRect().left ?? 0;
+        const newOriginX = Math.max(0, clientX - canvasLeft - restoredW / 2);
         dragRef.current = {
           startX: clientX,
           startY: clientY,
           originX: newOriginX,
-          originY: Math.max(0, clientY - 18),
+          originY: 8,
         };
       } else {
         dragRef.current = {
@@ -111,6 +117,7 @@ export function WindowFrame({
         document.removeEventListener("touchend", handleEnd);
         document.removeEventListener("touchcancel", handleEnd);
       };
+      interactionCleanup.current = handleEnd;
 
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleEnd);
@@ -118,11 +125,12 @@ export function WindowFrame({
       document.addEventListener("touchend", handleEnd);
       document.addEventListener("touchcancel", handleEnd);
     },
-    [win.isMaximized, win.position.x, win.position.y, win.size.width, onFocus, onMaximize, onMove]
+    [win.isMaximized, win.position.x, win.position.y, win.prevBounds?.size.width, onFocus, onMaximize, onMove]
   );
 
   const handleTitleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      if (e.button !== 0 || (e.target as HTMLElement).closest("button")) return;
       e.preventDefault();
       handleTitleStart(e.clientX, e.clientY);
     },
@@ -131,6 +139,7 @@ export function WindowFrame({
 
   const handleTitleTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      if ((e.target as HTMLElement).closest("button")) return;
       if (e.touches.length > 0) {
         handleTitleStart(e.touches[0].clientX, e.touches[0].clientY);
       }
@@ -146,6 +155,7 @@ export function WindowFrame({
   const handleResizeStart = useCallback(
     (direction: ResizeDirection, clientX: number, clientY: number) => {
       if (win.isMaximized) return;
+      interactionCleanup.current?.();
       onFocus();
 
       resizeRef.current = {
@@ -217,6 +227,7 @@ export function WindowFrame({
         document.removeEventListener("touchend", handleEnd);
         document.removeEventListener("touchcancel", handleEnd);
       };
+      interactionCleanup.current = handleEnd;
 
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleEnd);
@@ -257,7 +268,6 @@ export function WindowFrame({
     [handleResizeStart]
   );
 
-  if (win.isMinimized) return null;
 
   const HANDLE_SIZE = 8;
 
@@ -265,13 +275,14 @@ export function WindowFrame({
     <section
       role="region"
       aria-label={win.title}
+      hidden={!isVisible || win.isMinimized}
       className={`absolute flex flex-col overflow-hidden liquid-window ${
         isDragging || isResizing
           ? "select-none pointer-events-auto"
           : "transition-[box-shadow,border-color] duration-200"
       } ${
         win.isMaximized
-          ? "border-b border-border shadow-none rounded-none inset-0"
+          ? "border rounded-lg inset-0"
           : "border rounded-lg"
       } ${
         win.isFocused
@@ -281,10 +292,6 @@ export function WindowFrame({
       style={
         win.isMaximized
           ? {
-              left: 0,
-              top: 0,
-              width: "100%",
-              height: "100%",
               zIndex: win.zIndex,
             }
           : {
@@ -301,11 +308,11 @@ export function WindowFrame({
       {/* Liquid Glass Title Bar */}
       <header
         className={`group/titlebar flex items-center justify-between px-3.5 h-9 shrink-0 select-none font-sans text-xs border-b transition-colors duration-150 cursor-grab active:cursor-grabbing touch-none ${
-          win.isMaximized ? "rounded-none" : "rounded-t-lg"
+          win.isMaximized ? "rounded-t-lg" : "rounded-t-lg"
         } ${
           win.isFocused
-            ? "bg-white/10 dark:bg-white/5 backdrop-blur-2xl text-foreground font-semibold border-white/20 border-t border-t-white/35"
-            : "bg-white/5 dark:bg-black/20 backdrop-blur-lg text-muted-foreground border-white/10"
+            ? "bg-white/10 dark:bg-white/5 backdrop-blur-2xl text-foreground font-semibold border-border border-t border-t-white/35"
+            : "bg-white/5 dark:bg-black/20 backdrop-blur-lg text-muted-foreground border-border/60"
         }`}
         onMouseDown={handleTitleMouseDown}
         onTouchStart={handleTitleTouchStart}
@@ -367,9 +374,7 @@ export function WindowFrame({
 
       {/* Window Content */}
       <div
-        className={`flex-1 overflow-hidden bg-card/95 backdrop-blur-2xl text-card-foreground ${
-          win.isMaximized ? "rounded-none" : "rounded-b-lg"
-        }`}
+        className="@container flex-1 min-h-0 overflow-hidden bg-card/95 text-card-foreground rounded-b-lg"
       >
         {children}
       </div>

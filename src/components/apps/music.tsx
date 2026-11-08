@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import {
   Music,
   Play,
@@ -11,7 +11,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { MEDIA_CONFIG } from "@/lib/media-config";
-import { VirtualFS } from "@/features/virtual-fs";
+import { VirtualFS, subscribeFileSystem, getFileSystemRevision } from "@/features/virtual-fs";
 import type { FSNode } from "@/types";
 
 function formatTime(seconds: number) {
@@ -21,9 +21,11 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function MusicApp({ windowId, path }: { windowId: string; path?: string }) {
+export function MusicApp({ windowId, path, masterVolume, masterMuted }: { windowId: string; path?: string; masterVolume: number; masterMuted: boolean }) {
   const fsRef = useRef(new VirtualFS());
   const audioRef = useRef<HTMLAudioElement>(null);
+  const revision = useSyncExternalStore(subscribeFileSystem, getFileSystemRevision, () => 0);
+  const [sourceRevision, setSourceRevision] = useState(0);
 
   const [playlist, setPlaylist] = useState<FSNode[]>([]);
   const [audioUrl, setAudioUrl] = useState<string>("");
@@ -34,43 +36,37 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [durations, setDurations] = useState<Record<string, number>>({});
-  const [volume, setVolume] = useState(0.75);
-  const [isMuted, setIsMuted] = useState(false);
+  const volume = masterVolume;
+  const isMuted = masterMuted;
 
   const targetPath = path || "";
 
-  // Listen for global master volume changes from Top Bar System Tray & Control Center
-  useEffect(() => {
-    const handleMasterVolume = (e: Event) => {
-      const customEvent = e as CustomEvent<{ volume: number; isMuted: boolean; level: number }>;
-      const newVol = customEvent.detail.volume;
-      const muted = customEvent.detail.isMuted;
-      setVolume(customEvent.detail.level / 100);
-      setIsMuted(muted);
-      if (audioRef.current) {
-        audioRef.current.volume = muted ? 0 : newVol;
-      }
-    };
-
-    window.addEventListener("master-volume-change", handleMasterVolume);
-    return () => {
-      window.removeEventListener("master-volume-change", handleMasterVolume);
-    };
+  const loadTrack = useCallback((node: FSNode) => {
+    if (!node.content) return;
+    setProgress(0);
+    setDuration(0);
+    setSourceRevision((revision) => revision + 1);
+    setAudioUrl(node.content);
+    setTitle(node.name.replace(/\.[^/.]+$/, ""));
+    setCurrentTrackPath(node.path);
   }, []);
+
 
   // Build the local music library from the virtual filesystem (once).
   useEffect(() => {
+    const probes: HTMLAudioElement[] = [];
     const musicFolder = fsRef.current.getNode(MEDIA_CONFIG.musicDirectory);
     if (musicFolder && musicFolder.type === "directory" && musicFolder.children) {
-      const files = musicFolder.children.filter((node) =>
-        node.name.endsWith(MEDIA_CONFIG.musicExtension)
-      );
+      const files = musicFolder.children.filter((node) => node.type === "file" && /\.(mp3|wav|ogg)$/i.test(node.name));
       setPlaylist(files);
 
       // Preload audio duration metadata for tracklist
       files.forEach((file) => {
         if (file.content) {
-          const tempAudio = new Audio(file.content);
+          const tempAudio = new Audio();
+          probes.push(tempAudio);
+          tempAudio.preload = "metadata";
+          tempAudio.src = file.content;
           tempAudio.onloadedmetadata = () => {
             setDurations((prev) => ({
               ...prev,
@@ -80,11 +76,14 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
         }
       });
 
-      if (!path && files.length > 0) {
+      if (!path && !audioRef.current?.src && files.length > 0) {
         loadTrack(files[0]);
       }
     }
-  }, [path]);
+    return () => {
+      for (const audio of probes) { audio.onloadedmetadata = null; audio.removeAttribute("src"); audio.load(); }
+    };
+  }, [path, loadTrack, revision]);
 
   // When a path prop is supplied (open a file from the desktop), load it.
   useEffect(() => {
@@ -92,20 +91,27 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       const fileNode = fsRef.current.getNode(targetPath);
       if (fileNode && fileNode.type === "file" && fileNode.content) {
         loadTrack(fileNode);
+      } else {
+        setAudioUrl("");
+        setTitle("Audio file unavailable");
+        setIsPlaying(false);
       }
     }
-  }, [targetPath]);
+  }, [targetPath, loadTrack]);
 
-  // Auto-play when a new source is loaded.
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = masterVolume;
+      audioRef.current.muted = masterMuted;
+    }
+  }, [masterVolume, masterMuted]);
+
   useEffect(() => {
     if (audioUrl && audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => setIsPlaying(false));
     }
-  }, [audioUrl]);
+  }, [audioUrl, sourceRevision]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) setProgress(audioRef.current.currentTime);
@@ -123,11 +129,8 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
-    setVolume(val);
-    if (isMuted && val > 0) setIsMuted(false);
-    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : val;
+    if (audioRef.current) { audioRef.current.volume = val; audioRef.current.muted = false; }
 
-    // Dispatch to system tray to keep top bar volume slider in sync!
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("master-volume-change", {
@@ -152,7 +155,6 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
   const toggleMute = () => {
     const nextMute = !isMuted;
-    setIsMuted(nextMute);
     if (audioRef.current) audioRef.current.volume = nextMute ? 0 : volume;
 
     if (typeof window !== "undefined") {
@@ -162,13 +164,6 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
         })
       );
     }
-  };
-
-  const loadTrack = (node: FSNode) => {
-    if (!node.content) return;
-    setAudioUrl(node.content);
-    setTitle(node.name.replace(/\.[^/.]+$/, ""));
-    setCurrentTrackPath(node.path);
   };
 
   const currentIndex = playlist.findIndex((n) => n.path === currentTrackPath);
@@ -190,12 +185,15 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
   return (
     <div
-      className="flex flex-col h-full bg-background text-foreground font-mono select-none"
+      className="flex flex-col h-full bg-background text-foreground font-sans select-none"
       data-window-id={windowId}
     >
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onError={() => { setIsPlaying(false); setTitle("Audio unavailable or unsupported"); }}
         src={audioUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
@@ -212,7 +210,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
       </div>
 
       {/* Tracklist Library */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
         {playlist.length === 0 ? (
           <p className="text-xs text-muted-foreground">
             No audio files found in {MEDIA_CONFIG.musicDirectory}
@@ -282,14 +280,14 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
 
       {/* Transport Controls + Volume Bar */}
       <div className="shrink-0 px-4 py-3 border-t border-border flex items-center justify-between gap-4 bg-card/40">
-        {/* Playback Controls (Lucide icons replacing broken text glyphs) */}
+        {/* Playback Controls */}
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={prevTrack}
             disabled={playlist.length === 0}
             aria-label="Previous track"
-            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors"
+            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors cursor-pointer"
             title="Previous Track"
           >
             <SkipBack className="w-4 h-4" />
@@ -299,7 +297,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             onClick={togglePlay}
             disabled={!audioUrl}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className={`p-2 border rounded transition-all ${
+            className={`p-2 border rounded transition-all cursor-pointer ${
               isPlaying
                 ? "bg-primary/25 border-primary/60 text-primary shadow-sm"
                 : "bg-card hover:bg-primary/20 border-border/80 text-foreground hover:text-primary disabled:opacity-40"
@@ -313,7 +311,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             onClick={nextTrack}
             disabled={playlist.length === 0}
             aria-label="Next track"
-            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors"
+            className="p-2 bg-card hover:bg-primary/20 border border-border/80 text-foreground hover:text-primary disabled:opacity-40 rounded transition-colors cursor-pointer"
             title="Next Track"
           >
             <SkipForward className="w-4 h-4" />
@@ -327,7 +325,7 @@ export function MusicApp({ windowId, path }: { windowId: string; path?: string }
             onClick={toggleMute}
             disabled={!audioUrl}
             aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
-            className={`p-1.5 border rounded transition-colors ${
+            className={`p-1.5 border rounded transition-colors cursor-pointer ${
               isMuted || volume === 0
                 ? "bg-red-500/20 text-red-300 border-red-500/40"
                 : "bg-card hover:bg-primary/20 border-border/80 text-foreground hover:text-primary"

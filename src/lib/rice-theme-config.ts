@@ -110,6 +110,36 @@ export const RICE_THEMES: Record<string, RiceTheme> = {
     pillBg: "rgba(255, 255, 255, 0.92)",
     barBg: "rgba(241, 245, 249, 0.92)",
   },
+  "white-sanctuary": {
+    id: "white-sanctuary",
+    name: "White Sanctuary",
+    wallpaper: "/wallpapers/white-sanctuary.png",
+    thumb: "/wallpapers/thumbs/white-sanctuary.png",
+    mode: "dark",
+    accent: "#a855f7", // Violet Sanctuary
+    accentSecondary: "#ec4899",
+    cardBg: "rgba(18, 16, 28, 0.88)",
+    cardBorder: "rgba(168, 85, 247, 0.25)",
+    textColor: "#faf5ff",
+    textMuted: "#d8b4fe",
+    pillBg: "rgba(24, 20, 38, 0.92)",
+    barBg: "rgba(14, 12, 24, 0.92)",
+  },
+  "night-train": {
+    id: "night-train",
+    name: "Night Train",
+    wallpaper: "/wallpapers/night-train.png",
+    thumb: "/wallpapers/thumbs/night-train.png",
+    mode: "dark",
+    accent: "#10b981", // Emerald Neon
+    accentSecondary: "#38bdf8",
+    cardBg: "rgba(10, 20, 24, 0.88)",
+    cardBorder: "rgba(16, 185, 129, 0.25)",
+    textColor: "#f0fdf4",
+    textMuted: "#6ee7b7",
+    pillBg: "rgba(12, 24, 30, 0.92)",
+    barBg: "rgba(8, 16, 20, 0.92)",
+  },
 };
 
 export const DEFAULT_RICE_THEME = RICE_THEMES["golden-rose-yor"];

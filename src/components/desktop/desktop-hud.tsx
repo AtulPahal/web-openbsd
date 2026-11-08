@@ -1,13 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { RiceTheme } from "@/lib/rice-theme-config";
 
-interface DesktopHudProps {
-  theme: RiceTheme;
-}
-
-export function DesktopHud({ theme }: DesktopHudProps) {
+export function DesktopHud() {
   const [time, setTime] = useState("");
   const [ampm, setAmpm] = useState("");
   const [date, setDate] = useState("");
@@ -45,19 +40,19 @@ export function DesktopHud({ theme }: DesktopHudProps) {
         <div className="flex items-baseline justify-end gap-2 sm:gap-3">
           <h1
             className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-none drop-shadow-md select-none"
-            style={{ color: theme.textColor }}
+            style={{ color: "var(--foreground)" }}
           >
-            {time || "7:10"}
+            {time || "—"}
           </h1>
           <span
             className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wider opacity-85 select-none uppercase drop-shadow-sm"
-            style={{ color: theme.textColor }}
+            style={{ color: "var(--foreground)" }}
           >
-            {ampm || "PM"}
+            {ampm}
           </span>
         </div>
         <p className="text-xs sm:text-sm md:text-base font-semibold opacity-85 mt-2 tracking-wide drop-shadow-sm select-none">
-          {date || "Monday, Oct 05, 2026"}
+          {date}
         </p>
       </div>
     </div>

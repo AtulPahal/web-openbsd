@@ -3,15 +3,11 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import {
   MoreHorizontal,
-  Search,
   X,
-  Sparkles,
-  Command,
 } from "lucide-react";
 import type { AppId, AppCategory } from "@/types";
 import { APP_REGISTRY, APP_CATEGORIES } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
-import { SYSTEM_CONFIG } from "@/lib/system-config";
 
 interface AppLauncherProps {
   onOpenApp: (appId: AppId) => void;
@@ -25,13 +21,21 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
 
   const appList = Object.values(APP_REGISTRY);
 
-  // Close on Escape or click outside
+  const handleClose = () => {
+    setIsOpen(false);
+    setSearchQuery("");
+    setActiveCategory("All");
+  };
+
+  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsOpen(false);
+        setSearchQuery("");
+        setActiveCategory("All");
       }
     };
 
@@ -41,10 +45,8 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setSearchQuery("");
-      setActiveCategory("All");
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -78,10 +80,10 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
       {/* ================= macOS Sequoia App Library Overlay Modal ================= */}
       {isOpen && (
         <div
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
           className="fixed inset-0 z-[90] bg-black/55 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 select-none animate-in fade-in-0 duration-150"
         >
-          {/* Main Glassmorphic Container (matching screenshot) */}
+          {/* Main Glassmorphic Container */}
           <div
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-4xl max-h-[85vh] bg-[#1e1e24]/85 dark:bg-[#121217]/90 backdrop-blur-3xl border border-white/20 rounded-xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),inset_0_1px_1px_0_rgba(255,255,255,0.25)] flex flex-col overflow-hidden text-white font-sans animate-in zoom-in-95 duration-200"
@@ -121,7 +123,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleClose}
                   className="p-1.5 rounded-full hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer"
                   title="Close"
                 >
@@ -151,7 +153,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
               })}
             </div>
 
-            {/* 3. App Squircles Grid (matching macOS Launchpad) */}
+            {/* 3. App Squircles Grid */}
             <div className="flex-1 overflow-y-auto p-5 sm:p-6 scrollbar-thin">
               {filteredApps.length === 0 ? (
                 <div className="py-16 text-center text-white/50 text-xs">
@@ -169,7 +171,7 @@ export function AppLauncher({ onOpenApp }: AppLauncherProps) {
                         type="button"
                         onClick={() => {
                           onOpenApp(app.id);
-                          setIsOpen(false);
+                          handleClose();
                         }}
                         className="group flex flex-col items-center gap-2 w-16 sm:w-20 cursor-pointer focus:outline-none transition-transform active:scale-95"
                       >
