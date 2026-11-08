@@ -19,6 +19,8 @@ Before planning or executing changes in this repository, check the relevant docu
 | **Recent Refactors** | [`docs/recent-changes.md`](docs/recent-changes.md) | In-depth log of recent architectural improvements, bug fixes, and security hardening. |
 | **Architecture & Structure** | [`docs/architecture.md`](docs/architecture.md) | Component hierarchy, subsystem interactions, and data flow. |
 | **Architectural Decisions** | [`docs/decisions.md`](docs/decisions.md) | Recorded ADRs explaining design choices, state models, and dependency trade-offs. |
+| **Documentation Book Index** | [`docs/SUMMARY.md`](docs/SUMMARY.md) & [`docs/README.md`](docs/README.md) | Master mdBook table of contents and documentation book overview. |
+| **Contributing Guidelines** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Guide for branching, pull requests, coding style, and release verification. |
 
 ---
 

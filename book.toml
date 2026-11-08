@@ -1,0 +1,16 @@
+[book]
+authors = ["Atul Pahal <atulpahal@gmail.com>"]
+language = "en"
+multilingual = false
+src = "docs"
+title = "OpenBSD Web Desktop Documentation"
+description = "Comprehensive architecture, API, and operational documentation for the OpenBSD Web Desktop Portfolio."
+
+[output.html]
+git-repository-url = "https://github.com/AtulPahal/web-openbsd"
+edit-url-template = "https://github.com/AtulPahal/web-openbsd/edit/main/{path}"
+default-theme = "navy"
+preferred-dark-theme = "navy"
+mathjax-support = true
+copy-js = true
+smart-punctuation = true

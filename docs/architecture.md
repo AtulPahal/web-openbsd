@@ -1,78 +1,75 @@
 # Architecture
 
-## Overview
+System architecture, component tree, and state management specifications for the OpenBSD Web Desktop Portfolio.
 
-OpenBSD Web Desktop is a client-side single-page application rendered via the Next.js App Router. The server renders the initial HTML shell (root layout, metadata, fonts); all interactive desktop functionality runs as React client components in the browser.
+---
 
-## Component Hierarchy
+## 1. Component Hierarchy
 
 ```
 RootLayout (server)
-  └── page.tsx
+  └── page.tsx (Login Gate & Halt Screen)
+        ├── SDDMLogin (client)
         └── Desktop (client)
-              ├── Panel
-              │     ├── AppLauncher
-              │     └── SystemTray
-              └── Windows[]
-                    └── WindowFrame
-                          ├── TitleBar (close, minimize, maximize)
-                          └── App Content
+              ├── TopMenuBar (client)
+              │     ├── NixLogo (SVG start icon)
+              │     ├── PowerMenu (client portal)
+              │     ├── WorkspaceSwitcher
+              │     ├── LiveClock (<time>)
+              │     └── ControlCenterToggle
+              ├── NotificationCenter (client portal)
+              ├── DesktopHud (Time & Date widget)
+              ├── WallpaperCarousel (Coverflow modal)
+              ├── Dock (client)
+              └── main (Workspace Canvas)
+                    └── WindowFrame[]
+                          ├── TitleBar (traffic lights, drag, double-click maximize)
+                          └── App Content (preserved in DOM via hidden attribute)
                                 ├── Terminal
                                 ├── FileManager
                                 ├── TextEditor
                                 ├── SystemMonitor
-                                ├── About (Portfolio-focused)
-                                ├── Portfolio (new)
-                                ├── Resume (new)
                                 ├── Firefox
-                                ├── Music
-                                └── Video
+                                ├── MusicApp
+                                ├── VideoApp
+                                ├── Portfolio
+                                ├── Resume
+                                ├── CalendarApp
+                                ├── SystemSettings
+                                └── AIStudio
 ```
 
-## State Management
+---
 
-All window management state is co-located in a single React hook: `useWindowManager`. This hook owns the array of `WindowState` objects and exposes operations to open, close, focus, minimize, maximize, move, and resize windows. No external state management library is used — React `useState` is sufficient for the scope of this project.
+## 2. State Management
 
-The `Desktop` component is the top-level client component that calls `useWindowManager` and threads the state and callbacks down through props.
+All window management state is co-located in the custom `useWindowManager` hook (`src/hooks/use-window-manager.ts`).
 
-## Virtual Filesystem
+* **Window State Map**: Owns a `Map<WindowId, WindowState>` tracking coordinates, size, focus, z-index, minimization, maximization, and workspace index.
+* **Canvas Boundary Clamping**: Uses a `ResizeObserver` on `<main aria-label="Desktop workspace">` with the pure `fitBounds` algorithm to prevent windows from escaping screen boundaries.
+* **In-DOM Preservation**: All open window instances remain mounted in the DOM with `hidden={!isVisible || win.isMinimized}`, preserving unsaved text editor buffers, active terminal shells, and media playback across workspace switches.
 
-The virtual filesystem is an in-memory tree of `FSNode` objects. Each node has a `name`, `path`, `type` (file, directory, or symlink), UNIX-style `permissions` string, `owner`, `group`, `size`, and `modified` timestamp. Files carry an optional `content` string; directories carry an optional `children` array.
+---
 
-The filesystem is initialized with a default directory tree (modeled after OpenBSD's `/` layout) and is not persisted — it resets on every page reload.
+## 3. Shared Reactive Virtual Filesystem
 
-## Command Interpreter
+The virtual filesystem (`src/features/virtual-fs/index.ts`) is a singleton tree of `FSNode` objects shared by all applications:
+* **Storage**: Serialized to `localStorage` under `virtual_fs`.
+* **Reactivity**: Mutations trigger `subscribeFileSystem` listeners consumed by `useSyncExternalStore` in `FileManager`, `MusicApp`, and `TextEditor`.
+* **Transactionality**: In-memory mutations roll back automatically if local storage quota is exceeded.
 
-The terminal emulator includes a synchronous command interpreter that processes shell-like commands against the virtual filesystem. Commands execute immediately and return output as `TerminalLine` objects with typed content (input, output, error, system).
+---
 
-## App Registry
+## 4. Theming & Pywal Engine
 
-Applications are registered in `src/lib/app-registry.ts` as a `Record<string, AppDefinition>`. Each entry declares the app's `id`, display `name`, Lucide `icon` name, `defaultSize`, and `minSize`. The registry is the single source of truth for which apps are available in the launcher.
+Wallpaper color extraction is handled by `src/lib/pywal.ts`:
+* Pixel data is sampled via an HTML5 Canvas $96 \times 96$ quantization pipeline.
+* Extracted primary accent, secondary accent, and 16 terminal colors are injected directly into `:root` CSS variables.
+* The selected wallpaper and theme persist in `localStorage` across page reloads.
 
-Registered apps: `terminal`, `file-manager`, `text-editor`, `system-monitor`, `about`.
+---
 
-## Directory Structure
+## 5. Security & Isolation
 
-```
-src/
-  app/                — Next.js App Router (layout, page, globals.css)
-  components/
-    ui/               — shadcn/ui primitives (button, scroll-area, tooltip, etc.)
-    desktop/          — Desktop shell (Desktop, Panel, AppLauncher, SystemTray)
-    window/           — Window manager (Window, WindowFrame, TitleBar)
-    apps/             — App components (Terminal, FileManager, TextEditor, etc.)
-  features/           — Feature logic (virtual filesystem, command interpreter)
-  hooks/              — React hooks (useWindowManager, useDesktop)
-  lib/                — Utilities (utils.ts, app-registry.ts)
-  types/              — Shared TypeScript types (index.ts)
-```
-
-## Data Flow
-
-1. User clicks an app in the `Panel` → `AppLauncher` calls `openWindow(appId)`
-2. `useWindowManager` creates a new `WindowState` with a unique ID, default position/size from the registry, and pushes it to the windows array
-3. `Desktop` renders a `WindowFrame` for each non-minimized window, sorted by `zIndex`
-4. Clicking a window calls `focusWindow(id)`, promoting its `zIndex` to the top
-5. Dragging the title bar calls `moveWindow(id, position)`; dragging edges calls `resizeWindow(id, size)`
-6. Close/minimize/maximize buttons update the corresponding `WindowState` fields
-7. The app component inside the window receives only `{ windowId: string }` and uses hooks to interact with the window manager or filesystem as needed
+* **Proxy Route (`/api/proxy`)**: Blocks SSRF attacks against RFC 1918 private subnets, loopback addresses, and cloud metadata addresses (`BlockList`).
+* **Iframe Sandbox**: Embedded webpages in Firefox run in a sandboxed iframe without `allow-same-origin`.
