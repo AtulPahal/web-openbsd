@@ -104,6 +104,22 @@ export const ACCENT_COLORS = [
     primaryLight: "#e11d48",
     ring: "ring-rose-500",
   },
+  {
+    id: "martian",
+    name: "Martian Magenta",
+    hex: "#cb009e",
+    primary: "#d946ef",
+    primaryLight: "#cb009e",
+    ring: "ring-fuchsia-500",
+  },
+  {
+    id: "martian-violet",
+    name: "Martian Violet",
+    hex: "#550098",
+    primary: "#8b5cf6",
+    primaryLight: "#6d28d9",
+    ring: "ring-purple-600",
+  },
 ];
 
 const PUFFY_ASCII = `
