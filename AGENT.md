@@ -11,8 +11,9 @@ Before planning or executing changes in this repository, check the relevant docu
 |---|---|---|
 | **Overview & Setup** | [`README.md`](README.md) | High-level features, tech stack, installation, Bun commands, and terminal shell overview. |
 | **Agent Standards** | [`AGENT.md`](AGENT.md) | Operational invariants, coding conventions, UI rules, and verification checklist. |
-| **Design System** | [`DESIGN.md`](DESIGN.md) & [`docs/design-system.md`](docs/design-system.md) | **Evil Martians (`evilmartians.com`)** design foundation, color tokens, typography, and liquid glass rules. |
+| **Design System** | [`DESIGN.md`](DESIGN.md) | **Evil Martians (`evilmartians.com`)** design foundation, color tokens, typography, and liquid glass rules. |
 | **Data & Domain Models** | [`docs/models.md`](docs/models.md) | Comprehensive schemas, AI heuristic math formulas (NDVI, Cellular morphology score, Cosine similarity), VirtualFS, and spatial models. |
+| **Function & API Reference** | [`docs/functions.md`](docs/functions.md) | Exhaustive API reference for every function, hook, class method, and API route across the codebase. |
 | **Testing & QA** | [`docs/testing.md`](docs/testing.md) | Test suites, headless Chromium verification scripts, regression checklists, and accessibility audits. |
 | **Version History** | [`CHANGELOG.md`](CHANGELOG.md) | Complete version-by-version release history (v0.1.0 through v0.4.0). |
 | **Recent Refactors** | [`docs/recent-changes.md`](docs/recent-changes.md) | In-depth log of recent architectural improvements, bug fixes, and security hardening. |

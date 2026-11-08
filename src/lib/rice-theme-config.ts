@@ -140,6 +140,21 @@ export const RICE_THEMES: Record<string, RiceTheme> = {
     pillBg: "rgba(12, 24, 30, 0.92)",
     barBg: "rgba(8, 16, 20, 0.92)",
   },
+  "evil-martians": {
+    id: "evil-martians",
+    name: "Evil Martians",
+    wallpaper: "/wallpapers/night-train.png",
+    thumb: "/wallpapers/thumbs/night-train.png",
+    mode: "dark",
+    accent: "#cb009e", // Evil Martians Magenta
+    accentSecondary: "#550098", // Martian Violet
+    cardBg: "rgba(10, 10, 15, 0.88)",
+    cardBorder: "rgba(203, 0, 158, 0.25)",
+    textColor: "#f8fafc",
+    textMuted: "#d946ef",
+    pillBg: "rgba(16, 16, 24, 0.92)",
+    barBg: "rgba(10, 10, 15, 0.92)",
+  },
 };
 
 export const DEFAULT_RICE_THEME = RICE_THEMES["golden-rose-yor"];

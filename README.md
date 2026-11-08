@@ -14,6 +14,7 @@ An interactive, browser-native OpenBSD & macOS-inspired web desktop environment 
 | **[AGENT.md](AGENT.md)** | Operational guidelines, architectural rules, and engineering standards for AI coding assistants. |
 | **[DESIGN.md](DESIGN.md)** | **Evil Martians (`evilmartians.com`)** design system specification, palette tokens, Figtree typography, and liquid glass rules. |
 | **[docs/models.md](docs/models.md)** | Mathematical formulas and schemas for AI heuristics (NDVI, Cellular morphology score, Vector cosine similarity), VirtualFS, and spatial models. |
+| **[docs/functions.md](docs/functions.md)** | Exhaustive API reference documenting every function, hook, class method, and API route across the codebase. |
 | **[docs/testing.md](docs/testing.md)** | Testing strategy, automated build commands, headless Chromium browser verification scripts, and QA checklist. |
 | **[CHANGELOG.md](CHANGELOG.md)** | Complete version history through v0.4.0. |
 | **[docs/recent-changes.md](docs/recent-changes.md)** | In-depth log of recent architectural improvements, bug fixes, and security hardening. |
