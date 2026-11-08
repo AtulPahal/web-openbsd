@@ -18,6 +18,8 @@ An interactive, browser-native OpenBSD & macOS-inspired web desktop environment 
 | **[docs/testing.md](docs/testing.md)** | Testing strategy, automated build commands, headless Chromium browser verification scripts, and QA checklist. |
 | **[CHANGELOG.md](CHANGELOG.md)** | Complete version history through v0.4.0. |
 | **[docs/recent-changes.md](docs/recent-changes.md)** | In-depth log of recent architectural improvements, bug fixes, and security hardening. |
+| **[docs/SUMMARY.md](docs/SUMMARY.md)** | Full mdBook documentation table of contents and chapter index. |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Development workflow, coding standards, and PR guidelines. |
 
 ---
 

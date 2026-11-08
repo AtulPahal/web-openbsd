@@ -1,105 +1,50 @@
-# Architecture Decision Records
+# Architecture Decision Records (ADRs)
+
+---
 
 ## ADR-001: Use Next.js App Router
-
-**Status:** Accepted
-
-**Context:** The project needs a React framework that provides good defaults for TypeScript, font loading, and project structure. The desktop environment is primarily client-side, but the initial page load benefits from server-side rendering of the shell.
-
-**Decision:** Use Next.js 16 with the App Router. The root layout is a server component that loads fonts (Geist Sans, Geist Mono) and sets metadata. The `Desktop` component and all interactive children use the `"use client"` directive.
-
-**Consequences:**
-- Fast initial render via SSR of the outer HTML shell
-- Client components handle all interactivity without hydration issues
-- File-based routing is unused beyond the single page, but the project structure remains conventional
-- Font optimization via `next/font/google` eliminates layout shift
+* **Status**: Accepted
+* **Context**: The desktop environment requires server-side rendering for the initial HTML shell, OpenGraph SEO metadata, and font optimization, while the interactive desktop runs client-side.
+* **Decision**: Use Next.js 16 with the App Router and Turbopack. `RootLayout` serves as the server shell; `Desktop` and windowed applications use `"use client"`.
 
 ---
 
-## ADR-002: No External State Management Library
-
-**Status:** Accepted
-
-**Context:** The window manager needs to track position, size, z-index, and focus state for multiple windows. Options considered: Zustand, Jotai, Redux Toolkit, or plain React hooks.
-
-**Decision:** Use React `useState` inside a custom `useWindowManager` hook. No external state library.
-
-**Consequences:**
-- Zero additional dependencies for state management
-- All state is co-located in one hook, easy to reason about
-- State resets on page reload (acceptable — no persistence requirement)
-- If the app grew significantly (dozens of windows, cross-tab sync), this decision would need revisiting
+## ADR-002: Co-located Window State in Custom Hook
+* **Status**: Accepted
+* **Context**: Multi-window management requires tracking position, size, z-index, minimization, maximization, and workspace mapping.
+* **Decision**: Implement all window operations in a custom React hook `useWindowManager` with standard React state and native `ResizeObserver` canvas boundary enforcement. Avoid heavy external state management libraries (Redux, MobX).
 
 ---
 
-## ADR-003: Virtual Filesystem In-Memory
-
-**Status:** Accepted
-
-**Context:** The file manager and terminal need a filesystem to operate on. Options: IndexedDB persistence, localStorage, or in-memory only.
-
-**Decision:** Implement the virtual filesystem as an in-memory tree of `FSNode` objects. No persistence layer.
-
-**Consequences:**
-- Simplest possible implementation — a JavaScript object tree
-- Filesystem resets to defaults on every page reload
-- No storage quota concerns, no async APIs
-- Users cannot save files across sessions (acceptable for a demo/portfolio project)
-- The `FSNode` type supports files, directories, and symlinks with UNIX-style permissions
+## ADR-003: Shared Reactive Virtual Filesystem with Storage Persistence
+* **Status**: Accepted (Supersedes in-memory-only prototype)
+* **Context**: Multiple applications (Text Editor, File Manager, Terminal, Music App) must read and write from the same file tree, and saved files must survive page reloads.
+* **Decision**: Implement a singleton `VirtualFS` store with `localStorage` persistence and transaction rollback. Components subscribe via `subscribeFileSystem` and React's `useSyncExternalStore`.
 
 ---
 
 ## ADR-004: shadcn/ui for Component Primitives
-
-**Status:** Accepted
-
-**Context:** The project needs accessible, unstyled UI primitives (context menus, tooltips, scroll areas, dropdowns) that can be themed to match the OpenBSD aesthetic.
-
-**Decision:** Use shadcn/ui with the base-nova style. Components are copied into `src/components/ui/` and customized via Tailwind and CSS variables.
-
-**Consequences:**
-- No runtime CSS-in-JS cost — components are plain React + Tailwind
-- Full control over styling; components are owned source code, not a dependency
-- Accessible by default (keyboard navigation, ARIA attributes, focus management)
-- Available primitives: button, scroll-area, context-menu, tooltip, dropdown-menu, separator, tabs
+* **Status**: Accepted
+* **Context**: Need unstyled, accessible UI primitives (Context Menu, Tooltip, Scroll Area, Tabs) customizable via Tailwind CSS.
+* **Decision**: Use shadcn/ui primitives in `src/components/ui/`, customized to match the design system tokens.
 
 ---
 
-## ADR-005: Monochrome + Amber Accent Theme
-
-**Status:** Accepted
-
-**Context:** The project's visual identity is inspired by OpenBSD and classic UNIX workstations. The design must be high-contrast, functional, and visually distinct from typical web applications.
-
-**Decision:** Use a monochrome dark theme with amber/gold accent color for active and interactive elements. Sharp corners on all windows (border-radius: 0). Typography: Geist Sans for UI elements, Geist Mono for terminal and code.
-
-**Consequences:**
-- Strong visual identity that evokes CRT terminals and classic window managers
-- High contrast (light text on dark background) meets WCAG accessibility guidelines
-- Amber accent provides clear visual hierarchy for focused/active elements
-- Sharp corners reinforce the utilitarian, no-nonsense aesthetic
-- Design tokens are defined as CSS custom properties in `globals.css` and consumed via Tailwind utility classes
+## ADR-005: Adopt Figtree Variable Typeface
+* **Status**: Accepted
+* **Context**: The interface requires a versatile, highly legible geometric sans-serif typeface across all UI controls, windows, and panels.
+* **Decision**: Standardize on **Figtree** (`var(--font-figtree)`, weights 300 to 900) loaded via `next/font/google`. Reserve monospace exclusively for code blocks, terminal emulator output, and filesystem paths.
 
 ---
 
-## ADR-006: Transform into a Portfolio Website
-
-**Status:** Accepted
-
-**Context:** The OpenBSD Web Desktop environment serves as a compelling technical showcase, but it needs portfolio-specific content — a resume, projects, skills, and contact information — to function as a professional portfolio website. The resume data exists in `resuma.pdf`.
-
-**Decision:** Extend the desktop environment with portfolio apps rather than replacing it:
-- **Portfolio app** — Tabbed interface showing About, Skills, Projects, and Education content, backed by a new `src/lib/portfolio-data.ts` module that mirrors the resume content in structured form.
-- **Resume app** — PDF embed of `public/resume.pdf` with download and pop-out links.
-- **Terminal integration** — `resume` and `portfolio` shell commands that print formatted summaries, plus man pages for both.
-- **About app** — Repurposed to show contact info, social links, and tech stack (using Puffy ASCII art as visual anchor).
-- **Filesystem** — `resume.txt` added to `~/Documents/` with key contact info and skills.
-
-**Consequences:**
-- The desktop environment doubles as both a technical demonstration and a portfolio showcase
-- Resume data is maintained in two forms: structured (portfolio-data.ts) and PDF (resuma.pdf)
-- All existing OpenBSD aesthetic and behavior is preserved
-- The login password (`2026`) remains as a demo gate; a "View Resume" link is available on the login screen for immediate access
+## ADR-006: In-Browser Pywal Dynamic Theming Engine
+* **Status**: Accepted
+* **Context**: Allow arbitrary desktop wallpapers to dynamically generate matching 16-color ANSI terminal palettes and primary/secondary accents without requiring an external Python backend.
+* **Decision**: Implement a browser-native Canvas quantization pipeline in `src/lib/pywal.ts` that dynamically computes luminance/saturation and injects CSS custom properties into `:root`.
 
 ---
 
+## ADR-007: Adopt Evil Martians Design Foundation
+* **Status**: Accepted
+* **Context**: The interface aesthetic requires a cohesive, high-contrast developer identity fitting OpenBSD's UNIX heritage.
+* **Decision**: Adopt the **Evil Martians (`evilmartians.com`)** design specification from OpenDesignMD (`DESIGN.md`): near-black canvas, white contrast typography hierarchy, strict 8px window corners, 16px floating shell elements, and local liquid glass blur.
