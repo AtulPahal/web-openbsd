@@ -51,7 +51,7 @@ export const SYSTEM_CONFIG: SystemConfig = {
   localIp: "10.0.0.2",
   // Demo-only client-side value
   loginPassword: "2026",
-  wallpaper: "/wallpaper.jpg",
+  wallpaper: "/wallpapers/golden-rose-yor.png",
   website: "https://github.com/AtulPahal",
   browserHome: "https://github.com/AtulPahal",
   userAgent:

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X, Check, Sparkles } from "lucide-react";
 import { RICE_THEMES, type RiceTheme } from "@/lib/rice-theme-config";
 
+const THEMES_LIST = Object.values(RICE_THEMES);
+
 interface WallpaperCarouselProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,14 +19,8 @@ export function WallpaperCarousel({
   currentTheme,
   onSelectTheme,
 }: WallpaperCarouselProps) {
-  const themesList = Object.values(RICE_THEMES);
-  const initialIndex = themesList.findIndex((t) => t.id === currentTheme.id);
+  const initialIndex = THEMES_LIST.findIndex((t) => t.id === currentTheme.id);
   const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
-
-  useEffect(() => {
-    const idx = themesList.findIndex((t) => t.id === currentTheme.id);
-    if (idx >= 0) setActiveIndex(idx);
-  }, [currentTheme.id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -32,13 +28,13 @@ export function WallpaperCarousel({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowLeft") {
-        setActiveIndex((i) => (i - 1 + themesList.length) % themesList.length);
+        setActiveIndex((i) => (i - 1 + THEMES_LIST.length) % THEMES_LIST.length);
       }
       if (e.key === "ArrowRight") {
-        setActiveIndex((i) => (i + 1) % themesList.length);
+        setActiveIndex((i) => (i + 1) % THEMES_LIST.length);
       }
       if (e.key === "Enter") {
-        onSelectTheme(themesList[activeIndex]);
+        onSelectTheme(THEMES_LIST[activeIndex]);
         onClose();
       }
     };
@@ -75,16 +71,17 @@ export function WallpaperCarousel({
       {/* 3D Coverflow Container */}
       <div
         onClick={(e) => e.stopPropagation()}
+        style={{ transformStyle: "preserve-3d" }}
         className="relative w-full max-w-5xl h-72 sm:h-96 flex items-center justify-center perspective-[1200px] overflow-visible"
       >
-        {themesList.map((theme, idx) => {
+        {THEMES_LIST.map((theme, idx) => {
           const offset = idx - activeIndex;
           const isCenter = offset === 0;
 
           // Limit rendering range to -2 to +2 for clean carousel optics
           if (Math.abs(offset) > 2) return null;
 
-          const translateX = offset * 220; // px
+          const translateX = offset * 180; // px
           const translateZ = isCenter ? 80 : -140;
           const rotateY = isCenter ? 0 : offset < 0 ? 35 : -35;
           const opacity = isCenter ? 1 : 0.6;
@@ -141,7 +138,7 @@ export function WallpaperCarousel({
       >
         <button
           type="button"
-          onClick={() => setActiveIndex((i) => (i - 1 + themesList.length) % themesList.length)}
+          onClick={() => setActiveIndex((i) => (i - 1 + THEMES_LIST.length) % THEMES_LIST.length)}
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer active:scale-95"
           title="Previous"
         >
@@ -151,17 +148,17 @@ export function WallpaperCarousel({
         <button
           type="button"
           onClick={() => {
-            onSelectTheme(themesList[activeIndex]);
+            onSelectTheme(THEMES_LIST[activeIndex]);
             onClose();
           }}
           className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-wide shadow-xl transition-all active:scale-95 cursor-pointer"
         >
-          Apply {themesList[activeIndex].name}
+          Apply {THEMES_LIST[activeIndex].name}
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveIndex((i) => (i + 1) % themesList.length)}
+          onClick={() => setActiveIndex((i) => (i + 1) % THEMES_LIST.length)}
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer active:scale-95"
           title="Next"
         >

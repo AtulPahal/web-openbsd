@@ -6,11 +6,8 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  Maximize,
   Clapperboard,
   Film,
-  RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import { VirtualFS } from "@/features/virtual-fs";
 
@@ -21,12 +18,13 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function VideoApp({ windowId, path }: { windowId: string; path?: string }) {
+export function VideoApp({ windowId, path, masterVolume, masterMuted }: { windowId: string; path?: string; masterVolume: number; masterMuted: boolean }) {
   const fsRef = useRef(new VirtualFS());
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ownedUrl = useRef<string | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const isMuted = masterMuted;
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
@@ -36,6 +34,22 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
   const [ytId, setYtId] = useState("");
   const [title, setTitle] = useState("mpv");
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = masterVolume;
+      videoRef.current.muted = masterMuted;
+    }
+  }, [masterVolume, masterMuted, videoUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (ownedUrl.current === videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+        ownedUrl.current = null;
+      }
+    };
+  }, [videoUrl]);
 
   const checkYoutube = (url: string) => {
     const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
@@ -55,6 +69,9 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         setVideoUrl(fileNode.content);
         checkYoutube(fileNode.content);
         setTitle(`mpv - ${fileNode.name}`);
+      } else {
+        setVideoUrl("");
+        setTitle("Video file unavailable");
       }
     } else {
       setVideoUrl("");
@@ -84,8 +101,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         videoRef.current.pause();
         setIsPlaying(false);
       } else {
-        videoRef.current.play();
-        setIsPlaying(true);
+        videoRef.current.play().catch(() => setIsPlaying(false));
       }
     }
   };
@@ -94,7 +110,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
     if (videoRef.current) {
       const nextMute = !isMuted;
       videoRef.current.muted = nextMute;
-      setIsMuted(nextMute);
+      window.dispatchEvent(new CustomEvent("master-volume-change", { detail: { volume: masterVolume, level: Math.round(masterVolume * 100), isMuted: nextMute } }));
     }
   };
 
@@ -153,7 +169,9 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
+      if (ownedUrl.current) URL.revokeObjectURL(ownedUrl.current);
       const url = URL.createObjectURL(file);
+      ownedUrl.current = url;
       setVideoUrl(url);
       setIsYoutube(false);
       setTitle(`mpv - ${file.name}`);
@@ -184,7 +202,7 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         <p className="text-xs text-muted-foreground mt-2 text-center max-w-xs">
           {isDragging
             ? "Drop video file to start playback!"
-            : "Drop video files (.mp4, .webm) or open videos from File Manager to play"}
+            : title === "Video file unavailable" ? title : "Drop video files (.mp4, .webm) or open videos from File Manager to play"}
         </p>
 
         {/* Demo Video Load Button */}
@@ -230,11 +248,15 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
         <video
           ref={videoRef}
           src={videoUrl}
+          onLoadStart={() => { setProgress(0); setDuration(0); setIsPlaying(false); }}
           className="w-full h-full object-contain"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onError={() => { setIsPlaying(false); setTitle("Video unavailable or unsupported"); }}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={() => setIsPlaying(false)}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); togglePlay(); }}
         />
       )}
 
@@ -270,7 +292,8 @@ export function VideoApp({ windowId, path }: { windowId: string; path?: string }
             value={progress}
             onChange={handleSeek}
             style={{ accentColor: "var(--primary)" }}
-            className="flex-1 h-1.5 cursor-pointer bg-muted rounded"
+            aria-label="Video position"
+            className="min-w-0 flex-1 h-1.5 cursor-pointer bg-muted rounded"
           />
 
           {/* Total Duration */}

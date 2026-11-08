@@ -12,53 +12,34 @@ import {
   Check,
   Moon,
   VolumeX,
-  Lock,
-  Cpu,
-  HardDrive,
-  Globe,
-  Sliders,
   ChevronRight,
   ChevronLeft,
   Mail,
   Phone,
   MapPin,
-  ExternalLink,
-  Code,
-  Battery,
   BatteryCharging,
   Keyboard,
   Search,
-  Monitor,
   Eye,
-  Zap,
-  Sparkles,
   RefreshCw,
-  SlidersHorizontal,
   Image as ImageIcon,
-  Key,
-  Terminal,
   Bell,
   BellOff,
   Camera,
   Mic,
   FolderLock,
   Languages,
-  Clock,
-  CalendarDays,
   Database,
   Trash2,
   DownloadCloud,
   CheckCircle2,
-  AlertCircle,
-  FileText,
-  Music,
-  Video,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
-import { GitHubIcon, LinkedInIcon, EmailIcon } from "@/lib/social-icons";
+import { GitHubIcon, LinkedInIcon } from "@/lib/social-icons";
 import { getRealHardwareInfo, type SystemHardwareInfo } from "@/lib/hardware-info";
 import { RICE_THEMES } from "@/lib/rice-theme-config";
+import { getSavedWallpaper, getSavedPywalTheme, applyPywalTheme } from "@/lib/pywal";
 
 type SettingsSection =
   | "wifi"
@@ -140,6 +121,22 @@ const ICON_MAP: Record<string, React.ElementType> = {
   mail: Mail,
 };
 
+const MENU_ITEMS: Array<{ id: SettingsSection; label: string; icon: React.ElementType; color: string; desc: string }> = [
+  { id: "wifi", label: "Wi-Fi & Network", icon: Wifi, color: "text-emerald-400", desc: "Network status, IP, DNS" },
+  { id: "sound", label: "Sound & Audio", icon: Volume2, color: "text-amber-400", desc: "Volume, input mic, speakers" },
+  { id: "display", label: "Displays & Graphics", icon: Sun, color: "text-sky-400", desc: "Brightness, resolution, refresh rate" },
+  { id: "appearance", label: "Appearance & Themes", icon: Palette, color: "text-rose-400", desc: "Dark mode, wallpapers, accent color" },
+  { id: "notifications", label: "Notifications & Focus", icon: Bell, color: "text-amber-500", desc: "Do Not Disturb, app banners" },
+  { id: "privacy", label: "Privacy & Permissions", icon: FolderLock, color: "text-indigo-400", desc: "Camera, mic, filesystem access" },
+  { id: "security", label: "Security & PF Firewall", icon: Shield, color: "text-purple-400", desc: "Packet filter, sandbox, auto-lock" },
+  { id: "power", label: "Battery & Power", icon: BatteryCharging, color: "text-emerald-400", desc: "Battery health, energy modes" },
+  { id: "storage", label: "Storage & Cache", icon: Database, color: "text-cyan-400", desc: "VirtualFS disk volume & cleaner" },
+  { id: "keyboard", label: "Keyboard & Shell", icon: Keyboard, color: "text-blue-400", desc: "Vim/Emacs mode, key repeat" },
+  { id: "language", label: "Language & Region", icon: Languages, color: "text-teal-400", desc: "24-hour clock, locale, calendar" },
+  { id: "updates", label: "Software Update", icon: DownloadCloud, color: "text-violet-400", desc: "OpenBSD release & patch updates" },
+  { id: "system", label: "System & About", icon: Laptop, color: "text-amber-400", desc: "Developer profile, hardware specs" },
+];
+
 function ToggleSwitch({
   checked,
   onChange,
@@ -149,15 +146,24 @@ function ToggleSwitch({
   onChange: (checked: boolean) => void;
   activeColor?: string;
 }) {
+  const isTailwindBgClass = Boolean(activeColor && activeColor.startsWith("bg-"));
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      style={checked ? { backgroundColor: activeColor || "var(--primary)" } : {}}
+      style={
+        checked && !isTailwindBgClass
+          ? { backgroundColor: activeColor || "var(--primary)" }
+          : undefined
+      }
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-        checked ? (activeColor ? "" : "bg-primary") : "bg-muted/80"
+        checked
+          ? isTailwindBgClass
+            ? activeColor
+            : "bg-primary"
+          : "bg-muted/80"
       }`}
     >
       <span
@@ -175,7 +181,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Real Hardware telemetry
-  const [hwInfo, setHwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
+  const [hwInfo] = useState<SystemHardwareInfo>(getRealHardwareInfo);
 
   // 1. Wi-Fi & Network State
   const [wifiEnabled, setWifiEnabled] = useState(true);
@@ -195,11 +201,12 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   const [nightLight, setNightLight] = useState(false);
   const [resolution, setResolution] = useState(hwInfo.screenResolution);
   const [refreshRate, setRefreshRate] = useState("60Hz");
-  const [displayScale, setDisplayScale] = useState("100%");
 
   // 4. Appearance State
-  const [darkMode, setDarkMode] = useState(true);
-  const [activeWallpaper, setActiveWallpaper] = useState(SYSTEM_CONFIG.wallpaper);
+  const [darkMode, setDarkMode] = useState(() =>
+    typeof document !== "undefined" ? document.documentElement.classList.contains("dark") : true
+  );
+  const [activeWallpaper, setActiveWallpaper] = useState(getSavedWallpaper);
   const [activeAccent, setActiveAccent] = useState("amber");
   const [dockMagnify, setDockMagnify] = useState(true);
 
@@ -225,7 +232,6 @@ export function SystemSettings({ windowId }: { windowId: string }) {
 
   // 8. Power State
   const [powerProfile, setPowerProfile] = useState<"performance" | "balanced" | "saver">("balanced");
-  const [sleepTimeout, setSleepTimeout] = useState(30);
 
   // 9. Storage State
   const [cacheCleared, setCacheCleared] = useState(false);
@@ -242,8 +248,46 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateCheckedTime, setUpdateCheckedTime] = useState<string | null>("Just now");
 
+  // Keep Settings state synchronized with external desktop events
   useEffect(() => {
-    setHwInfo(getRealHardwareInfo());
+    const handleThemeEvt = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isDark: boolean }>;
+      if (typeof customEvent.detail?.isDark === "boolean") {
+        setDarkMode(customEvent.detail.isDark);
+      }
+    };
+    const handleWallpaperEvt = (e: Event) => {
+      const customEvent = e as CustomEvent<{ wallpaper: string }>;
+      if (customEvent.detail?.wallpaper) {
+        setActiveWallpaper(customEvent.detail.wallpaper);
+      }
+    };
+    const handleVolEvt = (e: Event) => {
+      const customEvent = e as CustomEvent<{ volume: number; isMuted: boolean; level: number }>;
+      if (typeof customEvent.detail?.level === "number") {
+        setVolume(customEvent.detail.level);
+      }
+      if (typeof customEvent.detail?.isMuted === "boolean") {
+        setIsMuted(customEvent.detail.isMuted);
+      }
+    };
+    const handleBrightEvt = (e: Event) => {
+      const customEvent = e as CustomEvent<{ brightness: number }>;
+      if (typeof customEvent.detail?.brightness === "number") {
+        setBrightness(customEvent.detail.brightness);
+      }
+    };
+
+    window.addEventListener("theme-change", handleThemeEvt);
+    window.addEventListener("wallpaper-change", handleWallpaperEvt);
+    window.addEventListener("master-volume-change", handleVolEvt);
+    window.addEventListener("brightness-change", handleBrightEvt);
+    return () => {
+      window.removeEventListener("theme-change", handleThemeEvt);
+      window.removeEventListener("wallpaper-change", handleWallpaperEvt);
+      window.removeEventListener("master-volume-change", handleVolEvt);
+      window.removeEventListener("brightness-change", handleBrightEvt);
+    };
   }, []);
 
   const handleVolumeChange = (newVal: number) => {
@@ -279,20 +323,12 @@ export function SystemSettings({ windowId }: { windowId: string }) {
   const handleAccentSelect = (accentId: string) => {
     setActiveAccent(accentId);
     const color = ACCENT_COLORS.find((c) => c.id === accentId);
-    if (color && typeof document !== "undefined") {
-      const isDark = document.documentElement.classList.contains("dark");
-      const primaryVal = isDark ? color.primary : color.primaryLight;
-      document.documentElement.style.setProperty("--primary", primaryVal);
-      document.documentElement.style.setProperty("--accent", primaryVal);
-      document.documentElement.style.setProperty("--ring", primaryVal);
-      document.documentElement.style.setProperty("--accent-color", color.hex);
-      document.documentElement.style.setProperty("--accent-glow", `${color.hex}60`);
-      document.documentElement.style.setProperty("--sidebar-primary", primaryVal);
-      document.documentElement.style.setProperty("--sidebar-ring", primaryVal);
-
+    const saved = getSavedPywalTheme();
+    if (color && saved) {
+      applyPywalTheme({ ...saved, special: { ...saved.special, accent: color.hex, cursor: color.hex } }, darkMode);
       window.dispatchEvent(
         new CustomEvent("accent-change", {
-          detail: { accentId: color.id, primary: primaryVal, hex: color.hex },
+          detail: { accentId: color.id, primary: color.hex, hex: color.hex },
         })
       );
     }
@@ -306,35 +342,19 @@ export function SystemSettings({ windowId }: { windowId: string }) {
     }, 1200);
   };
 
-  const menuItems: Array<{ id: SettingsSection; label: string; icon: React.ElementType; color: string; desc: string }> = [
-    { id: "wifi", label: "Wi-Fi & Network", icon: Wifi, color: "text-emerald-400", desc: "Network status, IP, DNS" },
-    { id: "sound", label: "Sound & Audio", icon: Volume2, color: "text-amber-400", desc: "Volume, input mic, speakers" },
-    { id: "display", label: "Displays & Graphics", icon: Sun, color: "text-sky-400", desc: "Brightness, resolution, refresh rate" },
-    { id: "appearance", label: "Appearance & Themes", icon: Palette, color: "text-rose-400", desc: "Dark mode, wallpapers, accent color" },
-    { id: "notifications", label: "Notifications & Focus", icon: Bell, color: "text-amber-500", desc: "Do Not Disturb, app banners" },
-    { id: "privacy", label: "Privacy & Permissions", icon: FolderLock, color: "text-indigo-400", desc: "Camera, mic, filesystem access" },
-    { id: "security", label: "Security & PF Firewall", icon: Shield, color: "text-purple-400", desc: "Packet filter, sandbox, auto-lock" },
-    { id: "power", label: "Battery & Power", icon: BatteryCharging, color: "text-emerald-400", desc: "Battery health, energy modes" },
-    { id: "storage", label: "Storage & Cache", icon: Database, color: "text-cyan-400", desc: "VirtualFS disk volume & cleaner" },
-    { id: "keyboard", label: "Keyboard & Shell", icon: Keyboard, color: "text-blue-400", desc: "Vim/Emacs mode, key repeat" },
-    { id: "language", label: "Language & Region", icon: Languages, color: "text-teal-400", desc: "24-hour clock, locale, calendar" },
-    { id: "updates", label: "Software Update", icon: DownloadCloud, color: "text-violet-400", desc: "OpenBSD release & patch updates" },
-    { id: "system", label: "System & About", icon: Laptop, color: "text-amber-400", desc: "Developer profile, hardware specs" },
-  ];
-
   const filteredMenuItems = useMemo(() => {
-    if (!searchQuery.trim()) return menuItems;
+    if (!searchQuery.trim()) return MENU_ITEMS;
     const q = searchQuery.toLowerCase();
-    return menuItems.filter(
+    return MENU_ITEMS.filter(
       (m) => m.label.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)
     );
-  }, [searchQuery, menuItems]);
+  }, [searchQuery]);
 
-  const activeCategoryMeta = menuItems.find((m) => m.id === activeSection) || menuItems[0];
+  const activeCategoryMeta = MENU_ITEMS.find((m) => m.id === activeSection) || MENU_ITEMS[0];
 
   return (
     <div
-      className="flex flex-col sm:flex-row h-full w-full bg-background font-mono text-foreground text-xs select-none overflow-hidden"
+      className="@container flex flex-col sm:flex-row h-full w-full bg-background font-sans text-foreground text-xs select-none overflow-hidden"
       data-window-id={windowId}
     >
       {/* --- DESKTOP SIDEBAR (hidden on mobile when in detail view) --- */}
@@ -845,7 +865,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
               <h2 className="text-sm font-bold text-foreground">Privacy & Application Permissions</h2>
-              <p className="text-[10px] text-muted-foreground">Manage sandbox access rights for desktop applications.</p>
+              <p className="text-[10px] text-muted-foreground">Demonstration settings only. Browser and operating-system permissions are not changed here.</p>
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
@@ -875,7 +895,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                 <FolderLock className="w-4 h-4 text-primary shrink-0" />
                 <div>
                   <div className="font-semibold text-xs">VirtualFS Storage Write Access</div>
-                  <div className="text-[10px] text-muted-foreground">Enforce OpenBSD unveil() sandboxed filesystem permissions</div>
+                  <div className="text-[10px] text-muted-foreground">Demonstration setting; does not enforce operating-system permissions</div>
                 </div>
               </div>
               <ToggleSwitch checked={fsAccess} onChange={setFsAccess} />
@@ -888,7 +908,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
           <div className="space-y-4">
             <div className="border-b border-border/60 pb-2">
               <h2 className="text-sm font-bold text-foreground">Security & PF Firewall</h2>
-              <p className="text-[10px] text-muted-foreground">OpenBSD Packet Filter (PF), pledge sandbox, and login authentication.</p>
+              <p className="text-[10px] text-muted-foreground">OpenBSD-inspired demonstration controls, not a real firewall or security boundary.</p>
             </div>
 
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl flex items-center justify-between">
@@ -897,7 +917,7 @@ export function SystemSettings({ windowId }: { windowId: string }) {
                   <Shield className="w-4 h-4" />
                   <span>PF (Packet Filter) Firewall</span>
                 </div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">Active filtering on interface em0</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Simulated packet-filter status</div>
               </div>
               <ToggleSwitch checked={pfActive} onChange={setPfActive} activeColor="bg-emerald-500" />
             </div>
@@ -1180,9 +1200,9 @@ export function SystemSettings({ windowId }: { windowId: string }) {
             <div className="p-3.5 bg-card/40 border border-border/60 rounded-xl space-y-2 text-xs">
               <div className="font-bold text-xs text-foreground">Latest Release Highlights:</div>
               <ul className="space-y-1 text-[11px] text-muted-foreground list-disc pl-4">
-                <li>Interactive in-browser AI/ML Model Studio with ONNX web execution.</li>
-                <li>Right-side auto-scaled dock and responsive mobile layout.</li>
-                <li>kitty Terminal with custom mascot vector icon and real hardware telemetry.</li>
+                <li>Interactive in-browser AI/ML heuristic demonstration studio.</li>
+                <li>Bottom dock with responsive layout and optional magnification.</li>
+                <li>kitty Terminal with custom mascot vector icon and browser-reported hardware estimates.</li>
                 <li>Real-time Web API hardware prober and live GitHub API profile client.</li>
               </ul>
             </div>

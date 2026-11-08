@@ -2,11 +2,41 @@ import type { FSNode } from "@/types";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 import { buildVirtualFileSystem } from "@/lib/virtual-fs-seed";
 
+let sharedRoot: FSNode | undefined;
+let revision = 0;
+const listeners = new Set<() => void>();
+
+export function subscribeFileSystem(listener: () => void) {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
+export function getFileSystemRevision() { return revision; }
+
+function commitFileSystem(root: FSNode) {
+  if (typeof localStorage !== "undefined") localStorage.setItem("virtual_fs", JSON.stringify(root));
+  revision++;
+  for (const listener of listeners) listener();
+}
 export class VirtualFS {
   private root: FSNode;
 
   constructor() {
-    this.root = buildVirtualFileSystem();
+    if (typeof window === "undefined") {
+      this.root = buildVirtualFileSystem();
+      return;
+    }
+    if (!sharedRoot) {
+      try {
+        const saved = localStorage.getItem("virtual_fs");
+        if (saved) {
+          const restored = JSON.parse(saved, (key, value) => key === "modified" ? new Date(value) : value) as FSNode;
+          if (restored.type === "directory" && restored.path === "/" && Array.isArray(restored.children)) sharedRoot = restored;
+        }
+      } catch { /* Missing or invalid storage starts with the seed. */ }
+      sharedRoot ??= buildVirtualFileSystem();
+    }
+    this.root = sharedRoot;
   }
 
   /** Normalize a path relative to cwd into an absolute path */
@@ -71,9 +101,11 @@ export class VirtualFS {
     const node = this.resolve(abs, "/");
     if (node) {
       if (node.type !== "file") return false;
+      const previous = { content: node.content, size: node.size, modified: node.modified };
       node.content = content;
-      node.size = content.length;
+      node.size = new TextEncoder().encode(content).length;
       node.modified = new Date();
+      try { commitFileSystem(this.root); } catch (error) { Object.assign(node, previous); throw error; }
       return true;
     }
 
@@ -92,10 +124,11 @@ export class VirtualFS {
       permissions: "rw-r--r--",
       owner: "user",
       group: "user",
-      size: content.length,
-      modified: new Date("2024-10-01T00:00:00Z"),
+      size: new TextEncoder().encode(content).length,
+      modified: new Date(),
       content,
     });
+    try { commitFileSystem(this.root); } catch (error) { parent.children.pop(); throw error; }
     return true;
   }
 
@@ -119,9 +152,10 @@ export class VirtualFS {
       owner: "user",
       group: "user",
       size: 512,
-      modified: new Date("2024-10-01T00:00:00Z"),
+      modified: new Date(),
       children: [],
     });
+    try { commitFileSystem(this.root); } catch (error) { parent.children.pop(); throw error; }
     return true;
   }
 
@@ -145,6 +179,7 @@ export class VirtualFS {
     }
 
     parent.children.splice(idx, 1);
+    try { commitFileSystem(this.root); } catch (error) { parent.children.splice(idx, 0, target); throw error; }
     return true;
   }
 

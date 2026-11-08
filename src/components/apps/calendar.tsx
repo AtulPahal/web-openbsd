@@ -10,8 +10,6 @@ import {
   Sparkles,
   Trash2,
   Tag,
-  CheckCircle2,
-  Layers,
 } from "lucide-react";
 import {
   type CalendarEvent,
@@ -29,11 +27,20 @@ function formatDateStr(d: Date): string {
 export function CalendarApp({ windowId }: { windowId: string }) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [events, setEvents] = useState<CalendarEvent[]>(INITIAL_CALENDAR_EVENTS);
+  const [events, setEvents] = useState<CalendarEvent[]>(() => {
+    try {
+      const saved = localStorage.getItem("calendar_events");
+      if (saved) {
+        const value = JSON.parse(saved);
+        if (Array.isArray(value) && value.every((event) => typeof event.id === "string" && typeof event.title === "string" && /^\d{4}-\d{2}-\d{2}$/.test(event.dateStr) && typeof event.time === "string" && ["Work", "Personal", "Project", "Milestone"].includes(event.category))) return value;
+      }
+    } catch { /* Invalid saved events use the initial data. */ }
+    return INITIAL_CALENDAR_EVENTS;
+  });
 
   // New Event Form State
   const [newTitle, setNewTitle] = useState("");
-  const [newTime, setNewTime] = useState("12:00 PM");
+  const [newTime, setNewTime] = useState("12:00");
   const [newCategory, setNewCategory] = useState<CalendarEvent["category"]>("Work");
 
   const year = currentDate.getFullYear();
@@ -105,7 +112,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
   }, [selectedDate]);
 
   const selectedEvents = useMemo(() => {
-    return events.filter((e) => e.dateStr === selectedDateStr);
+    return events.filter((e) => e.dateStr === selectedDateStr).sort((a, b) => new Date(`${a.dateStr} ${a.time}`).getTime() - new Date(`${b.dateStr} ${b.time}`).getTime());
   }, [events, selectedDateStr]);
 
   const handlePrevMonth = () => {
@@ -124,22 +131,26 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
   const handleAddEvent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim() || !/^([01]\d|2[0-3]):[0-5]\d$/.test(newTime)) return;
 
     const newEvt: CalendarEvent = {
       id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       dateStr: selectedDateStr,
       title: newTitle.trim(),
-      time: newTime,
+      time: new Date(`${selectedDateStr}T${newTime}`).toLocaleTimeString("en-US", { hour12: true, hour: "numeric", minute: "2-digit" }),
       category: newCategory,
     };
 
-    setEvents((prev) => [...prev, newEvt]);
+    const next = [...events, newEvt];
+    try { localStorage.setItem("calendar_events", JSON.stringify(next)); } catch { window.alert("Could not save events: browser storage is unavailable."); return; }
+    setEvents(next);
     setNewTitle("");
   };
 
   const handleDeleteEvent = (id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+    const next = events.filter((event) => event.id !== id);
+    try { localStorage.setItem("calendar_events", JSON.stringify(next)); } catch { window.alert("Could not save events: browser storage is unavailable."); return; }
+    setEvents(next);
   };
 
   const isToday = useCallback(
@@ -177,7 +188,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="flex h-full w-full flex-col bg-background font-mono text-foreground text-xs select-none overflow-hidden"
+      className="@container flex h-full w-full flex-col bg-background font-sans text-foreground text-xs select-none overflow-hidden"
       data-window-id={windowId}
     >
       {/* App Header Bar */}
@@ -219,9 +230,9 @@ export function CalendarApp({ windowId }: { windowId: string }) {
       </div>
 
       {/* Main Responsive Grid */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col @min-[620px]:flex-row overflow-y-auto @min-[620px]:overflow-hidden">
         {/* Left Column: Month Grid */}
-        <div className="w-full md:w-7/12 border-b md:border-b-0 md:border-r border-border/60 p-2.5 sm:p-3 flex flex-col gap-2 shrink-0 md:shrink md:overflow-hidden bg-card/10">
+        <div className="w-full @min-[620px]:w-7/12 border-b @min-[620px]:border-b-0 @min-[620px]:border-r border-border/60 p-3 flex flex-col gap-2 shrink-0 @min-[620px]:shrink @min-[620px]:overflow-hidden bg-card/10">
           <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted-foreground tracking-wider uppercase pb-1.5 border-b border-border/40 shrink-0">
             {daysOfWeek.map((d) => (
               <div key={d}>{d}</div>
@@ -302,7 +313,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
         </div>
 
         {/* Right Column: Schedule & Add Event Panel */}
-        <div className="w-full md:w-5/12 p-3 flex flex-col gap-3 overflow-y-auto bg-card/30 scrollbar-thin">
+        <div className="w-full @min-[620px]:w-5/12 p-3 flex flex-col gap-3 overflow-y-auto bg-card/30 scrollbar-thin">
           {/* Selected Date Banner */}
           <div className="p-3 bg-card/60 border border-border/60 rounded-lg flex items-center justify-between shadow-sm">
             <div>
@@ -348,8 +359,8 @@ export function CalendarApp({ windowId }: { windowId: string }) {
                       <button
                         type="button"
                         onClick={() => handleDeleteEvent(evt.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-400 rounded-lg hover:bg-red-500/15 transition-all cursor-pointer"
-                        title="Delete event"
+                        className="p-1 text-muted-foreground hover:text-destructive rounded-lg hover:bg-destructive/15 transition-all cursor-pointer"
+                        aria-label={`Delete ${evt.title}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -384,6 +395,7 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
             <input
               type="text"
+              aria-label="Event title"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Event title (e.g. AI Model Benchmark)..."
@@ -392,13 +404,14 @@ export function CalendarApp({ windowId }: { windowId: string }) {
 
             <div className="flex gap-2">
               <input
-                type="text"
+                type="time"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
-                placeholder="Time (12:00 PM)"
+                aria-label="Event time"
                 className="w-1/2 px-3 py-1.5 bg-background/60 border border-border/60 rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary transition-colors"
               />
               <select
+                aria-label="Event category"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as CalendarEvent["category"])}
                 className="w-1/2 px-2.5 py-1.5 bg-background/60 border border-border/60 rounded-xl text-xs text-foreground outline-none focus:border-primary transition-colors"

@@ -1,144 +1,81 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Power, Lock, RotateCw, LogOut } from "lucide-react";
-import type { RiceTheme } from "@/lib/rice-theme-config";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Power, Lock, RotateCw, LogOut, Moon } from "lucide-react";
 
 interface PowerMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  theme: RiceTheme;
   onLock: () => void;
   onRestart: () => void;
   onShutdown: () => void;
   onSleep: () => void;
 }
 
-export function PowerMenu({
-  isOpen,
-  onClose,
-  theme,
-  onLock,
-  onRestart,
-  onShutdown,
-  onSleep,
-}: PowerMenuProps) {
+export function PowerMenu({ isOpen, onClose, onLock, onRestart, onShutdown, onSleep }: PowerMenuProps) {
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; }, [onClose]);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isOpen && e.key === "Escape") onClose();
+    if (!isOpen) return;
+    const trigger = document.querySelector<HTMLButtonElement>("[data-power-trigger]");
+    const place = () => {
+      const rect = trigger?.closest("header")?.getBoundingClientRect();
+      if (rect) setPosition({ left: Math.max(8, rect.left), top: rect.bottom + 8 });
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (isOpen && menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        const trigger = (e.target as HTMLElement).closest("[data-power-trigger]");
-        if (!trigger) onClose();
+    place();
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !menuRef.current?.contains(event.target) && !trigger?.contains(event.target)) closeRef.current();
+    };
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        trigger?.focus();
       }
+      const items = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>("[role=menuitem]") ?? []);
+      const index = items.indexOf(document.activeElement as HTMLButtonElement);
+      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+        items[next]?.focus();
+      }
+      if (event.key === "Tab") closeRef.current();
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", keyboard);
+    window.addEventListener("resize", place);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", keyboard);
+      window.removeEventListener("resize", place);
+    };
+  }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen && position) menuRef.current?.querySelector<HTMLButtonElement>("[role=menuitem]")?.focus();
+  }, [isOpen, position]);
 
-  return (
-    <>
-      {/* Invisible click-outside backdrop dismisser */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-[75] select-none"
-      />
+  if (!isOpen || !position) return null;
+  const actions = [
+    { label: "Shutdown", icon: Power, action: onShutdown },
+    { label: "Lock", icon: Lock, action: onLock },
+    { label: "Restart", icon: RotateCw, action: onRestart },
+    { label: "Sleep", icon: Moon, action: onSleep },
+    { label: "Logout", icon: LogOut, action: onLock },
+  ];
 
-      {/* Symmetrical Floating Liquid Glass Power Menu */}
-      <div
-        ref={menuRef}
-        role="menu"
-        aria-label="Session and power options"
-        onClick={(e) => e.stopPropagation()}
-        className="absolute top-11 sm:top-12 left-0 z-[80] w-56 sm:w-60 p-2.5 rounded-2xl dock-liquid-glass flex flex-col space-y-1 text-white font-sans select-none animate-in slide-in-from-top-2 fade-in-0 duration-150 shadow-2xl"
-      >
-        {/* 1. Shutdown (Liquid Glass item; turns vibrant rose/pink ONLY on hover) */}
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onClose();
-            onShutdown();
-          }}
-          className="w-full p-2.5 rounded-xl bg-white/5 hover:bg-[#f472b6] text-white/95 hover:text-[#0c121d] font-sans font-bold text-xs sm:text-sm flex items-center gap-3 transition-all duration-200 active:scale-95 cursor-pointer border border-white/5 hover:border-transparent group shadow-sm"
-        >
-          <Power className="w-4 h-4 text-rose-400 group-hover:text-[#0c121d] stroke-[2.5] transition-colors shrink-0" />
-          <span className="tracking-tight font-sans font-bold">Shutdown</span>
+  return createPortal(
+    <div ref={menuRef} id="power-menu" role="menu" aria-label="Session and power options" style={position} className="power-panel dock-liquid-glass fixed z-[80] flex w-60 max-w-[calc(100vw-1rem)] flex-col gap-1 rounded-2xl font-sans text-sm">
+      {actions.map(({ label, icon: Icon, action }, index) => (
+        <button key={label} type="button" role="menuitem" onClick={() => { onClose(); action(); }} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:bg-primary focus-visible:text-primary-foreground ${index > 1 ? "border-t border-border" : ""}`}>
+          <Icon aria-hidden="true" className="size-4 shrink-0" />
+          <span className={index === 0 ? "font-semibold" : "font-medium"}>{label}</span>
         </button>
-
-        {/* 2. Lock */}
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onClose();
-            onLock();
-          }}
-          className="w-full px-3 py-2 rounded-xl hover:bg-white/10 flex items-center gap-3 text-xs text-white/85 hover:text-white font-sans font-medium transition-all cursor-pointer text-left"
-        >
-          <Lock className="w-4 h-4 text-white/70 shrink-0" />
-          <span className="font-sans font-medium text-xs">Lock</span>
-        </button>
-        <div className="h-px bg-white/10 my-0.5 mx-2" />
-
-        {/* 3. Restart */}
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onClose();
-            onRestart();
-          }}
-          className="w-full px-3 py-2 rounded-xl hover:bg-white/10 flex items-center gap-3 text-xs text-white/85 hover:text-white font-sans font-medium transition-all cursor-pointer text-left"
-        >
-          <RotateCw className="w-4 h-4 text-white/70 shrink-0" />
-          <span className="font-sans font-medium text-xs">Restart</span>
-        </button>
-        <div className="h-px bg-white/10 my-0.5 mx-2" />
-
-        {/* 4. Sleep */}
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onClose();
-            onSleep();
-          }}
-          className="w-full px-3 py-2 rounded-xl hover:bg-white/10 flex items-center gap-3 text-xs text-white/85 hover:text-white font-sans font-medium transition-all cursor-pointer text-left"
-        >
-          <div className="w-4 text-center font-mono font-bold leading-none select-none text-white/70 shrink-0">
-            <span className="text-[11px]">z</span>
-            <span className="text-[9px]">z</span>
-            <span className="text-[8px]">z</span>
-          </div>
-          <span className="font-sans font-medium text-xs">Sleep</span>
-        </button>
-        <div className="h-px bg-white/10 my-0.5 mx-2" />
-
-        {/* 5. Logout */}
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onClose();
-            onLock();
-          }}
-          className="w-full px-3 py-2 rounded-xl hover:bg-white/10 flex items-center gap-3 text-xs text-white/85 hover:text-white font-sans font-medium transition-all cursor-pointer text-left"
-        >
-          <LogOut className="w-4 h-4 text-white/70 shrink-0" />
-          <span className="font-sans font-medium text-xs">Logout</span>
-        </button>
-      </div>
-    </>
+      ))}
+    </div>, document.body
   );
 }

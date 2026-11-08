@@ -17,9 +17,7 @@ import {
   Mouse,
   Speaker,
   Settings,
-  Shield,
   Radio,
-  ExternalLink,
 } from "lucide-react";
 import { SYSTEM_CONFIG } from "@/lib/system-config";
 
@@ -179,7 +177,7 @@ export function SystemTray({
     );
   };
 
-  const handleOpenSettings = (appSection?: string) => {
+  const handleOpenSettings = (_appSection?: string) => {
     setActivePopover(null);
     if (typeof window !== "undefined") {
       window.dispatchEvent(

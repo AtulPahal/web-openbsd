@@ -35,6 +35,10 @@ export interface WindowState {
   isFocused: boolean;
   workspace?: number;
   appState?: AppState;
+  prevBounds?: {
+    position: Position;
+    size: Size;
+  };
 }
 
 export interface DesktopNotification {

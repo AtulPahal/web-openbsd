@@ -1,425 +1,115 @@
 "use client";
 
-/**
- * Pywal Color Extraction & Dynamic Theming Engine
- * Based on Dylan Araps' pywal (https://github.com/dylanaraps/pywal)
- *
- * Extracts 16 terminal colors, background, foreground, and primary/secondary accents
- * directly from wallpapers and applies them system-wide via CSS custom properties.
- */
+import { SYSTEM_CONFIG } from "@/lib/system-config";
 
+/** Pywal-compatible palette data. Browser extraction is not the Python pywal CLI. */
 export interface PywalPalette {
   wallpaper: string;
-  special: {
-    background: string;
-    foreground: string;
-    cursor: string;
-    accent: string;
-    accentSecondary: string;
-  };
-  colors: {
-    color0: string; // bg
-    color1: string; // red
-    color2: string; // green
-    color3: string; // yellow
-    color4: string; // blue
-    color5: string; // magenta
-    color6: string; // cyan
-    color7: string; // white / fg
-    color8: string; // bright black
-    color9: string; // bright red
-    color10: string; // bright green
-    color11: string; // bright yellow
-    color12: string; // bright blue
-    color13: string; // bright magenta
-    color14: string; // bright cyan
-    color15: string; // bright white
-  };
+  special: { background: string; foreground: string; cursor: string; accent: string; accentSecondary: string };
+  colors: Record<`color${number}`, string>;
 }
 
-/** Pre-computed pywal palettes for the system wallpapers for instant zero-latency startup */
-export const DEFAULT_PYWAL_PALETTES: Record<string, PywalPalette> = {
-  "golden-rose-yor.png": {
-    wallpaper: "golden-rose-yor.png",
-    special: {
-      background: "#0c0d14",
-      foreground: "#fff6eb",
-      cursor: "#f59e0b",
-      accent: "#f59e0b", // Warm Golden Rose
-      accentSecondary: "#e11d48", // Crimson Rose
-    },
-    colors: {
-      color0: "#0c0d14",
-      color1: "#e11d48",
-      color2: "#10b981",
-      color3: "#f59e0b",
-      color4: "#38bdf8",
-      color5: "#ec4899",
-      color6: "#06b6d4",
-      color7: "#f1f5f9",
-      color8: "#262e3d",
-      color9: "#fb7185",
-      color10: "#34d399",
-      color11: "#fbbf24",
-      color12: "#60a5fa",
-      color13: "#f472b6",
-      color14: "#22d3ee",
-      color15: "#ffffff",
-    },
-  },
-  "frieren-azure.jpg": {
-    wallpaper: "frieren-azure.jpg",
-    special: {
-      background: "#070b15",
-      foreground: "#f0f9ff",
-      cursor: "#38bdf8",
-      accent: "#38bdf8", // Sky Azure
-      accentSecondary: "#f59e0b",
-    },
-    colors: {
-      color0: "#070b15",
-      color1: "#f43f5e",
-      color2: "#10b981",
-      color3: "#fbbf24",
-      color4: "#38bdf8",
-      color5: "#a855f7",
-      color6: "#06b6d4",
-      color7: "#e2e8f0",
-      color8: "#1e293b",
-      color9: "#fb7185",
-      color10: "#34d399",
-      color11: "#fde047",
-      color12: "#60a5fa",
-      color13: "#c084fc",
-      color14: "#38bdf8",
-      color15: "#ffffff",
-    },
-  },
-  "heterochromia-dolls.jpg": {
-    wallpaper: "heterochromia-dolls.jpg",
-    special: {
-      background: "#0d0e14",
-      foreground: "#f8fafc",
-      cursor: "#ef4444",
-      accent: "#ef4444", // Crimson Ruby
-      accentSecondary: "#3b82f6", // Sapphire
-    },
-    colors: {
-      color0: "#0d0e14",
-      color1: "#ef4444",
-      color2: "#10b981",
-      color3: "#f59e0b",
-      color4: "#3b82f6",
-      color5: "#d946ef",
-      color6: "#06b6d4",
-      color7: "#e2e8f0",
-      color8: "#272733",
-      color9: "#f87171",
-      color10: "#34d399",
-      color11: "#fbbf24",
-      color12: "#60a5fa",
-      color13: "#e879f9",
-      color14: "#22d3ee",
-      color15: "#ffffff",
-    },
-  },
-  "cyber-game-over.jpg": {
-    wallpaper: "cyber-game-over.jpg",
-    special: {
-      background: "#07090e",
-      foreground: "#f0fdf4",
-      cursor: "#22c55e",
-      accent: "#38bdf8", // Cyber Neon Cyan
-      accentSecondary: "#22c55e",
-    },
-    colors: {
-      color0: "#07090e",
-      color1: "#f43f5e",
-      color2: "#22c55e",
-      color3: "#eab308",
-      color4: "#38bdf8",
-      color5: "#a855f7",
-      color6: "#14b8a6",
-      color7: "#e2e8f0",
-      color8: "#1e293b",
-      color9: "#fb7185",
-      color10: "#4ade80",
-      color11: "#facc15",
-      color12: "#60a5fa",
-      color13: "#c084fc",
-      color14: "#2dd4bf",
-      color15: "#ffffff",
-    },
-  },
-  "dual-gaze.png": {
-    wallpaper: "dual-gaze.png",
-    special: {
-      background: "#0a0e17",
-      foreground: "#f0f9ff",
-      cursor: "#06b6d4",
-      accent: "#06b6d4", // Electric Cyan
-      accentSecondary: "#ec4899",
-    },
-    colors: {
-      color0: "#0a0e17",
-      color1: "#ec4899",
-      color2: "#10b981",
-      color3: "#f59e0b",
-      color4: "#06b6d4",
-      color5: "#8b5cf6",
-      color6: "#38bdf8",
-      color7: "#f1f5f9",
-      color8: "#1e293b",
-      color9: "#f472b6",
-      color10: "#34d399",
-      color11: "#fbbf24",
-      color12: "#22d3ee",
-      color13: "#a78bfa",
-      color14: "#67e8f9",
-      color15: "#ffffff",
-    },
-  },
-  "office-roxy.png": {
-    wallpaper: "office-roxy.png",
-    special: {
-      background: "#080d1a",
-      foreground: "#f8fafc",
-      cursor: "#2563eb",
-      accent: "#3b82f6", // Royal Cobalt
-      accentSecondary: "#0ea5e9",
-    },
-    colors: {
-      color0: "#080d1a",
-      color1: "#f43f5e",
-      color2: "#10b981",
-      color3: "#fbbf24",
-      color4: "#3b82f6",
-      color5: "#8b5cf6",
-      color6: "#0ea5e9",
-      color7: "#f1f5f9",
-      color8: "#1e293b",
-      color9: "#fb7185",
-      color10: "#34d399",
-      color11: "#fde047",
-      color12: "#60a5fa",
-      color13: "#a78bfa",
-      color14: "#38bdf8",
-      color15: "#ffffff",
-    },
-  },
-  "white-sanctuary.png": {
-    wallpaper: "white-sanctuary.png",
-    special: {
-      background: "#0b0c16",
-      foreground: "#faf5ff",
-      cursor: "#a855f7",
-      accent: "#a855f7", // Violet Sanctuary
-      accentSecondary: "#ec4899",
-    },
-    colors: {
-      color0: "#0b0c16",
-      color1: "#ec4899",
-      color2: "#10b981",
-      color3: "#f59e0b",
-      color4: "#a855f7",
-      color5: "#d946ef",
-      color6: "#38bdf8",
-      color7: "#f1f5f9",
-      color8: "#23243a",
-      color9: "#f472b6",
-      color10: "#34d399",
-      color11: "#fbbf24",
-      color12: "#c084fc",
-      color13: "#e879f9",
-      color14: "#60a5fa",
-      color15: "#ffffff",
-    },
-  },
-  "night-train.png": {
-    wallpaper: "night-train.png",
-    special: {
-      background: "#080f14",
-      foreground: "#f0fdf4",
-      cursor: "#10b981",
-      accent: "#10b981", // Emerald Neon
-      accentSecondary: "#38bdf8",
-    },
-    colors: {
-      color0: "#080f14",
-      color1: "#f43f5e",
-      color2: "#10b981",
-      color3: "#facc15",
-      color4: "#38bdf8",
-      color5: "#8b5cf6",
-      color6: "#14b8a6",
-      color7: "#e2e8f0",
-      color8: "#1a2c33",
-      color9: "#fb7185",
-      color10: "#34d399",
-      color11: "#fde047",
-      color12: "#60a5fa",
-      color13: "#a78bfa",
-      color14: "#2dd4bf",
-      color15: "#ffffff",
-    },
-  },
-};
+const paletteCache = new Map<string, Promise<PywalPalette>>();
 
-export const DEFAULT_PYWAL = DEFAULT_PYWAL_PALETTES["golden-rose-yor.png"];
+export function getSavedWallpaper(): string {
+  try { return localStorage.getItem("desktop_wallpaper") || SYSTEM_CONFIG.wallpaper; } catch { return SYSTEM_CONFIG.wallpaper; }
+}
 
-/**
- * Apply Pywal Palette to DOM root CSS variables
- */
-export function applyPywalTheme(palette: PywalPalette) {
+export function getSavedDarkMode(): boolean {
+  try { return localStorage.getItem("desktop_dark_mode") !== "false"; } catch { return true; }
+}
+
+export function getSavedPywalTheme(): PywalPalette | null {
+  try {
+    const value = JSON.parse(localStorage.getItem("pywal_palette") || "null") as PywalPalette | null;
+    if (!value || typeof value.wallpaper !== "string" || !value.special || !value.colors) return null;
+    const colors = [value.special.background, value.special.foreground, value.special.cursor, value.special.accent, value.special.accentSecondary, ...Array.from({ length: 16 }, (_, index) => value.colors[`color${index}`])];
+    return colors.every((color) => typeof color === "string" && /^#[0-9a-f]{6}$/i.test(color)) ? value : null;
+  } catch { return null; }
+}
+
+export function applyPywalTheme(palette: PywalPalette, dark = getSavedDarkMode()) {
   if (typeof document === "undefined") return;
-
   const root = document.documentElement;
-  const { special, colors } = palette;
-
-  // 1. Core theme accents
-  root.style.setProperty("--primary", special.accent);
-  root.style.setProperty("--ring", special.accent);
-  root.style.setProperty("--accent", special.accent);
-  root.style.setProperty("--accent-color", special.accent);
-  root.style.setProperty("--accent-glow", `${special.accent}4d`);
-  root.style.setProperty("--accent-secondary", special.accentSecondary);
-
-  // 2. Background and text
-  root.style.setProperty("--background", special.background);
-  root.style.setProperty("--foreground", special.foreground);
-  root.style.setProperty("--card-border", `${special.accent}33`);
-
-  // 3. Pywal 16 Terminal Colors
-  Object.entries(colors).forEach(([slot, val]) => {
-    root.style.setProperty(`--${slot}`, val);
-  });
-
-  // Store in localStorage for instant retrieval across pages
+  root.classList.toggle("dark", dark);
+  const background = dark ? palette.special.background : palette.special.foreground;
+  const foreground = dark ? palette.special.foreground : palette.special.background;
+  const accent = palette.special.accent;
+  const rgb = accent.match(/\w\w/g)!.map((component) => parseInt(component, 16) / 255).map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+  const luminance = rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  const onAccent = luminance > 0.179 ? "#000000" : "#ffffff";
+  const variables: Record<string, string> = {
+    background, foreground, primary: accent, "primary-foreground": onAccent,
+    accent, "accent-foreground": onAccent, ring: accent, "accent-color": accent,
+    "accent-glow": `${accent}4d`, "accent-secondary": palette.special.accentSecondary,
+    card: `${background}e6`, "card-foreground": foreground,
+    popover: `${background}eb`, "popover-foreground": foreground,
+    muted: `${foreground}14`, "muted-foreground": `color-mix(in srgb, ${foreground} 75%, ${background})`,
+    secondary: `${foreground}1a`, "secondary-foreground": foreground,
+    border: `${foreground}30`, input: `${foreground}30`, "card-border": `${accent}55`,
+    sidebar: `${background}eb`, "sidebar-foreground": foreground,
+    "sidebar-primary": accent, "sidebar-primary-foreground": onAccent,
+    "sidebar-ring": accent, "sidebar-border": `${foreground}30`,
+    "sidebar-accent": `${accent}26`, "sidebar-accent-foreground": foreground,
+    "pywal-bg": palette.special.background, "pywal-fg": palette.special.foreground,
+  };
+  for (let index = 1; index <= 5; index++) variables[`chart-${index}`] = palette.colors[`color${index}`];
+  for (const [name, color] of Object.entries(variables)) root.style.setProperty(`--${name}`, color);
+  for (const [name, color] of Object.entries(palette.colors)) root.style.setProperty(`--${name}`, color);
   try {
     localStorage.setItem("pywal_palette", JSON.stringify(palette));
-  } catch (e) {}
-
-  // Dispatch event so all listening components update immediately
-  window.dispatchEvent(
-    new CustomEvent("pywal-palette-change", { detail: { palette } })
-  );
+    localStorage.setItem("desktop_wallpaper", palette.wallpaper);
+    localStorage.setItem("desktop_dark_mode", String(dark));
+  } catch { /* Current session still works when storage is unavailable. */ }
+  window.dispatchEvent(new CustomEvent("pywal-palette-change", { detail: { palette, isDark: dark } }));
 }
 
-/**
- * Retrieve saved Pywal Palette from localStorage if available
- */
-export function getSavedPywalTheme(): PywalPalette | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("pywal_palette");
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  return null;
-}
-
-/**
- * Extract Pywal Palette dynamically from any wallpaper image using HTML5 Canvas
- */
 export async function extractPywalFromImage(imageUrl: string): Promise<PywalPalette> {
-  // Check if we have pre-computed palette
-  const filename = imageUrl.split("/").pop() || "";
-  if (DEFAULT_PYWAL_PALETTES[filename]) {
-    return DEFAULT_PYWAL_PALETTES[filename];
-  }
-
-  const { promise, resolve } = Promise.withResolvers<PywalPalette>();
-
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = () => {
+  const existing = paletteCache.get(imageUrl);
+  if (existing) return existing;
+  const { promise, resolve, reject } = Promise.withResolvers<PywalPalette>();
+  paletteCache.set(imageUrl, promise);
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.onload = () => {
     try {
       const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        resolve(DEFAULT_PYWAL);
-        return;
+      canvas.width = 96;
+      canvas.height = 96;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) throw new Error("Wallpaper color extraction is unavailable");
+      context.drawImage(image, 0, 0, 96, 96);
+      const pixels = context.getImageData(0, 0, 96, 96).data;
+      const counts = new Map<number, number>();
+      for (let index = 0; index < pixels.length; index += 4) {
+        if (pixels[index + 3] < 128) continue;
+        const key = (pixels[index] >> 4) * 256 + (pixels[index + 1] >> 4) * 16 + (pixels[index + 2] >> 4);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
       }
-
-      const size = 64;
-      canvas.width = size;
-      canvas.height = size;
-      ctx.drawImage(img, 0, 0, size, size);
-
-      const imgData = ctx.getImageData(0, 0, size, size).data;
-      const colorCounts: Record<string, number> = {};
-
-      // Sample pixels with quantization
-      for (let i = 0; i < imgData.length; i += 16) {
-        const r = Math.round(imgData[i] / 16) * 16;
-        const g = Math.round(imgData[i + 1] / 16) * 16;
-        const b = Math.round(imgData[i + 2] / 16) * 16;
-        const key = `${r},${g},${b}`;
-        colorCounts[key] = (colorCounts[key] || 0) + 1;
+      const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 64).map(([key, count]) => {
+        const rgb = [(key >> 8) * 16 + 8, ((key >> 4) & 15) * 16 + 8, (key & 15) * 16 + 8];
+        const max = Math.max(...rgb); const min = Math.min(...rgb);
+        return { rgb, count, light: (max + min) / 510, saturation: (max - min) / Math.max(1, max) };
+      });
+      if (!ranked.length) throw new Error("Wallpaper contains no visible pixels");
+      const darkest = [...ranked].sort((a, b) => a.light - b.light)[0].rgb;
+      const lightest = [...ranked].sort((a, b) => b.light - a.light)[0].rgb;
+      const accents = ranked.filter((color) => color.light > 0.32 && color.light < 0.85).sort((a, b) => (b.saturation * 2 + Math.log(b.count + 1) / 10) - (a.saturation * 2 + Math.log(a.count + 1) / 10));
+      const toHex = (rgb: number[]) => `#${rgb.map((channel) => Math.round(Math.min(255, Math.max(0, channel))).toString(16).padStart(2, "0")).join("")}`;
+      const background = toHex(darkest.map((channel) => channel * 0.35));
+      const foreground = toHex(lightest.map((channel) => channel + (255 - channel) * 0.75));
+      const accent = toHex((accents[0] ?? ranked[0]).rgb);
+      const secondary = toHex((accents.find((color) => color.rgb.some((channel, index) => Math.abs(channel - (accents[0] ?? ranked[0]).rgb[index]) > 64)) ?? accents[1] ?? ranked[0]).rgb);
+      const colors: PywalPalette["colors"] = { color0: background, color7: foreground, color8: toHex(darkest.map((channel) => channel * 0.75)), color15: foreground };
+      for (let index = 1; index <= 6; index++) {
+        const rgb = (accents[(index - 1) % Math.max(1, accents.length)] ?? ranked[(index - 1) % ranked.length]).rgb;
+        colors[`color${index}`] = toHex(rgb);
+        colors[`color${index + 8}`] = toHex(rgb.map((channel) => channel + (255 - channel) * 0.25));
       }
-
-      const sortedColors = Object.entries(colorCounts)
-        .sort((a, b) => b[1] - a[1])
-        .map(([k]) => {
-          const [r, g, b] = k.split(",").map(Number);
-          return [r, g, b];
-        });
-
-      // Pick dominant accent with good saturation
-      let bestAccent = [245, 158, 11];
-      let maxSat = 0;
-      for (const [r, g, b] of sortedColors.slice(0, 20)) {
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const sat = max === 0 ? 0 : (max - min) / max;
-        if (sat > maxSat && max > 60 && min < 220) {
-          maxSat = sat;
-          bestAccent = [r, g, b];
-        }
-      }
-
-      const toHex = (c: number[]) =>
-        `#${c.map((x) => Math.min(255, Math.max(0, x)).toString(16).padStart(2, "0")).join("")}`;
-
-      const accentHex = toHex(bestAccent);
-      const bgHex = "#0a0e17";
-
-      const generated: PywalPalette = {
-        wallpaper: filename,
-        special: {
-          background: bgHex,
-          foreground: "#f8fafc",
-          cursor: accentHex,
-          accent: accentHex,
-          accentSecondary: "#38bdf8",
-        },
-        colors: {
-          color0: bgHex,
-          color1: "#ef4444",
-          color2: "#10b981",
-          color3: "#f59e0b",
-          color4: accentHex,
-          color5: "#ec4899",
-          color6: "#06b6d4",
-          color7: "#e2e8f0",
-          color8: "#1e293b",
-          color9: "#f87171",
-          color10: "#34d399",
-          color11: "#fbbf24",
-          color12: accentHex,
-          color13: "#f472b6",
-          color14: "#22d3ee",
-          color15: "#ffffff",
-        },
-      };
-
-      resolve(generated);
-    } catch (e) {
-      resolve(DEFAULT_PYWAL);
-    }
+      resolve({ wallpaper: imageUrl, special: { background, foreground, cursor: accent, accent, accentSecondary: secondary }, colors });
+    } catch (error) { paletteCache.delete(imageUrl); reject(error); }
   };
-
-  img.onerror = () => resolve(DEFAULT_PYWAL);
-  img.src = imageUrl;
-
+  image.onerror = () => { paletteCache.delete(imageUrl); reject(new Error("Wallpaper could not be loaded for color extraction")); };
+  image.src = imageUrl;
   return promise;
 }

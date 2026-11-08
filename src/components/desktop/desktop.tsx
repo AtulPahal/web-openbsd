@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useWindowManager } from "@/hooks/use-window-manager";
 import { WindowFrame } from "@/components/window/window-frame";
 import { Dock } from "@/components/desktop/dock";
@@ -30,10 +30,11 @@ import {
 } from "@/components/ui/context-menu";
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { APP_ICON_MAP } from "@/lib/app-icons";
-import { SYSTEM_CONFIG } from "@/lib/system-config";
-import { DEFAULT_RICE_THEME, RICE_THEMES, type RiceTheme } from "@/lib/rice-theme-config";
-import { extractPywalFromImage, applyPywalTheme } from "@/lib/pywal";
-import { Sparkles, ImageIcon, Eye, Music } from "lucide-react";
+import { DEFAULT_RICE_THEME, RICE_THEMES } from "@/lib/rice-theme-config";
+import type { RiceTheme } from "@/lib/rice-theme-config";
+import { extractPywalFromImage, applyPywalTheme, getSavedWallpaper, getSavedDarkMode, getSavedPywalTheme } from "@/lib/pywal";
+import { ImageIcon, Eye } from "lucide-react";
+
 interface Toast {
   id: string;
   message: string;
@@ -45,6 +46,7 @@ interface DesktopProps {
 }
 
 export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
+  const canvasRef = useRef<HTMLElement>(null);
   const {
     windows,
     openWindow,
@@ -54,124 +56,117 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
     maximizeWindow,
     moveWindow,
     resizeWindow,
-  } = useWindowManager();
+  } = useWindowManager(canvasRef);
 
   const [activeWorkspace, setActiveWorkspace] = useState(1);
   const [brightness, setBrightness] = useState(100);
-  const [riceTheme, setRiceTheme] = useState<RiceTheme>(DEFAULT_RICE_THEME);
-  const [wallpaper, setWallpaper] = useState<string>(DEFAULT_RICE_THEME.wallpaper);
-  const [isDarkMode, setIsDarkMode] = useState(DEFAULT_RICE_THEME.mode === "dark");
+  const [riceTheme, setRiceTheme] = useState<RiceTheme>(() => Object.values(RICE_THEMES).find((theme) => theme.wallpaper === getSavedWallpaper()) ?? DEFAULT_RICE_THEME);
+  const [wallpaper, setWallpaper] = useState(getSavedWallpaper);
+  const [isDarkMode, setIsDarkMode] = useState(getSavedDarkMode);
   const [dockMagnification, setDockMagnification] = useState(true);
   const [masterVolume, setMasterVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
   const [isDndOn, setIsDndOn] = useState(false);
-  const [isMediaPlaying, setIsMediaPlaying] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Aesthetic Rice Overlays
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
-  const [isMediaOverlayOpen, setIsMediaOverlayOpen] = useState(false);
   const [isWallpaperCarouselOpen, setIsWallpaperCarouselOpen] = useState(false);
   const [showDesktopHud, setShowDesktopHud] = useState(true);
 
-  const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([
-    {
-      id: "init-1",
-      title: "Screenshot captured",
-      message: "You can paste the image from the clipboard.",
-      timestamp: "10:52",
-    },
-    {
-      id: "init-2",
-      title: "Home Manager",
-      message: "System environment and rice themes synchronized.",
-      timestamp: "10:45",
-    },
-  ]);
+  const [notificationHistory, setNotificationHistory] = useState<DesktopNotification[]>([]);
   const nextIdRef = useRef(0);
+  const themeRequest = useRef(0);
 
-  const addNotification = (title: string, message: string, appId?: AppId, duration = 2500) => {
-    const id = `notif-${nextIdRef.current++}`;
-    const timestamp = new Date().toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const addNotification = useCallback(
+    (title: string, message: string, appId?: AppId, duration = 2500) => {
+      const id = `notif-${nextIdRef.current++}`;
+      const timestamp = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
-    const item: DesktopNotification = {
-      id,
-      title,
-      message,
-      timestamp,
-      appId,
-    };
+      const item: DesktopNotification = {
+        id,
+        title,
+        message,
+        timestamp,
+        appId,
+      };
 
-    setNotificationHistory((prev) => [item, ...prev]);
+      setNotificationHistory((prev) => [item, ...prev]);
 
-    if (!isDndOn) {
-      const toast: Toast = { id, message };
-      setToasts((prev) => [...prev, toast]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, duration);
-    }
-  };
-
-  const handleOpenApp = (appId: AppId, appState?: AppState) => {
-    const existing = windows.find((w) => w.appId === appId && !w.isMinimized);
-    if (existing) {
-      focusWindow(existing.id);
-    } else {
-      openWindow(appId, appState, activeWorkspace);
-    }
-  };
-
-  const handleVolumeChange = (newLevel: number, muted = isMuted) => {
-    setMasterVolume(newLevel);
-    setIsMuted(muted);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("master-volume-change", {
-          detail: { volume: muted ? 0 : newLevel / 100, isMuted: muted, level: newLevel },
-        })
-      );
-    }
-  };
-
-  // Synchronize CSS variables and theme attributes dynamically
-  // Synchronize CSS variables and Pywal theme attributes dynamically from wallpaper
-  const applyRiceTheme = async (newTheme: RiceTheme) => {
-    setRiceTheme(newTheme);
-    setWallpaper(newTheme.wallpaper);
-    const isDark = newTheme.mode === "dark";
-    setIsDarkMode(isDark);
-
-    try {
-      const pywal = await extractPywalFromImage(newTheme.wallpaper);
-      applyPywalTheme(pywal);
-    } catch (e) {
-      if (typeof document !== "undefined") {
-        document.documentElement.classList.toggle("dark", isDark);
-        document.documentElement.style.setProperty("--primary", newTheme.accent);
-        document.documentElement.style.setProperty("--accent", newTheme.accent);
-        document.documentElement.style.setProperty("--ring", newTheme.accent);
-        document.documentElement.style.setProperty("--accent-color", newTheme.accent);
-        document.documentElement.style.setProperty("--accent-glow", `${newTheme.accent}60`);
+      if (!isDndOn) {
+        const toast: Toast = { id, message };
+        setToasts((prev) => [...prev, toast]);
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, duration);
       }
+    },
+    [isDndOn]
+  );
+
+  const handleOpenApp = useCallback(
+    (appId: AppId, appState?: AppState) => {
+      const existing = windows.find((w) => w.appId === appId && (!appState?.path || w.appState?.path === appState.path));
+      if (existing) {
+        if (existing.workspace && existing.workspace !== activeWorkspace) {
+          setActiveWorkspace(existing.workspace);
+        }
+        focusWindow(existing.id);
+      } else {
+        openWindow(appId, appState, activeWorkspace);
+      }
+    },
+    [windows, activeWorkspace, focusWindow, openWindow]
+  );
+
+  const requestClose = useCallback((id: string) => {
+    const event = new CustomEvent("before-close-window", { detail: id, cancelable: true });
+    if (window.dispatchEvent(event)) closeWindow(id);
+  }, [closeWindow]);
+
+  const handleVolumeChange = useCallback(
+    (newLevel: number, muted = isMuted) => {
+      setMasterVolume(newLevel);
+      setIsMuted(muted);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("master-volume-change", {
+            detail: { volume: muted ? 0 : newLevel / 100, isMuted: muted, level: newLevel },
+          })
+        );
+      }
+    },
+    [isMuted]
+  );
+
+  const applyRiceTheme = useCallback(async (newTheme: RiceTheme) => {
+    const request = ++themeRequest.current;
+    try {
+      const palette = await extractPywalFromImage(newTheme.wallpaper);
+      if (request !== themeRequest.current) return;
+      const dark = newTheme.mode === "dark";
+      applyPywalTheme(palette, dark);
+      setRiceTheme({ ...newTheme, accent: palette.special.accent, accentSecondary: palette.special.accentSecondary, textColor: "var(--foreground)", textMuted: "var(--muted-foreground)" });
+      setWallpaper(newTheme.wallpaper);
+      setIsDarkMode(dark);
+      window.dispatchEvent(new CustomEvent("theme-change", { detail: { isDark: dark } }));
+      window.dispatchEvent(new CustomEvent("wallpaper-change", { detail: { wallpaper: newTheme.wallpaper, fromTheme: true } }));
+    } catch {
+      addNotification("Wallpaper unavailable", "Could not extract this wallpaper's colors; the previous theme was kept.");
     }
-  };
+  }, [addNotification]);
 
   useEffect(() => {
-    applyRiceTheme(DEFAULT_RICE_THEME);
+    const saved = getSavedPywalTheme();
+    if (saved && saved.wallpaper === getSavedWallpaper()) applyPywalTheme(saved, getSavedDarkMode());
+    else extractPywalFromImage(getSavedWallpaper()).then((palette) => applyPywalTheme(palette, getSavedDarkMode())).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", isDarkMode);
-    }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const handleClose = (e: CustomEvent<string>) => closeWindow(e.detail);
+    const handleClose = (e: CustomEvent<string>) => requestClose(e.detail);
     const handleOpen = (e: CustomEvent<{ appId: AppId; appState?: AppState }>) => {
       handleOpenApp(e.detail.appId, e.detail.appState);
     };
@@ -195,7 +190,14 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
     const handleThemeChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ isDark: boolean }>;
       if (typeof customEvent.detail?.isDark === "boolean") {
-        setIsDarkMode(customEvent.detail.isDark);
+        const nextDark = customEvent.detail.isDark;
+        setIsDarkMode(nextDark);
+        const palette = getSavedPywalTheme();
+        if (palette) applyPywalTheme(palette, nextDark);
+        setRiceTheme((prev) => ({
+          ...prev,
+          mode: nextDark ? "dark" : "light",
+        }));
       }
     };
     const handleDockMagnify = (e: Event) => {
@@ -205,11 +207,16 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
       }
     };
     const handleWallpaperChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{ wallpaper: string }>;
-      if (customEvent.detail?.wallpaper) {
-        const foundTheme = Object.values(RICE_THEMES).find((t) => t.wallpaper === customEvent.detail.wallpaper);
-        if (foundTheme) applyRiceTheme(foundTheme);
-        else setWallpaper(customEvent.detail.wallpaper);
+      const customEvent = e as CustomEvent<{ wallpaper: string; fromTheme?: boolean }>;
+      if (customEvent.detail?.wallpaper && !customEvent.detail.fromTheme) {
+        const foundTheme = Object.values(RICE_THEMES).find(
+          (t) => t.wallpaper === customEvent.detail.wallpaper
+        );
+        if (foundTheme) {
+          applyRiceTheme(foundTheme);
+        } else {
+          applyRiceTheme({ ...DEFAULT_RICE_THEME, id: "custom", name: "Custom Wallpaper", wallpaper: customEvent.detail.wallpaper, thumb: customEvent.detail.wallpaper, mode: getSavedDarkMode() ? "dark" : "light" });
+        }
       }
     };
     const handleBrightnessEvt = (e: Event) => {
@@ -238,11 +245,8 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
       window.removeEventListener("wallpaper-change", handleWallpaperChange);
       window.removeEventListener("brightness-change", handleBrightnessEvt);
     };
-  }, [closeWindow, activeWorkspace]);
+  }, [requestClose, handleOpenApp, addNotification, applyRiceTheme]);
 
-  const visibleWindows = windows.filter(
-    (w) => (w.workspace ?? 1) === activeWorkspace
-  );
 
   const renderAppContent = (appId: AppId, windowId: string, appState?: AppState) => {
     switch (appId) {
@@ -257,9 +261,9 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
       case "firefox":
         return <Firefox windowId={windowId} />;
       case "music":
-        return <MusicApp windowId={windowId} path={appState?.path} />;
+        return <MusicApp windowId={windowId} path={appState?.path} masterVolume={masterVolume / 100} masterMuted={isMuted} />;
       case "video":
-        return <VideoApp windowId={windowId} path={appState?.path} />;
+        return <VideoApp windowId={windowId} path={appState?.path} masterVolume={masterVolume / 100} masterMuted={isMuted} />;
       case "portfolio":
         return <Portfolio windowId={windowId} />;
       case "resume":
@@ -290,12 +294,9 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             activeWorkspace={activeWorkspace}
             onSelectWorkspace={(ws) => setActiveWorkspace(ws)}
             windows={windows}
-            theme={riceTheme}
             onToggleNotificationCenter={() => setIsNotificationCenterOpen((prev) => !prev)}
-            onToggleWallpaperCarousel={() => setIsWallpaperCarouselOpen((prev) => !prev)}
+            isNotificationCenterOpen={isNotificationCenterOpen}
             unreadCount={notificationHistory.length}
-            nowPlayingTrack={isMediaPlaying ? "Machine Girl - Nu Nu Meta Phenomena" : undefined}
-            isMediaPlaying={isMediaPlaying}
             onLock={onLock}
             onShutdown={onShutdown}
           />
@@ -308,15 +309,16 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
           />
 
           {/* Desktop Aesthetic Time & Date Widget */}
-          {showDesktopHud && <DesktopHud theme={riceTheme} />}
+          {showDesktopHud && <DesktopHud />}
 
           {/* Window Canvas (Semantic <main>) */}
-          <main role="main" aria-label="Desktop workspace" className="flex-1 relative overflow-hidden px-2 sm:px-4 pb-20 sm:pb-24 z-20">
-            {visibleWindows.map((win) => (
+          <main ref={canvasRef} role="main" aria-label="Desktop workspace" className="flex-1 min-h-0 relative overflow-hidden z-20 mb-20 mx-2 sm:mx-4 mt-2">
+            {windows.map((win) => (
               <WindowFrame
                 key={win.id}
                 window={win}
-                onClose={() => closeWindow(win.id)}
+                isVisible={(win.workspace ?? 1) === activeWorkspace && !win.isMinimized}
+                onClose={() => requestClose(win.id)}
                 onMinimize={() => minimizeWindow(win.id)}
                 onMaximize={() => maximizeWindow(win.id)}
                 onFocus={() => focusWindow(win.id)}
@@ -336,7 +338,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             onSelectTheme={applyRiceTheme}
           />
 
-          {/* OpenBSD Right-Side Dock */}
+          {/* OpenBSD Bottom Dock */}
           <Dock
             windows={windows}
             onFocusWindow={(id) => {
@@ -352,7 +354,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
           />
 
           {/* Toast Notification Toasts */}
-          <div className="fixed top-11 right-4 z-40 flex flex-col gap-1.5 pointer-events-none">
+          <div role="status" aria-live="polite" className="fixed top-16 right-4 z-[65] flex max-w-[calc(100vw-2rem)] flex-col gap-1.5 pointer-events-none">
             {toasts.map((toast) => (
               <div
                 key={toast.id}
@@ -392,6 +394,7 @@ export function Desktop({ onLock, onShutdown }: DesktopProps = {}) {
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
             theme={riceTheme}
+            isDarkMode={isDarkMode}
           />
         </div>
       </ContextMenuTrigger>

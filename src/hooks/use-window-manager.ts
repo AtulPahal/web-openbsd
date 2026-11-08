@@ -1,269 +1,134 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import type { RefObject } from "react";
 import type { WindowId, WindowState, AppId, Position, Size, AppState } from "@/types";
 import { APP_REGISTRY } from "@/lib/app-registry";
 import { BASE_OFFSET, CASCADE_STEP } from "@/lib/desktop-config";
 
-const TOP_BAR_HEIGHT = 28;
-const DOCK_WIDTH = 56;
-
-function generateId(): WindowId {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `win-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+function fitBounds(position: Position, size: Size, area: Size) {
+  const fitted = { width: Math.min(size.width, area.width), height: Math.min(size.height, area.height) };
+  return { size: fitted, position: { x: Math.min(Math.max(0, position.x), area.width - fitted.width), y: Math.min(Math.max(0, position.y), area.height - fitted.height) } };
 }
 
-export function useWindowManager() {
-  const [windowMap, setWindowMap] = useState<Map<WindowId, WindowState>>(
-    () => new Map()
-  );
+export function useWindowManager(canvasRef: RefObject<HTMLElement | null>) {
+  const [windowMap, setWindowMap] = useState<Map<WindowId, WindowState>>(() => new Map());
   const nextZIndexRef = useRef(1);
   const cascadeCountRef = useRef(0);
+  const areaRef = useRef<Size>({ width: 1, height: 1 });
 
-  const windows = Array.from(windowMap.values());
-
-  // Handle window viewport resizing & orientation changes
   useEffect(() => {
-    const handleResize = () => {
-      if (typeof window === "undefined") return;
-      const screenW = window.innerWidth;
-      const screenH = window.innerHeight;
-      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
-
-      setWindowMap((prev) => {
-        let changed = false;
-        const next = new Map(prev);
-
-        for (const [wid, win] of next) {
-          if (win.isMaximized) {
-            next.set(wid, {
-              ...win,
-              position: { x: 0, y: 0 },
-              size: { width: screenW, height: availableH },
-            });
-            changed = true;
-          } else {
-            // Clamp position so window stays on screen
-            const maxX = Math.max(0, screenW - 100);
-            const maxY = Math.max(0, availableH - 60);
-            const clampedX = Math.min(Math.max(0, win.position.x), maxX);
-            const clampedY = Math.min(Math.max(0, win.position.y), maxY);
-
-            if (clampedX !== win.position.x || clampedY !== win.position.y) {
-              next.set(wid, {
-                ...win,
-                position: { x: clampedX, y: clampedY },
-              });
-              changed = true;
-            }
-          }
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const update = () => {
+      const area = { width: Math.max(1, canvas.clientWidth), height: Math.max(1, canvas.clientHeight) };
+      areaRef.current = area;
+      setWindowMap((previous) => {
+        const next = new Map(previous);
+        for (const [id, win] of next) {
+          const bounds = win.isMaximized ? { position: { x: 0, y: 0 }, size: area } : fitBounds(win.position, win.size, area);
+          next.set(id, { ...win, ...bounds, prevBounds: win.prevBounds ? fitBounds(win.prevBounds.position, win.prevBounds.size, area) : undefined });
         }
-
-        return changed ? next : prev;
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
-    };
-  }, []);
-
-  const openWindow = useCallback(
-    (appId: AppId, appState?: AppState, workspace: number = 1) => {
-      const appDef = APP_REGISTRY[appId];
-      if (!appDef) return;
-
-      const id = generateId();
-      const zIndex = nextZIndexRef.current++;
-
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT - 20);
-      const availableW = isMobile ? screenW - 20 : screenW - DOCK_WIDTH - 20;
-
-      const offset = BASE_OFFSET + (cascadeCountRef.current % 8) * CASCADE_STEP;
-      cascadeCountRef.current++;
-
-      const newWindow: WindowState = {
-        id,
-        title: appDef.name,
-        appId,
-        position: isMobile
-          ? { x: 8, y: 8 }
-          : { x: Math.min(offset, availableW - appDef.defaultSize.width), y: Math.min(offset, availableH - appDef.defaultSize.height) },
-        size: isMobile
-          ? { width: availableW, height: availableH }
-          : {
-              width: Math.min(appDef.defaultSize.width, availableW),
-              height: Math.min(appDef.defaultSize.height, availableH),
-            },
-        minSize: { ...appDef.minSize },
-        zIndex,
-        isMinimized: false,
-        isMaximized: isMobile,
-        isFocused: true,
-        workspace,
-        appState,
-      };
-
-      setWindowMap((prev) => {
-        const next = new Map(prev);
-        for (const [wid, ws] of next) {
-          if (ws.isFocused) {
-            next.set(wid, { ...ws, isFocused: false });
-          }
-        }
-        next.set(id, newWindow);
         return next;
       });
-    },
-    []
-  );
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [canvasRef]);
+
+  const openWindow = useCallback((appId: AppId, appState?: AppState, workspace = 1) => {
+    const app = APP_REGISTRY[appId];
+    if (!app) return;
+    const area = areaRef.current;
+    const offset = BASE_OFFSET + (cascadeCountRef.current++ % 8) * CASCADE_STEP;
+    const bounds = fitBounds({ x: offset, y: offset / 2 }, app.defaultSize, area);
+    const mobile = area.width < 640;
+    const id = crypto.randomUUID();
+    const win: WindowState = { id, title: app.name, appId, ...bounds, minSize: app.minSize, zIndex: nextZIndexRef.current++, isMinimized: false, isMaximized: mobile, isFocused: true, workspace, appState, prevBounds: bounds };
+    if (mobile) { win.position = { x: 0, y: 0 }; win.size = area; }
+    setWindowMap((previous) => {
+      const next = new Map(previous);
+      for (const [key, state] of next) if (state.isFocused) next.set(key, { ...state, isFocused: false });
+      next.set(id, win);
+      return next;
+    });
+  }, []);
 
   const closeWindow = useCallback((id: WindowId) => {
-    setWindowMap((prev) => {
-      const next = new Map(prev);
+    setWindowMap((previous) => {
+      const removed = previous.get(id);
+      const next = new Map(previous);
       next.delete(id);
+      if (removed?.isFocused) {
+        const candidate = [...next.values()].filter((win) => !win.isMinimized && win.workspace === removed.workspace).sort((a, b) => b.zIndex - a.zIndex)[0];
+        if (candidate) next.set(candidate.id, { ...candidate, isFocused: true });
+      }
       return next;
     });
   }, []);
 
   const focusWindow = useCallback((id: WindowId) => {
-    setWindowMap((prev) => {
-      const win = prev.get(id);
-      if (!win) return prev;
-
-      const zIndex = nextZIndexRef.current++;
-      const next = new Map(prev);
-      for (const [wid, ws] of next) {
-        if (ws.isFocused && wid !== id) {
-          next.set(wid, { ...ws, isFocused: false });
-        }
-      }
-      next.set(id, {
-        ...win,
-        zIndex,
-        isFocused: true,
-        isMinimized: false,
-      });
+    setWindowMap((previous) => {
+      const win = previous.get(id);
+      if (!win) return previous;
+      if (win.isFocused && !win.isMinimized) return previous;
+      const next = new Map(previous);
+      for (const [key, state] of next) if (state.isFocused) next.set(key, { ...state, isFocused: false });
+      next.set(id, { ...win, isFocused: true, isMinimized: false, zIndex: nextZIndexRef.current++ });
       return next;
     });
   }, []);
 
   const minimizeWindow = useCallback((id: WindowId) => {
-    setWindowMap((prev) => {
-      const win = prev.get(id);
-      if (!win) return prev;
-
-      const next = new Map(prev);
+    setWindowMap((previous) => {
+      const win = previous.get(id);
+      if (!win) return previous;
+      const next = new Map(previous);
       next.set(id, { ...win, isMinimized: true, isFocused: false });
-      return next;
-    });
-  }, []);
-
-  const maximizeWindow = useCallback((id: WindowId) => {
-    setWindowMap((prev) => {
-      const win = prev.get(id);
-      if (!win) return prev;
-
-      const next = new Map(prev);
-      if (win.isMaximized) {
-        const appDef = APP_REGISTRY[win.appId];
-        const defaultW = appDef?.defaultSize.width ?? 680;
-        const defaultH = appDef?.defaultSize.height ?? 460;
-        const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-        const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-
-        next.set(id, {
-          ...win,
-          isMaximized: false,
-          position: { x: BASE_OFFSET, y: BASE_OFFSET },
-          size: {
-            width: Math.min(defaultW, screenW - 80),
-            height: Math.min(defaultH, screenH - TOP_BAR_HEIGHT - 60),
-          },
-        });
-      } else {
-        const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-        const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-        const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
-
-        next.set(id, {
-          ...win,
-          isMaximized: true,
-          position: { x: 0, y: 0 },
-          size: {
-            width: screenW,
-            height: availableH,
-          },
-        });
+      if (win.isFocused) {
+        const candidate = [...next.values()].filter((other) => !other.isMinimized && other.workspace === win.workspace).sort((a, b) => b.zIndex - a.zIndex)[0];
+        if (candidate) next.set(candidate.id, { ...candidate, isFocused: true });
       }
       return next;
     });
   }, []);
 
+  const maximizeWindow = useCallback((id: WindowId) => {
+    setWindowMap((previous) => {
+      const win = previous.get(id);
+      if (!win) return previous;
+      const area = areaRef.current;
+      const bounds = win.isMaximized ? fitBounds(win.prevBounds?.position ?? { x: 0, y: 0 }, win.prevBounds?.size ?? APP_REGISTRY[win.appId].defaultSize, area) : { position: { x: 0, y: 0 }, size: area };
+      const next = new Map(previous);
+      next.set(id, { ...win, ...bounds, isMaximized: !win.isMaximized, prevBounds: win.isMaximized ? win.prevBounds : { position: win.position, size: win.size } });
+      return next;
+    });
+  }, []);
+
   const moveWindow = useCallback((id: WindowId, position: Position) => {
-    setWindowMap((prev) => {
-      const win = prev.get(id);
-      if (!win) return prev;
-
-      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
-
-      const clampedPosition: Position = {
-        x: Math.min(Math.max(-win.size.width + 100, position.x), screenW - 100),
-        y: Math.min(Math.max(0, position.y), availableH - 30),
-      };
-
-      const next = new Map(prev);
-      next.set(id, { ...win, position: clampedPosition, isMaximized: false });
+    setWindowMap((previous) => {
+      const win = previous.get(id);
+      if (!win) return previous;
+      const next = new Map(previous);
+      next.set(id, { ...win, ...fitBounds(position, win.size, areaRef.current), isMaximized: false });
       return next;
     });
   }, []);
 
   const resizeWindow = useCallback((id: WindowId, size: Size) => {
-    setWindowMap((prev) => {
-      const win = prev.get(id);
-      if (!win) return prev;
-
-      const screenW = typeof window !== "undefined" ? window.innerWidth : 1280;
-      const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
-      const availableH = Math.max(200, screenH - TOP_BAR_HEIGHT);
-
-      const clampedSize: Size = {
-        width: Math.min(Math.max(size.width, win.minSize.width), screenW),
-        height: Math.min(Math.max(size.height, win.minSize.height), availableH),
-      };
-
-      const next = new Map(prev);
-      next.set(id, { ...win, size: clampedSize, isMaximized: false });
+    setWindowMap((previous) => {
+      const win = previous.get(id);
+      if (!win) return previous;
+      const area = areaRef.current;
+      const fittedSize = { width: Math.min(area.width, Math.max(size.width, win.minSize.width)), height: Math.min(area.height, Math.max(size.height, win.minSize.height)) };
+      const next = new Map(previous);
+      next.set(id, { ...win, ...fitBounds(win.position, fittedSize, area), isMaximized: false });
       return next;
     });
   }, []);
 
-  const getWindow = useCallback(
-    (id: WindowId): WindowState | undefined => {
-      return windowMap.get(id);
-    },
-    [windowMap]
-  );
-
-  return {
-    windows,
-    openWindow,
-    closeWindow,
-    focusWindow,
-    minimizeWindow,
-    maximizeWindow,
-    moveWindow,
-    resizeWindow,
-    getWindow,
-  };
+  const getWindow = useCallback((id: WindowId) => windowMap.get(id), [windowMap]);
+  return { windows: Array.from(windowMap.values()), openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, moveWindow, resizeWindow, getWindow };
 }

@@ -15,13 +15,9 @@ import {
   Plus,
   X,
   Menu,
-  Bookmark,
-  Share2,
-  SlidersHorizontal,
   Flame,
+  Check,
 } from "lucide-react";
-import { SYSTEM_CONFIG } from "@/lib/system-config";
-import { PORTFOLIO_DATA } from "@/lib/portfolio-data";
 import { GitHubIcon } from "@/lib/social-icons";
 import { buildProxyUrl } from "@/lib/browser-config";
 
@@ -33,6 +29,7 @@ interface Tab {
   history: string[];
   historyIndex: number;
 }
+
 function getDomainFromUrl(url: string): string {
   if (url === "about:home" || url === "about:newtab" || !url) return "Firefox Home";
   try {
@@ -51,6 +48,7 @@ const DEFAULT_BOOKMARKS = [
 ];
 
 export function Firefox({ windowId }: { windowId: string }) {
+  const nextTabIdRef = useRef(2);
   const [tabs, setTabs] = useState<Tab[]>([
     {
       id: "tab-1",
@@ -61,10 +59,11 @@ export function Firefox({ windowId }: { windowId: string }) {
     },
   ]);
   const [activeTabId, setActiveTabId] = useState("tab-1");
-  const [inputUrl, setInputUrl] = useState("about:home");
+  const [inputUrl, setInputUrl] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showBookmarksBar, setShowBookmarksBar] = useState(true);
   const [showAppMenu, setShowAppMenu] = useState(false);
+  const [reloadVersion, setReloadVersion] = useState(0);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -109,10 +108,10 @@ export function Firefox({ windowId }: { windowId: string }) {
   };
 
   const createTab = (url = "about:home") => {
-    const newId = `tab-${Date.now()}`;
+    const newId = `tab-${nextTabIdRef.current++}`;
     const newTab: Tab = {
       id: newId,
-      title: "New Tab",
+      title: url === "about:home" ? "New Tab" : getDomainFromUrl(url),
       url,
       history: [url],
       historyIndex: 0,
@@ -126,16 +125,17 @@ export function Firefox({ windowId }: { windowId: string }) {
   const closeTab = (tabId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (tabs.length === 1) {
-      // Keep at least one tab open
+      const resetId = `tab-${nextTabIdRef.current++}`;
       setTabs([
         {
-          id: `tab-${Date.now()}`,
+          id: resetId,
           title: "Firefox Home",
           url: "about:home",
           history: ["about:home"],
           historyIndex: 0,
         },
       ]);
+      setActiveTabId(resetId);
       setInputUrl("");
       return;
     }
@@ -189,15 +189,7 @@ export function Firefox({ windowId }: { windowId: string }) {
     }
   };
 
-  const reload = () => {
-    if (iframeRef.current) {
-      const src = iframeRef.current.src;
-      iframeRef.current.src = "about:blank";
-      setTimeout(() => {
-        if (iframeRef.current) iframeRef.current.src = src;
-      }, 50);
-    }
-  };
+  const reload = () => setReloadVersion((version) => version + 1);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -206,11 +198,12 @@ export function Firefox({ windowId }: { windowId: string }) {
   };
 
   const isHome = activeTab.url === "about:home";
-  const isDirectFrameBlocked = !isHome && (activeTab.url.includes("github.com") || activeTab.url.includes("google.com"));
+  const hostname = isHome ? "" : new URL(activeTab.url).hostname;
+  const isDirectFrameBlocked = ["github.com", "google.com"].some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
 
   return (
     <div
-      className="h-full w-full flex flex-col bg-[#1c1b22] text-[#fbfbfe] font-sans select-none overflow-hidden"
+      className="h-full w-full flex flex-col bg-[#1c1b22] text-[#fbfbfe] font-sans select-none overflow-hidden relative"
       data-window-id={windowId}
     >
       {/* 1. Firefox Tab Strip */}
@@ -262,7 +255,7 @@ export function Firefox({ windowId }: { windowId: string }) {
       </div>
 
       {/* 2. Firefox Navigation & Awesomebar Toolbar */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2b2a33] border-b border-[#383740] shrink-0 text-xs">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2b2a33] border-b border-[#383740] shrink-0 text-xs relative">
         {/* Navigation Buttons */}
         <button
           type="button"
@@ -325,7 +318,7 @@ export function Firefox({ windowId }: { windowId: string }) {
             <button
               type="button"
               onClick={() => setIsBookmarked(!isBookmarked)}
-              className={`p-1 hover:text-[#fbfbfe] transition-colors ${
+              className={`p-1 hover:text-[#fbfbfe] transition-colors cursor-pointer ${
                 isBookmarked ? "text-primary fill-primary" : ""
               }`}
               title="Bookmark this page"
@@ -349,12 +342,74 @@ export function Firefox({ windowId }: { windowId: string }) {
         {/* Hamburger Application Menu */}
         <button
           type="button"
-          onClick={() => setShowAppMenu(!showAppMenu)}
-          className="p-1.5 rounded-lg hover:bg-[#383740] text-[#fbfbfe] transition-colors cursor-pointer"
+          onClick={() => setShowAppMenu((prev) => !prev)}
+          className={`p-1.5 rounded-lg hover:bg-[#383740] text-[#fbfbfe] transition-colors cursor-pointer ${
+            showAppMenu ? "bg-[#383740]" : ""
+          }`}
           title="Open Application Menu"
         >
           <Menu className="w-4 h-4" />
         </button>
+
+        {/* Application Menu Dropdown */}
+        {showAppMenu && (
+          <>
+            <div
+              className="fixed inset-0 z-30"
+              onClick={() => setShowAppMenu(false)}
+            />
+            <div className="absolute right-2 top-11 z-40 w-56 rounded-xl bg-[#2b2a33] border border-[#42414d] shadow-2xl p-1.5 text-xs text-[#fbfbfe] space-y-0.5 animate-in fade-in-0 zoom-in-95 duration-150">
+              <button
+                type="button"
+                onClick={() => {
+                  createTab();
+                  setShowAppMenu(false);
+                }}
+                className="w-full px-3 py-1.5 rounded-lg hover:bg-[#383740] flex items-center justify-between text-left cursor-pointer"
+              >
+                <span>New Tab</span>
+                <span className="text-[10px] text-[#8f8f9d]">Ctrl+T</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBookmarksBar((b) => !b);
+                  setShowAppMenu(false);
+                }}
+                className="w-full px-3 py-1.5 rounded-lg hover:bg-[#383740] flex items-center justify-between text-left cursor-pointer"
+              >
+                <span>Bookmarks Toolbar</span>
+                {showBookmarksBar && <Check className="w-3.5 h-3.5 text-primary" />}
+              </button>
+              <div className="h-px bg-[#42414d] my-1" />
+              <button
+                type="button"
+                onClick={() => {
+                  navigateTo("about:home");
+                  setShowAppMenu(false);
+                }}
+                className="w-full px-3 py-1.5 rounded-lg hover:bg-[#383740] flex items-center justify-between text-left cursor-pointer"
+              >
+                <span>Firefox Home</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigateTo("https://github.com/AtulPahal");
+                  setShowAppMenu(false);
+                }}
+                className="w-full px-3 py-1.5 rounded-lg hover:bg-[#383740] flex items-center justify-between text-left cursor-pointer"
+              >
+                <span>Atul Pahal GitHub</span>
+                <ExternalLink className="w-3 h-3 text-[#8f8f9d]" />
+              </button>
+              <div className="h-px bg-[#42414d] my-1" />
+              <div className="px-3 py-1 text-[10px] text-[#8f8f9d]">
+                Firefox 125.0 (OpenBSD amd64)
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 3. Firefox Bookmarks Toolbar */}
@@ -478,8 +533,8 @@ export function Firefox({ windowId }: { windowId: string }) {
             <div className="w-full max-w-xl p-4 bg-[#2b2a33]/40 border border-[#383740]/60 rounded-xl flex items-center gap-3 text-xs text-[#9f9fa6]">
               <Shield className="w-5 h-5 text-emerald-400 shrink-0" />
               <div>
-                <span className="text-[#fbfbfe] font-semibold">Enhanced Tracking Protection:</span>{" "}
-                Firefox automatically blocks known social media trackers, cross-site tracking cookies, and cryptominers.
+                <span className="text-[#fbfbfe] font-semibold">Embedded browsing:</span>{" "}
+                Pages run in an isolated sandbox. Sites may require opening an external browser tab.
               </div>
             </div>
           </div>
@@ -510,11 +565,12 @@ export function Firefox({ windowId }: { windowId: string }) {
         ) : (
           /* Embedded Webpage Frame */
           <iframe
+            key={`${activeTab.id}:${reloadVersion}`}
             ref={iframeRef}
             src={buildProxyUrl(activeTab.url)}
             className="w-full h-full border-none bg-white"
             title={activeTab.title}
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            sandbox="allow-scripts allow-popups allow-forms"
           />
         )}
       </div>

@@ -33,13 +33,13 @@ const SDDMLogin = dynamic(
 );
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isShutDown, setIsShutDown] = useState(false);
+  useEffect(() => {
+    if (isShutDown) document.getElementById("reboot-control")?.focus();
+  }, [isShutDown]);
 
   useEffect(() => {
-    setMounted(true);
-
     const handleLock = () => {
       setIsAuthenticated(false);
     };
@@ -56,24 +56,10 @@ export default function Home() {
     };
   }, []);
 
-  if (!mounted) {
-    return (
-      <div
-        className="h-full min-h-[100dvh] w-full bg-cover bg-center bg-[#0a0a0a]"
-        style={{ backgroundImage: `url('${SYSTEM_CONFIG.wallpaper}')` }}
-        suppressHydrationWarning
-      />
-    );
-  }
-
   // System Halted / Powered Down Screen
   if (isShutDown) {
     return (
       <div
-        onClick={() => {
-          setIsShutDown(false);
-          setIsAuthenticated(false);
-        }}
         className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white select-none p-6 font-mono cursor-pointer"
       >
         <div className="flex flex-col items-center max-w-md text-center space-y-4">
@@ -81,15 +67,15 @@ export default function Home() {
             <Power className="w-8 h-8 text-rose-400" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white/90">
-            System Safely Powered Down
+            Desktop session powered down
           </h1>
           <p className="text-xs text-white/50 leading-relaxed">
-            The operating system has halted. All virtual filesystem buffers flushed to disk.
+            This is a browser-based desktop. Saved files remain in local browser storage.
           </p>
-          <div className="pt-4 flex items-center gap-2 text-xs text-primary animate-pulse">
-            <RotateCcw className="w-4 h-4" />
-            <span>Click anywhere or press any key to reboot</span>
-          </div>
+          <button id="reboot-control" type="button" onClick={() => { setIsShutDown(false); setIsAuthenticated(false); }} className="mt-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground">
+            <RotateCcw aria-hidden="true" className="w-4 h-4" />
+            <span>Restart desktop</span>
+          </button>
         </div>
       </div>
     );

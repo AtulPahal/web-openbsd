@@ -4,18 +4,12 @@ import { useState, useMemo } from "react";
 import {
   Brain,
   Cpu,
-  Sparkles,
-  Zap,
   RotateCcw,
   Sliders,
-  CheckCircle2,
-  AlertTriangle,
-  Layers,
   Activity,
-  Gauge,
-  HelpCircle,
 } from "lucide-react";
-import { AI_MODELS, type ModelDefinition } from "@/lib/ai-models-data";
+import { AI_MODELS } from "@/lib/ai-models-data";
+import type { ModelDefinition } from "@/lib/ai-models-data";
 
 export function AIStudio({ windowId }: { windowId: string }) {
   const modelKeys = Object.keys(AI_MODELS);
@@ -59,7 +53,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
     setInputs(init);
   };
 
-  // Compute live prediction
+  // Recompute the JavaScript demo heuristic when inputs change.
   const prediction = useMemo(() => {
     return activeModel.predict(inputs);
   }, [activeModel, inputs]);
@@ -68,7 +62,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-background font-mono text-foreground text-xs select-none overflow-hidden"
+      className="@container flex flex-col h-full w-full bg-background font-sans text-foreground text-xs select-none overflow-hidden"
       data-window-id={windowId}
     >
       {/* 1. App Header */}
@@ -81,7 +75,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-foreground tracking-wide">AI/ML Studio</span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary/20 text-primary border border-primary/30">
-                Web ONNX Engine
+                JavaScript Demo Heuristics
               </span>
             </div>
           </div>
@@ -125,9 +119,9 @@ export function AIStudio({ windowId }: { windowId: string }) {
       </div>
 
       {/* 3. Main Workspace: Feature Sliders (Left/Top) & Prediction Dashboard (Right/Bottom) */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col @min-[620px]:flex-row overflow-y-auto @min-[620px]:overflow-hidden">
         {/* Left Column: Feature Controls */}
-        <div className="w-full md:w-1/2 p-3 sm:p-4 border-b md:border-b-0 md:border-r border-border/60 overflow-y-auto space-y-3.5 bg-card/20 scrollbar-thin">
+        <div className="w-full @min-[620px]:w-1/2 p-4 border-b @min-[620px]:border-b-0 @min-[620px]:border-r border-border/60 overflow-y-auto space-y-3.5 bg-card/20 scrollbar-thin">
           <div className="flex items-center justify-between border-b border-border/40 pb-2">
             <div>
               <h3 className="font-bold text-sm text-foreground">{activeModel.name}</h3>
@@ -183,16 +177,16 @@ export function AIStudio({ windowId }: { windowId: string }) {
           </div>
         </div>
 
-        {/* Right Column: Real-Time Inference Results */}
-        <div className="w-full md:w-1/2 p-3 sm:p-4 flex flex-col gap-3.5 overflow-y-auto bg-card/10 scrollbar-thin">
+        {/* Right Column: Interactive Heuristic Results */}
+        <div className="w-full @min-[620px]:w-1/2 p-4 flex flex-col gap-3.5 overflow-y-auto bg-card/10 scrollbar-thin">
           <div className="flex items-center justify-between border-b border-border/40 pb-2">
             <div className="flex items-center gap-2 font-bold text-xs text-foreground">
               <Activity className="w-4 h-4 text-emerald-400" />
-              <span>Real-Time Inference Output</span>
+              <span>Demo Heuristic Output</span>
             </div>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Live Prediction
+              Interactive Demo
             </span>
           </div>
 
@@ -208,7 +202,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 PREDICTED CLASSIFICATION
               </span>
-              <span className="text-xs font-bold text-foreground">Confidence: {prediction.confidence}%</span>
+              <span className="text-xs font-bold text-foreground">Demo Score: {prediction.confidence}%</span>
             </div>
 
             <div className="text-lg font-bold tracking-tight" style={{ color: activeClassMeta.color }}>
@@ -218,10 +212,10 @@ export function AIStudio({ windowId }: { windowId: string }) {
             <p className="text-xs text-foreground/80 leading-relaxed">{activeClassMeta.description}</p>
           </div>
 
-          {/* Probability Distribution Bars */}
+          {/* Heuristic Distribution Bars */}
           <div className="p-3 bg-card/40 border border-border/60 rounded-xl space-y-2.5">
             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Class Probability Distribution
+              Heuristic Class Distribution (Not Calibrated)
             </div>
             <div className="space-y-2">
               {activeModel.classes.map((cls) => {
@@ -263,7 +257,7 @@ export function AIStudio({ windowId }: { windowId: string }) {
             </div>
           </div>
 
-          {/* Hardware & Execution Engine Telemetry */}
+          {/* JavaScript Demo Execution Details */}
           <div className="p-3 bg-background/40 border border-border/50 rounded-xl flex items-center justify-between text-[11px]">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Cpu className="w-4 h-4 text-sky-400" />
@@ -272,8 +266,8 @@ export function AIStudio({ windowId }: { windowId: string }) {
               </span>
             </div>
             <div className="text-right font-mono">
-              <span className="text-emerald-400 font-bold">~{activeModel.latencyMs} ms</span>
-              <span className="text-muted-foreground text-[9px] ml-1">inference</span>
+              <span className="text-emerald-400 font-bold">JavaScript</span>
+              <span className="text-muted-foreground text-[9px] ml-1">demo · not ONNX</span>
             </div>
           </div>
         </div>

@@ -10,7 +10,6 @@ import {
   Globe,
   Info,
   Settings,
-  Terminal,
   User,
 } from "lucide-react";
 import { KittyIcon } from "@/lib/social-icons";
